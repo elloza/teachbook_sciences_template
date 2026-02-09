@@ -43,7 +43,8 @@ def build_pdf():
     # 1. Generate LaTeX source
     print("📝 Generando archivos LaTeX con Jupyter Book...")
     try:
-        subprocess.run(["jupyter-book", "build", BOOK_DIR, "--builder", "latex"], check=True)
+        # Reordered arguments to put options before the directory path
+        subprocess.run(["jupyter-book", "build", "-b", "latex", BOOK_DIR], check=True)
     except subprocess.CalledProcessError:
         print("❌ Error generando los archivos LaTeX.")
         return False
@@ -120,4 +121,4 @@ def glob_pdf():
 if __name__ == "__main__":
     success = build_pdf()
     if not success:
-        sys.exit(0)
+        sys.exit(1)
