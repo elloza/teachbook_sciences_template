@@ -1,0 +1,50 @@
+format: jb-book
+root: es/intro
+parts:
+  - caption: Tutorial
+    chapters:
+    - file: es/01_tutorial/01_que_es_un_teachbook
+    - file: es/01_tutorial/02_flujo_trabajo
+    - file: es/01_tutorial/03_edicion_con_ia
+    - file: es/01_tutorial/04_publicacion
+  - caption: Ejemplos por Grado
+    chapters:
+    - file: es/02_grados/grado_fisica/intro
+      sections:
+      - file: es/02_grados/grado_fisica/ejemplo_fisica
+    - file: es/02_grados/grado_matematicas/intro
+      sections:
+      - file: es/02_grados/grado_matematicas/ejemplo_matematicas
+    - file: es/02_grados/grado_estadistica/intro
+      sections:
+      - file: es/02_grados/grado_estadistica/ejemplo_estadistica
+  - caption: Información
+    chapters:
+    - file: es/90_acerca_de
+    - file: es/91_licencias
+    - file: es/92_como_citar
+
+  # English Version
+  - caption: English Version
+    chapters:
+    - file: en/intro
+    - file: en/01_tutorial/01_que_es_un_teachbook
+    - file: en/01_tutorial/02_flujo_trabajo
+    - file: en/01_tutorial/03_edicion_con_ia
+    - file: en/01_tutorial/04_publicacion
+  - caption: Examples by Degree (EN)
+    chapters:
+    - file: en/02_grados/grado_fisica/intro
+      sections:
+      - file: en/02_grados/grado_fisica/ejemplo_fisica
+    - file: en/02_grados/grado_matematicas/intro
+      sections:
+      - file: en/02_grados/grado_matematicas/ejemplo_matematicas
+    - file: en/02_grados/grado_estadistica/intro
+      sections:
+      - file: en/02_grados/grado_estadistica/ejemplo_estadistica
+  - caption: Information (EN)
+    chapters:
+    - file: en/90_acerca_de
+    - file: en/91_licencias
+    - file: en/92_como_citar

@@ -1,0 +1,35 @@
+title: TeachBook (Plantilla Ciencias Químicas) 
+author: Álvaro Lozano Murciego y André Sales Mendes (USAL)
+copyright: "2025, TeachBooks Project"
+logo: "_static/logo.png"
+language: es
+execute:
+  execute_notebooks: off
+parse:
+  myst_enable_extensions:
+    - colon_fence
+    - dollarmath
+    - linkify
+html:
+  use_edit_page_button: false
+  use_repository_button: false
+  use_download_button: true
+  announcement: "📖 <b>¡Libro disponible!</b> <a href='_static/teachbook.pdf' style='color: #fff; text-decoration: underline; font-weight: bold;' download>Descarga el libro completo aquí en PDF</a>"
+  extra_navbar: |
+    <div style="margin-top: 10px; font-size: 0.8em; color: #666;">
+      Powered by <a href="https://jupyterbook.org">Jupyter Book</a>
+    </div>
+sphinx:
+  config:
+    html_static_path: ["_static"]
+    html_css_files: ["custom.css"]
+    html_js_files: ["custom.js"]
+    # Remove header icons as requested
+    html_theme_options:
+      icon_links: []
+latex:
+  latex_engine: xelatex
+  options: "spanish"
+  preamble: |
+    \usepackage[spanish]{babel}
+    \selectlanguage{spanish}
