@@ -41,12 +41,14 @@ def build_pdf():
     print("🚀 Iniciando generación de PDF (esto puede tardar)...")
     
     # 1. Generate LaTeX source
-    print("📝 Generando archivos LaTeX con Jupyter Book...")
+    print("📝 Generando archivos LaTeX con Jupyter Book...", flush=True)
     try:
-        # Reordered arguments to put options before the directory path
-        subprocess.run(["jupyter-book", "build", "-b", "latex", BOOK_DIR], check=True)
-    except subprocess.CalledProcessError:
-        print("❌ Error generando los archivos LaTeX.")
+        import jupyter_book
+        print(f"DEBUG: Jupyter Book Version: {jupyter_book.__version__}", flush=True)
+        # Use builder BEFORE path, and use the most compatible form
+        subprocess.run(["jupyter-book", "build", "--builder", "latex", BOOK_DIR], check=True)
+    except Exception as e:
+        print(f"❌ Error durante la ejecución de jupyter-book: {e}", flush=True)
         return False
 
     # 2. Compile PDF
