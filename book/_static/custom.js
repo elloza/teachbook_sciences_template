@@ -31,54 +31,73 @@ document.addEventListener("DOMContentLoaded", function () {
     // 2. Inject PDF Button (Always, if configured)
     injectPDFButton(rootPath);
 
-    // 3. Robust Sidebar Toggle (Manual Handler)
+    // 3. Robust Sidebar Toggle (Manual Handler with Polling)
     // The theme's native behavior is unreliable due to ID mismatches.
     // We implement a manual toggle to guarantee functionality.
-    const primaryCheckbox = document.getElementById('pst-primary-sidebar-checkbox');
+    // POLLING: We run this check multiple times to catch elements rendered late by theme JS.
 
-    // Find all primary toggles (desktop header icon + mobile overlay if any)
-    const primaryToggles = document.querySelectorAll('label[for="__primary"], .primary-toggle');
+    function applySidebarFix() {
+        const primaryCheckbox = document.getElementById('pst-primary-sidebar-checkbox');
+        // Find toggles that haven't been fixed yet
+        const primaryToggles = document.querySelectorAll('label[for="__primary"]:not([data-fixed]), .primary-toggle:not([data-fixed])');
 
-    primaryToggles.forEach(toggle => {
-        // Remove 'for' attribute to prevent browser's native confused behavior
-        toggle.removeAttribute('for');
+        primaryToggles.forEach(toggle => {
+            console.log("TeachBook: Applying fix to primary toggle", toggle);
 
-        // Clone element to strip existing listeners (if any theme listeners are causing issues)
-        const newToggle = toggle.cloneNode(true);
-        toggle.parentNode.replaceChild(newToggle, toggle);
+            // Mark as fixed immediately to prevent double-processing
+            toggle.setAttribute('data-fixed', 'true');
 
-        newToggle.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
+            // Remove 'for' attribute to prevent browser's native confused behavior
+            toggle.removeAttribute('for');
 
-            if (primaryCheckbox) {
-                primaryCheckbox.checked = !primaryCheckbox.checked;
-                // Dispatch change event to trigger CSS/Theme reactions
-                primaryCheckbox.dispatchEvent(new Event('change', { bubbles: true }));
-                console.log("TeachBook: Primary sidebar toggled manually. State:", primaryCheckbox.checked);
-            }
+            // Clone element to strip existing listeners
+            const newToggle = toggle.cloneNode(true);
+            toggle.parentNode.replaceChild(newToggle, toggle);
+
+            newToggle.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+
+                if (primaryCheckbox) {
+                    primaryCheckbox.checked = !primaryCheckbox.checked;
+                    // Dispatch change event to trigger CSS/Theme reactions
+                    primaryCheckbox.dispatchEvent(new Event('change', { bubbles: true }));
+                    console.log("TeachBook: Primary sidebar toggled manually. State:", primaryCheckbox.checked);
+                }
+            });
         });
-    });
 
-    // Secondary sidebar (if needed, same logic)
-    const secondaryCheckbox = document.getElementById('pst-secondary-sidebar-checkbox');
-    const secondaryToggles = document.querySelectorAll('label[for="__secondary"], .secondary-toggle');
+        // Secondary sidebar (if needed, same logic)
+        const secondaryCheckbox = document.getElementById('pst-secondary-sidebar-checkbox');
+        const secondaryToggles = document.querySelectorAll('label[for="__secondary"]:not([data-fixed]), .secondary-toggle:not([data-fixed])');
 
-    secondaryToggles.forEach(toggle => {
-        toggle.removeAttribute('for');
-        // Clone to strip listeners
-        const newToggle = toggle.cloneNode(true);
-        toggle.parentNode.replaceChild(newToggle, toggle);
+        secondaryToggles.forEach(toggle => {
+            console.log("TeachBook: Applying fix to secondary toggle", toggle);
+            toggle.setAttribute('data-fixed', 'true');
+            toggle.removeAttribute('for');
 
-        newToggle.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            if (secondaryCheckbox) {
-                secondaryCheckbox.checked = !secondaryCheckbox.checked;
-                secondaryCheckbox.dispatchEvent(new Event('change', { bubbles: true }));
-            }
+            const newToggle = toggle.cloneNode(true);
+            toggle.parentNode.replaceChild(newToggle, toggle);
+
+            newToggle.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (secondaryCheckbox) {
+                    secondaryCheckbox.checked = !secondaryCheckbox.checked;
+                    secondaryCheckbox.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+            });
         });
-    });
+    }
+
+    // Run immediately
+    applySidebarFix();
+
+    // Re-run periodically to catch late-loading elements
+    const intervalId = setInterval(applySidebarFix, 500);
+
+    // Stop polling after 5 seconds to save resources
+    setTimeout(() => clearInterval(intervalId), 5000);
 });
 
 function injectLanguageSwitcher(languages, rootPath) {
