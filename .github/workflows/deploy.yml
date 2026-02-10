@@ -35,6 +35,15 @@ jobs:
       - name: Build HTML book
         run: |
           python scripts/build_book.py
+          # FAILSAFE: Ensure .nojekyll exists even if script skipped it
+          touch book/_build/html/.nojekyll
+
+      - name: Debug Build Output
+        run: |
+          echo "Listing build output structure:"
+          ls -R book/_build/html
+          echo "Checking for .nojekyll:"
+          ls -la book/_build/html/.nojekyll
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
