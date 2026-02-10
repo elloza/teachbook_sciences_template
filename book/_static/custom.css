@@ -6,29 +6,27 @@ html {
 /* Base Styles & Layout Consistency */
 :root {
     --pst-content-width: 60rem;
-    /* Stable width for all sections */
     --usal-blue: #003153;
     --usal-blue-light: #004a7c;
 }
 
-/* Ensure homogeneous article width across pages without breaking sidebar toggle (now patched with JS) */
+/* Ensure homogeneous article width */
 .bd-main .bd-content .bd-article-container {
     max-width: var(--pst-content-width) !important;
     margin-left: auto !important;
     margin-right: auto !important;
 }
 
-/* Language Switcher Styling */
+/* Language Switcher Container */
 .teachbook-lang-container {
     display: inline-block;
     height: 100%;
     align-self: center;
     position: relative;
-    z-index: 10000;
-    /* Ensure it stays above content */
+    z-index: 100000 !important;
 }
 
-/* Hover Support */
+/* Dropdown visibility on hover */
 .teachbook-lang-container:hover .teachbook-lang-dropdown {
     display: block;
 }
@@ -40,11 +38,11 @@ html {
     padding: 0 0.6rem !important;
     height: 32px !important;
     border: none !important;
-    /* Removed border as requested */
     background-color: transparent !important;
     color: var(--pst-color-text-main) !important;
     font-size: 0.9em;
     transition: background-color 0.2s ease;
+    cursor: pointer;
 }
 
 .teachbook-lang-btn:hover {
@@ -56,25 +54,24 @@ html {
     font-weight: 600;
 }
 
+/* The actual dropdown list */
 .teachbook-lang-dropdown {
     display: none;
     position: absolute;
     right: 0;
     top: 32px;
-    /* Alignment with button height */
     margin: 0 !important;
     min-width: 140px;
-    z-index: 10001;
+    z-index: 110000 !important;
     border: 1px solid var(--pst-color-border);
     background-color: var(--pst-color-background-main);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     border-radius: 6px;
     padding: 0.4rem 0;
     list-style: none;
-    /* Crucial since we removed dropdown-menu */
+    animation: fadeInDown 0.2s ease-out;
 }
 
-/* Ensure list items don't have bullets or extra padding */
 .teachbook-lang-dropdown li {
     padding: 0;
     margin: 0;
@@ -145,10 +142,24 @@ html {
     to {
         opacity: 1;
         transform: translateY(0);
-
-        /* Ensure sidebar toggles are always on top and clickable */
-        .sidebar-toggle {
-            z-index: 1000 !important;
-            position: relative;
-        }
     }
+}
+
+/* Ensure sidebar toggles are always on top and clickable */
+.sidebar-toggle {
+    z-index: 200000 !important;
+    position: relative;
+    cursor: pointer;
+}
+
+/* Force header components to stay above title text */
+.bd-header-article {
+    position: relative;
+    z-index: 5000 !important;
+}
+
+/* Fix for the dropdown being behind content even with high z-index */
+/* Sometimes the parent container limits the stack */
+.article-header-buttons {
+    z-index: 10000 !important;
+}

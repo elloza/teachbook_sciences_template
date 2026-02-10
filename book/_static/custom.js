@@ -35,18 +35,31 @@ document.addEventListener("DOMContentLoaded", function () {
 
     document.querySelectorAll('label.sidebar-toggle').forEach(label => {
         const forAttr = label.getAttribute('for');
-        if (forAttr === '__primary' && primaryCheckbox) {
+        if ((forAttr === '__primary' || label.classList.contains('primary-toggle')) && primaryCheckbox) {
             console.log("TeachBook: Fixing primary toggle label.");
             label.setAttribute('for', primaryCheckbox.id);
-            // Manual fallback if native label behavior is blocked
+            // Stronger listener to override any theme-level event blocking
             label.addEventListener('click', (e) => {
-                primaryCheckbox.checked = !primaryCheckbox.checked;
-                // Dispatch event to trigger theme's JS listeners if any
-                primaryCheckbox.dispatchEvent(new Event('change'));
+                e.preventDefault();
+                e.stopPropagation();
+                console.log("TeachBook: Direct toggle click handled.");
+                if (primaryCheckbox) {
+                    primaryCheckbox.checked = !primaryCheckbox.checked;
+                    primaryCheckbox.dispatchEvent(new Event('change', { bubbles: true }));
+                }
             });
-        } else if (forAttr === '__secondary' && secondaryCheckbox) {
+        } else if ((forAttr === '__secondary' || label.classList.contains('secondary-toggle')) && secondaryCheckbox) {
             console.log("TeachBook: Fixing secondary toggle label.");
             label.setAttribute('for', secondaryCheckbox.id);
+            label.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log("TeachBook: Secondary toggle click handled.");
+                if (secondaryCheckbox) {
+                    secondaryCheckbox.checked = !secondaryCheckbox.checked;
+                    secondaryCheckbox.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+            });
         }
     });
 });

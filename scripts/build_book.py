@@ -201,7 +201,41 @@ def main():
     
     for lang in languages:
         build_language(lang)
+    
+    # After builds, ensure the root _static folder exists and contains ALL assets
+    # (both our custom ones and the theme's assets from any built language)
+    if not os.path.exists(FINAL_HTML_DIR):
+        os.makedirs(FINAL_HTML_DIR)
         
+    final_static = os.path.join(FINAL_HTML_DIR, "_static")
+    
+    # 1. Start with our custom static files
+    custom_static = os.path.join(BOOK_DIR, "_static")
+    if os.path.exists(custom_static):
+        if os.path.exists(final_static):
+            shutil.rmtree(final_static)
+        shutil.copytree(custom_static, final_static)
+        print(f"📦 Custom static assets copied to: {final_static}")
+
+    # 2. Add theme assets from the first available language build
+    if languages:
+        first_lang = languages[0]
+        # We need to find where they WERE built before they were moved or deleted.
+        # Actually, let's just copy them from the first lang's final destination
+        lang_static = os.path.join(FINAL_HTML_DIR, first_lang, "_static")
+        if os.path.exists(lang_static):
+            print(f"📦 Merging theme assets from '{first_lang}'... ")
+            for root, dirs, files in os.walk(lang_static):
+                rel_path = os.path.relpath(root, lang_static)
+                target_dir = os.path.join(final_static, rel_path)
+                if not os.path.exists(target_dir):
+                    os.makedirs(target_dir)
+                for file in files:
+                    src_file = os.path.join(root, file)
+                    dst_file = os.path.join(target_dir, file)
+                    if not os.path.exists(dst_file):
+                        shutil.copy2(src_file, dst_file)
+    
     if "default" not in languages and len(languages) > 0:
         default_lang = "es" if "es" in languages else languages[0]
         create_redirect_index(default_lang)
