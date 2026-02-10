@@ -67,13 +67,6 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 function injectLanguageSwitcher(languages, rootPath) {
-    // In our standalone build structure:
-    // /index.html (redirect)
-    // /es/intro.html
-    // /en/intro.html
-
-    // We want to link to ../{code}/intro.html
-
     const path = window.location.pathname;
     let currentLangCode = "es";
     languages.forEach(lang => {
@@ -90,31 +83,21 @@ function injectLanguageSwitcher(languages, rootPath) {
             </button>
             <ul class="teachbook-lang-dropdown">
                 ${languages.map(l => {
-        // Logic to switch language preserving the rest of the path if possible
-        // or falling back to the intro page of the target language
-        let targetUrl;
+        // Use Sphinx's calculated root path to ensure we always get back to the project root
+        // regardless of current depth.
+        const targetUrl = rootPath + `${l.code}/intro.html`;
 
-        // If we are in a subfolder like /en/folder/page.html
-        if (path.includes(`/${currentLangCode}/`)) {
-            // Replace /en/ with /es/ (or vice versa)
-            <ul class="teachbook-lang-dropdown">
-                ${languages.map(l => {
-                    // Use Sphinx's calculated root path to ensure we always get back to the project root
-                    // regardless of current depth.
-                    // Example: if we are at /en/folder/page.html, rootPath is "../../"
-                    // Target becomes "../../es/intro.html" -> Correct.
-                    const targetUrl = rootPath + `${l.code}/intro.html`;
-
-                    return `
+        return `
                     <li>
                         <a href="${targetUrl}" class="dropdown-item ${l.code === currentLangCode ? 'active' : ''}">
                             ${l.name}
                         </a>
                     </li>
-                `}).join('')}
+                    `;
+    }).join('')}
             </ul>
-        </div >
-        `;
+        </div>
+    `;
 
     const header = document.querySelector(".article-header-buttons");
     if (header) {
@@ -134,9 +117,8 @@ function injectPDFButton(rootPath) {
         let lang = window.location.pathname.includes("/en/") ? "en" : "es";
 
         // In standalone build, _static is at the root of the language folder
-        // So from any page, the relative path to _static is stored in rootPath (DOCUMENTATION_OPTIONS.URL_ROOT)
-        const pdfFilename = `teachbook_${ lang }.pdf`;
-        const pdfUrl = rootPath + `_static / ${ pdfFilename } `;
+        const pdfFilename = `teachbook_${lang}.pdf`;
+        const pdfUrl = rootPath + `_static/${pdfFilename}`;
 
         const langStrings = {
             "es": { "text": "Libro Completo (PDF)", "title": "Descargar PDF completo" },
@@ -145,14 +127,14 @@ function injectPDFButton(rootPath) {
         const strings = langStrings[lang] || langStrings["en"];
 
         const btnHtml = `
-        < div class="sidebar-footer-pdf" >
-            <div class="custom-sidebar-pdf-container">
-                <a href="${pdfUrl}" id="custom-pdf-btn" class="btn btn-sm" download title="${strings.title}">
-                    <i class="fa-solid fa-file-pdf"></i>
-                    <span>${strings.text}</span>
-                </a>
+            <div class="sidebar-footer-pdf">
+                <div class="custom-sidebar-pdf-container">
+                    <a href="${pdfUrl}" id="custom-pdf-btn" class="btn btn-sm" download title="${strings.title}">
+                        <i class="fa-solid fa-file-pdf"></i>
+                        <span>${strings.text}</span>
+                    </a>
+                </div>
             </div>
-            </div >
         `;
 
         const div = document.createElement("div");
