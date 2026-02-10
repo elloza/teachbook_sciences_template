@@ -42,14 +42,28 @@ def build_pdf():
     
     # 1. Generate LaTeX source
     print("📝 Generando archivos LaTeX con Jupyter Book...", flush=True)
+    
+    # --- DIAGNOSTICS START ---
+    print("\n🔍 BUSCANDO CAUSA RAÍZ EN CI:", flush=True)
     try:
-        # Debug: Check version via CLI
-        subprocess.run(["jupyter-book", "--version"], check=False)
+        print("1. Versión de Python:", sys.version, flush=True)
+        print("2. Paquetes instalados (pip freeze):", flush=True)
+        subprocess.run([sys.executable, "-m", "pip", "freeze"], check=False)
+        print("3. Ayuda de Jupyter Book (para ver opciones válidas):", flush=True)
+        subprocess.run([sys.executable, "-m", "jupyter_book", "build", "--help"], check=False)
+    except Exception as e:
+        print(f"⚠️ Error intentando diagnosticar: {e}", flush=True)
+    print("--------------------------------\n", flush=True)
+    # --- DIAGNOSTICS END ---
+
+    try:
+        # Build command: Use sys.executable -m jupyter_book to avoid path issues
+        # Use --builder before the directory
+        cmd = [sys.executable, "-m", "jupyter_book", "build", "--builder", "latex", BOOK_DIR]
+        print(f"🚀 Ejecutando comando: {' '.join(cmd)}", flush=True)
         
-        # Build command: Use --builder before the directory
-        # We don't use check=True here so we can handle the error manually and show output
         result = subprocess.run(
-            ["jupyter-book", "build", "--builder", "latex", BOOK_DIR], 
+            cmd, 
             capture_output=True, 
             text=True
         )

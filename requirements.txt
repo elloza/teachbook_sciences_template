@@ -1,9 +1,9 @@
-jupyter-book
+jupyter-book==0.15.1
 matplotlib
 numpy
 pandas
 seaborn
 sympy
-livereload
+livereload==2.7.1
 sphinx-autobuild
-watchdog
+watchdog==3.0.0
