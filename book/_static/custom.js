@@ -7,14 +7,16 @@ document.addEventListener("DOMContentLoaded", function () {
     console.log(`TeachBook v${TEACHBOOK_VERSION}: Loading UI components...`);
 
     // 1. Fetch Languages
-    const rootPath = (typeof DOCUMENTATION_OPTIONS !== 'undefined' && DOCUMENTATION_OPTIONS.URL_ROOT) ? DOCUMENTATION_OPTIONS.URL_ROOT : '';
-    const jsonPath = rootPath + '_static/languages.json';
+    const rootPath = (typeof DOCUMENTATION_OPTIONS !== 'undefined' && DOCUMENTATION_OPTIONS.URL_ROOT) ? DOCUMENTATION_OPTIONS.URL_ROOT : './';
 
-    fetch(jsonPath)
-        .then(res => {
-            if (!res.ok) throw new Error("No languages.json found");
-            return res.json();
-        })
+    const tryFetch = (path) => fetch(path).then(res => {
+        if (!res.ok) throw new Error("Not found");
+        return res.json();
+    });
+
+    // Try relative to current page first (for local dev), then root (for prod)
+    tryFetch(rootPath + '_static/languages.json')
+        .catch(() => tryFetch('_static/languages.json')) // fallback for root-level access or different build structs
         .then(languages => {
             if (languages.length > 1) {
                 injectLanguageSwitcher(languages, rootPath);
@@ -23,7 +25,7 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         })
         .catch(err => {
-            console.log("TeachBook: Language switcher disabled (single mode or error).", err);
+            console.log("TeachBook: Language switcher disabled (missing languages.json).");
         });
 
     // 2. Inject PDF Button (Always, if configured)
