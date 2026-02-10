@@ -43,9 +43,10 @@ def build_pdf():
     # 1. Generate LaTeX source
     print("📝 Generando archivos LaTeX con Jupyter Book...", flush=True)
     try:
-        import jupyter_book
-        print(f"DEBUG: Jupyter Book Version: {jupyter_book.__version__}", flush=True)
-        # Use builder BEFORE path, and use the most compatible form
+        # Debug: Check version via CLI
+        subprocess.run(["jupyter-book", "--version"], check=False)
+        
+        # Build command: Use --builder before the directory
         subprocess.run(["jupyter-book", "build", "--builder", "latex", BOOK_DIR], check=True)
     except Exception as e:
         print(f"❌ Error durante la ejecución de jupyter-book: {e}", flush=True)
