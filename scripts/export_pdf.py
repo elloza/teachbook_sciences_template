@@ -57,16 +57,29 @@ def build_pdf():
     # --- DIAGNOSTICS END ---
 
     try:
-        # Build command: Use sys.executable -m jupyter_book to avoid path issues
-        # Use --builder before the directory
-        cmd = [sys.executable, "-m", "jupyter_book", "build", "--builder", "latex", BOOK_DIR]
-        print(f"🚀 Ejecutando comando: {' '.join(cmd)}", flush=True)
+        # Build command: Invoke the Click app directly from Python
+        # This bypasses any issues with the `jupyter-book` executable script
+        from jupyter_book.cli.main import main as jb_main
+        from click.testing import CliRunner
+
+        print(f"🚀 Ejecutando jupyter-book build (direct module invoke)...", flush=True)
         
-        result = subprocess.run(
-            cmd, 
-            capture_output=True, 
-            text=True
-        )
+        runner = CliRunner()
+        result = runner.invoke(jb_main, ["build", "--builder", "latex", BOOK_DIR])
+
+        if result.exit_code != 0:
+            print("❌ Error en jupyter-book build:", flush=True)
+            print("--- STDOUT ---", flush=True)
+            print(result.output, flush=True) # Click runner combines stdout/stderr
+            print("--- EXCEPTION ---", flush=True)
+            print(result.exception, flush=True)
+            return False
+            
+    except Exception as e:
+        print(f"❌ Error inesperado ejecutando jupyter-book: {e}", flush=True)
+        import traceback
+        traceback.print_exc()
+        return False
         
         if result.returncode != 0:
             print("❌ Error en jupyter-book build:", flush=True)
