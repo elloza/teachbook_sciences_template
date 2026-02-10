@@ -47,9 +47,23 @@ def build_pdf():
         subprocess.run(["jupyter-book", "--version"], check=False)
         
         # Build command: Use --builder before the directory
-        subprocess.run(["jupyter-book", "build", "--builder", "latex", BOOK_DIR], check=True)
+        # We don't use check=True here so we can handle the error manually and show output
+        result = subprocess.run(
+            ["jupyter-book", "build", "--builder", "latex", BOOK_DIR], 
+            capture_output=True, 
+            text=True
+        )
+        
+        if result.returncode != 0:
+            print("❌ Error en jupyter-book build:", flush=True)
+            print("--- STDOUT ---", flush=True)
+            print(result.stdout, flush=True)
+            print("--- STDERR ---", flush=True)
+            print(result.stderr, flush=True)
+            return False
+            
     except Exception as e:
-        print(f"❌ Error durante la ejecución de jupyter-book: {e}", flush=True)
+        print(f"❌ Error inesperado ejecutando jupyter-book: {e}", flush=True)
         return False
 
     # 2. Compile PDF
