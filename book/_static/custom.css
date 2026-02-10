@@ -11,11 +11,11 @@ html {
     --usal-blue-light: #004a7c;
 }
 
-/* Ensure homogeneous article width across pages without breaking sidebar toggle */
-.bd-article-container {
-    max-width: var(--pst-content-width);
-    margin-left: auto;
-    margin-right: auto;
+/* Ensure homogeneous article width across pages without breaking sidebar toggle (now patched with JS) */
+.bd-main .bd-content .bd-article-container {
+    max-width: var(--pst-content-width) !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
 }
 
 /* Language Switcher Styling */
@@ -24,7 +24,8 @@ html {
     height: 100%;
     align-self: center;
     position: relative;
-    /* CRITICAL for absolute positioning of child dropdown */
+    z-index: 10000;
+    /* Ensure it stays above content */
 }
 
 /* Hover Support */
@@ -59,29 +60,40 @@ html {
     display: none;
     position: absolute;
     right: 0;
-    left: auto;
-    top: 34.3px;
-    /* Precise alignment from user */
+    top: 32px;
+    /* Alignment with button height */
     margin: 0 !important;
-    min-width: 160px;
-    z-index: 1000;
+    min-width: 140px;
+    z-index: 10001;
     border: 1px solid var(--pst-color-border);
     background-color: var(--pst-color-background-main);
-    box-shadow: var(--pst-box-shadow-medium, 0 4px 12px rgba(0, 0, 0, 0.1));
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     border-radius: 6px;
     padding: 0.4rem 0;
+    list-style: none;
+    /* Crucial since we removed dropdown-menu */
 }
 
-.teachbook-lang-dropdown.show {
-    display: block;
-    animation: fadeInDown 0.15s ease-out;
+/* Ensure list items don't have bullets or extra padding */
+.teachbook-lang-dropdown li {
+    padding: 0;
+    margin: 0;
+    list-style: none;
 }
 
 .teachbook-lang-dropdown .dropdown-item {
+    display: block;
+    width: 100%;
+    clear: both;
+    font-weight: 500;
     color: var(--pst-color-text-main) !important;
+    text-align: inherit;
+    white-space: nowrap;
+    background-color: transparent;
+    border: 0;
     padding: 0.5rem 1rem;
     font-size: 0.85em;
-    font-weight: 500;
+    text-decoration: none !important;
 }
 
 .teachbook-lang-dropdown .dropdown-item:hover,

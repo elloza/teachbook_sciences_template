@@ -28,6 +28,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // 2. Inject PDF Button (Always, if configured)
     injectPDFButton(rootPath);
+
+    // 3. Fix Sidebar Toggle ID mismatch (Theme regression)
+    const toggleLabel = document.querySelector('label.sidebar-toggle.primary-toggle');
+    const primaryCheckbox = document.getElementById('pst-primary-sidebar-checkbox');
+    if (toggleLabel && primaryCheckbox && toggleLabel.getAttribute('for') !== primaryCheckbox.id) {
+        console.log("TeachBook: Fixing sidebar toggle ID mismatch.");
+        toggleLabel.setAttribute('for', primaryCheckbox.id);
+    }
 });
 
 function injectLanguageSwitcher(languages, rootPath) {
@@ -45,14 +53,14 @@ function injectLanguageSwitcher(languages, rootPath) {
     });
 
     const dropdownHtml = `
-        <div class="dropdown teachbook-lang-container">
+        <div class="teachbook-lang-container">
             <button class="btn btn-sm teachbook-lang-btn" 
-                    type="button" data-bs-toggle="dropdown" aria-expanded="false" 
+                    type="button" 
                     title="Change Language / Cambiar Idioma">
                 <i class="fa-solid fa-language"></i>
                 <span class="lang-text">${currentLangCode.toUpperCase()}</span>
             </button>
-            <ul class="dropdown-menu teachbook-lang-dropdown">
+            <ul class="teachbook-lang-dropdown">
                 ${languages.map(l => {
         // Link to the relative sibling directory
         const targetUrl = `../${l.code}/intro.html`;

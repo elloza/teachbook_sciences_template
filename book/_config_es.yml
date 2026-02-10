@@ -16,10 +16,10 @@ parse:
     <div style="margin-top: 10px; font-size: 0.8em; color: #666;">
       Powered by <a href="https://jupyterbook.org">Jupyter Book</a>
     </div>
-    html_theme_options:
-      icon_links: []
-    latex_docclass:
-      book: jupyterBook
+html_theme_options:
+  icon_links: []
+latex_docclass:
+  book: jupyterBook
 latex:
   latex_engine: xelatex
   options: "spanish"
