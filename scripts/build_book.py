@@ -35,7 +35,7 @@ def get_languages():
         
     return sorted(languages)
 
-def generate_languages_json(languages):
+def generate_languages_json(languages, output_static_dir=None):
     """Generates a JSON file with available languages for the JS switcher."""
     lang_data = []
     for lang in languages:
@@ -46,15 +46,17 @@ def generate_languages_json(languages):
             "name": LANG_DISPLAY_NAMES.get(lang, lang.upper())
         })
     
-    static_dir = os.path.join(BOOK_DIR, "_static")
-    if not os.path.exists(static_dir):
-        os.makedirs(static_dir)
+    # Target directory: either source or specified build dir
+    target_dir = output_static_dir if output_static_dir else os.path.join(BOOK_DIR, "_static")
+    
+    if not os.path.exists(target_dir):
+        os.makedirs(target_dir)
         
-    json_path = os.path.join(static_dir, "languages.json")
+    json_path = os.path.join(target_dir, "languages.json")
     with open(json_path, 'w', encoding='utf-8') as f:
         json.dump(lang_data, f, indent=2, ensure_ascii=False)
     
-    print(f"🌍 Archivo de idiomas generado: {json_path}")
+    print(f"🌍 Archivo de idiomas generado en: {json_path}")
 
 def fix_pdf_paths(build_dir, pdf_filename):
     """Fixes relative paths for the PDF download button in HTML files within a specific build dir."""
@@ -239,6 +241,10 @@ def main():
     if "default" not in languages and len(languages) > 0:
         default_lang = "es" if "es" in languages else languages[0]
         create_redirect_index(default_lang)
+    
+    # 3. Final step: Regenerate languages.json in the final static folder
+    # to be 100% sure it's there
+    generate_languages_json(languages, final_static)
         
     print("\n✅ ¡Construcción completa!")
     print(f"🌍 Web disponible en: {os.path.abspath(FINAL_HTML_DIR)}")
