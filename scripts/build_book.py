@@ -168,7 +168,24 @@ def build_language(lang):
             shutil.rmtree(final_dest)
         shutil.copytree(built_html_path_nested, final_dest)
         print(f"✅ Versión {lang} movida correctamente.")
+
+        # CRITICAL FIX: Merge the generated _static folder (containing theme assets)
+        # from the temp build to the final root _static folder.
+        # Sphinx/JB puts _static at the root of the build output, not inside the 'en' folder.
+        temp_static_dir = os.path.join(temp_build_root, "_build", "html", "_static")
+        final_static_dir = os.path.join(FINAL_HTML_DIR, "_static")
+        
+        if os.path.exists(temp_static_dir):
+            print(f"📦 Merging theme assets from temp build ({lang}) to global _static...")
+            if not os.path.exists(final_static_dir):
+                os.makedirs(final_static_dir)
             
+            # Use our safe merge function (definition needs to be accessible, or we inline simple copy)
+            # Since merge_dir_into is defined in main(), we can't call it here easily unless we move it 
+            # or use shutil.copytree with dirs_exist_ok=True (Py3.8+). 
+            # GitHub Actions uses Py3.11, so dirs_exist_ok=True is safe and cleaner.
+            shutil.copytree(temp_static_dir, final_static_dir, dirs_exist_ok=True)
+
     except subprocess.CalledProcessError:
         print(f"❌ Error compilando idioma standalone: {lang}")
         sys.exit(1)
@@ -199,19 +216,19 @@ def main():
     print("📚 Iniciando proceso de construcción multi-idioma...")
     languages = get_languages()
     print(f"🔍 Idiomas detectados: {languages}")
+    
+    # Pre-create root _static to avoid race conditions or missing dirs
+    if not os.path.exists(FINAL_HTML_DIR):
+        os.makedirs(FINAL_HTML_DIR)
+    final_static = os.path.join(FINAL_HTML_DIR, "_static")
+    if not os.path.exists(final_static):
+        os.makedirs(final_static)
+
     generate_languages_json(languages)
     
     for lang in languages:
         build_language(lang)
     
-    # After builds, ensure _static assets are available everywhere
-    if not os.path.exists(FINAL_HTML_DIR):
-        os.makedirs(FINAL_HTML_DIR)
-        
-    final_static = os.path.join(FINAL_HTML_DIR, "_static")
-    if not os.path.exists(final_static):
-        os.makedirs(final_static)
-
     def merge_dir_into(src_dir, dst_dir):
         """Merge src_dir into dst_dir without deleting dst_dir first.
         Overwrites files that already exist. Skips locked files gracefully."""
@@ -234,20 +251,8 @@ def main():
         merge_dir_into(custom_static, final_static)
         print(f"📦 Custom static assets merged into: {final_static}")
 
-    # 2. Merge theme assets from the first available language build
-    if languages:
-        first_lang = languages[0]
-        lang_static = os.path.join(FINAL_HTML_DIR, first_lang, "_static")
-        if os.path.exists(lang_static):
-            print(f"📦 Merging theme assets from '{first_lang}'...")
-            merge_dir_into(lang_static, final_static)
-
-    # 3. Regenerate languages.json in ALL _static directories
+    # 2. Regenerate languages.json in ALL _static directories (Just in case)
     generate_languages_json(languages, final_static)
-    for lang in languages:
-        lang_static_dir = os.path.join(FINAL_HTML_DIR, lang, "_static")
-        if os.path.exists(lang_static_dir):
-            generate_languages_json(languages, lang_static_dir)
     
     if "default" not in languages and len(languages) > 0:
         default_lang = "es" if "es" in languages else languages[0]
