@@ -1,6 +1,6 @@
 title: TeachBook (Chemistry Sciences Template)
 author: Álvaro Lozano Murciego y André Sales Mendes (USAL)
-copyright: "2025, TeachBooks Project"
+copyright: "2025, based on TeachBooks Project"
 logo: "_static/logo.png"
 language: en
 exclude_patterns: ["_build", "Thumbs.db", ".DS_Store", "**.ipynb_checkpoints", "_build_*", "es/"]

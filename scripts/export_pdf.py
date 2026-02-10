@@ -113,12 +113,26 @@ def build_pdf_for_lang(lang):
             return False
             
         main_tex = tex_files[0]
-        tectonic_exe = check_latex_installed()
-        if not tectonic_exe:
+        tex_engine_path = check_latex_installed()
+        if not tex_engine_path:
             print("❌ No hay motor LaTeX.")
             return False
             
-        subprocess.run([tectonic_exe, "-X", "compile", main_tex], check=True)
+        print(f"🔧 Usando motor: {tex_engine_path}")
+        
+        # Determine commands based on engine
+        engine_name = os.path.basename(tex_engine_path).lower()
+        if "tectonic" in engine_name:
+            cmd = [tex_engine_path, "-X", "compile", main_tex]
+        elif "latexmk" in engine_name:
+            # Use xelatex as per project config
+            cmd = [tex_engine_path, "-xelatex", "-interaction=nonstopmode", "-halt-on-error", main_tex]
+        else:
+            # Fallback to pdflatex
+            cmd = [tex_engine_path, "-interaction=nonstopmode", "-halt-on-error", main_tex]
+
+        print(f"🚀 Ejecutando: {' '.join(cmd)}")
+        subprocess.run(cmd, check=True)
         
         found_pdf = glob_pdf(".")
         if found_pdf:
@@ -131,7 +145,7 @@ def build_pdf_for_lang(lang):
             print("❌ No se generó el PDF final.")
             return False
     except Exception as e:
-        print(f"❌ Errror compilando {lang}: {e}")
+        print(f"❌ Error compilando {lang}: {e}")
         return False
     finally:
         os.chdir(current_dir)
