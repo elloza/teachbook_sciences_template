@@ -1,11 +1,12 @@
 import os
 import sys
 import subprocess
-import shutil
+import argparse
 
 # Configuration
 VENV_DIR = ".venv"
 REQUIREMENTS_FILE = "requirements.txt"
+DEV_REQUIREMENTS_FILE = "requirements-dev.txt"
 MIN_PYTHON_VERSION = (3, 7)
 
 def check_python_version():
@@ -42,40 +43,76 @@ def create_venv():
     else:
         print(f"✅ Virtual environment '{VENV_DIR}' already exists.")
 
-def install_requirements():
+def install_requirements(dev_mode=False):
     """Installs dependencies from requirements.txt into the virtual environment."""
-    if not os.path.exists(REQUIREMENTS_FILE):
-        print(f"⚠️ Warning: '{REQUIREMENTS_FILE}' not found. Skipping installation.")
-        return
-
     pip_cmd = get_venv_pip()
-    print(f"⬇️  Installing dependencies from '{REQUIREMENTS_FILE}'...")
-    
-    try:
-        # Upgrade pip first
-        subprocess.check_call([get_venv_python(), "-m", "pip", "install", "--upgrade", "pip"], stdout=subprocess.DEVNULL)
-        
-        # Install requirements
-        subprocess.check_call([pip_cmd, "install", "-r", REQUIREMENTS_FILE])
-        print("✅ Dependencies installed successfully.")
-    except subprocess.CalledProcessError:
-        print("❌ Error installing dependencies.")
-        sys.exit(1)
+    python_cmd = get_venv_python()
 
-def verify_installation():
+    # Upgrade pip first
+    try:
+        subprocess.check_call([python_cmd, "-m", "pip", "install", "--upgrade", "pip"], stdout=subprocess.DEVNULL)
+    except subprocess.CalledProcessError:
+        print("⚠️ Warning: Could not upgrade pip.")
+
+    # 1. Install Production Requirements
+    if os.path.exists(REQUIREMENTS_FILE):
+        print(f"⬇️  Installing dependencies from '{REQUIREMENTS_FILE}'...")
+        try:
+            subprocess.check_call([pip_cmd, "install", "-r", REQUIREMENTS_FILE])
+            print("✅ Core dependencies installed.")
+        except subprocess.CalledProcessError:
+            print("❌ Error installing core dependencies.")
+            sys.exit(1)
+    else:
+        print(f"⚠️ Warning: '{REQUIREMENTS_FILE}' not found. Skipping.")
+
+    # 2. Install Dev Requirements (if requested)
+    if dev_mode:
+        if os.path.exists(DEV_REQUIREMENTS_FILE):
+             print(f"🛠️  Dev Mode: Installing dependencies from '{DEV_REQUIREMENTS_FILE}'...")
+             try:
+                 subprocess.check_call([pip_cmd, "install", "-r", DEV_REQUIREMENTS_FILE])
+                 print("✅ Dev dependencies installed.")
+                 
+                 # 3. Playwright specific setup
+                 install_playwright_browsers(python_cmd)
+
+             except subprocess.CalledProcessError:
+                 print("❌ Error installing dev dependencies.")
+                 sys.exit(1)
+        else:
+            print(f"⚠️ Warning: '{DEV_REQUIREMENTS_FILE}' not found, but --dev was requested.")
+
+def install_playwright_browsers(python_cmd):
+    """Installs Playwright browsers using the venv python."""
+    print("🎭 Checking Playwright browser installation...")
+    try:
+        # Check if we can import playwright
+        subprocess.check_call([python_cmd, "-c", "import playwright"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        
+        print("   Running 'playwright install' (this may take a while)...")
+        subprocess.check_call([python_cmd, "-m", "playwright", "install"])
+        print("✅ Playwright browsers installed.")
+    except subprocess.CalledProcessError:
+         print("⚠️  Playwright not found or failed to install browsers. Is it in requirements-dev.txt?")
+
+def verify_installation(dev_mode=False):
     """Lists installed packages to verify the environment."""
     print("\n🔍 Verifying installed packages:")
     pip_cmd = get_venv_pip()
     try:
         result = subprocess.check_output([pip_cmd, "freeze"], text=True)
-        print(result)
+        # print(result) # Reduced verbosity
         
         # Check for key packages
         required_packages = ["jupyter-book", "sphinx-autobuild", "watchdog"]
+        if dev_mode:
+            required_packages.append("playwright")
+
         missing = [pkg for pkg in required_packages if pkg not in result]
         
         if missing:
-             print(f"⚠️ Warning: Some key packages seem missing from 'pip freeze': {missing}")
+             print(f"⚠️ Warning: Some key packages seem missing: {missing}")
         else:
              print("✨ All key packages verified.")
 
@@ -83,15 +120,20 @@ def verify_installation():
         print("❌ Error verification failed.")
 
 def main():
+    parser = argparse.ArgumentParser(description="Setup TeachBook Environment")
+    parser.add_argument("--dev", action="store_true", help="Install development tools (Playwright, etc.)")
+    args = parser.parse_args()
+
     print("🛠️  TeachBook Environment Setup")
     print("=============================")
+    print(f"Mode: {'Development 🛠️' if args.dev else 'Production 🚀'}")
     
     check_python_version()
     create_venv()
-    install_requirements()
-    verify_installation()
+    install_requirements(dev_mode=args.dev)
+    verify_installation(dev_mode=args.dev)
     
-    print("\n🎉 Setup Complete! Active the environment with:")
+    print("\n🎉 Setup Complete! Activate the environment with:")
     if os.name == "nt":
         print(f"   {VENV_DIR}\\Scripts\\activate")
     else:

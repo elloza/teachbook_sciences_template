@@ -25,6 +25,11 @@ Simplemente díselo en lenguaje natural:
 
 ## Acción Técnica
 El agente ejecutará:
-```bash
-python scripts/setup_env.py
-```
+- **Producción (Solo lectura/Web):**
+  ```bash
+  python scripts/setup_env.py
+  ```
+- **Desarrollo (Con herramientas de prueba):**
+  ```bash
+  python scripts/setup_env.py --dev
+  ```
