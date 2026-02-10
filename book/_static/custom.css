@@ -155,11 +155,11 @@ html {
 /* Force header components to stay above title text */
 .bd-header-article {
     position: relative;
-    z-index: 5000 !important;
+    z-index: 550000 !important;
 }
 
 /* Fix for the dropdown being behind content even with high z-index */
 /* Sometimes the parent container limits the stack */
 .article-header-buttons {
-    z-index: 500000 !important;
+    z-index: 560000 !important;
 }
