@@ -256,5 +256,12 @@ def main():
     print("\n✅ ¡Construcción completa!")
     print(f"🌍 Web disponible en: {os.path.abspath(FINAL_HTML_DIR)}")
 
+    # Ensure .nojekyll exists to prevent GitHub Pages from ignoring _static
+    nojekyll_path = os.path.join(FINAL_HTML_DIR, ".nojekyll")
+    if not os.path.exists(nojekyll_path):
+        with open(nojekyll_path, 'w') as f:
+            pass
+        print("✅ Archivo .nojekyll creado para GitHub Pages.")
+
 if __name__ == "__main__":
     main()
