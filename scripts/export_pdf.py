@@ -6,14 +6,25 @@ import glob
 
 # Configuration
 BOOK_DIR = "book"
-BUILD_PDF_DIR = os.path.join(BOOK_DIR, "_build", "latex")
 STATIC_DIR = os.path.join(BOOK_DIR, "_static")
-PDF_FILENAME = "teachbook.pdf"
-DEST_PDF_PATH = os.path.join(STATIC_DIR, PDF_FILENAME)
+
+def get_languages():
+    """Detects languages based on _config_<lang>.yml files."""
+    configs = glob.glob(os.path.join(BOOK_DIR, "_config_*.yml"))
+    languages = []
+    
+    for conf in configs:
+        filename = os.path.basename(conf)
+        lang_code = filename.replace("_config_", "").replace(".yml", "")
+        languages.append(lang_code)
+    
+    if not languages and os.path.exists(os.path.join(BOOK_DIR, "_config.yml")):
+        return ["default"] # Single language mode
+        
+    return sorted(languages)
 
 def check_latex_installed():
     """Checks if tectonic, latexmk or pdflatex is available."""
-    # Also check if tectonic is in scripts/ folder
     script_dir = os.path.dirname(os.path.abspath(__file__))
     local_tectonic = os.path.join(script_dir, "tectonic.exe" if os.name == 'nt' else "tectonic")
     
@@ -26,151 +37,127 @@ def ensure_static_dir():
     """Ensures the static directory exists."""
     if not os.path.exists(STATIC_DIR):
         os.makedirs(STATIC_DIR)
-        print(f"📁 Directorio creado: {STATIC_DIR}")
 
-def build_pdf():
-    """Builds the PDF using jupyter-book latex builder + tectonic/latexmk."""
+def glob_pdf(search_dir):
+    for file in os.listdir(search_dir):
+        if file.endswith(".pdf"):
+            return os.path.abspath(os.path.join(search_dir, file))
+    return None
+
+def build_pdf_for_lang(lang):
+    """Builds the PDF for a specific language using a standalone temporary project."""
+    print(f"\n🚀 Iniciando generación de PDF STANDALONE para: {lang.upper()}...")
     
-    # 0. Check for LaTeX tools
-    if not check_latex_installed():
-        print("⚠️  No se detectó un motor LaTeX.")
-        print("ℹ️  Puedes instalar uno ligero ejecutando: python scripts/setup_latex.py")
-        print("ℹ️  O espera a publicar: el PDF se generará automáticamente en GitHub Actions.")
-        return False
+    if lang == "default":
+        config_file = "_config.yml"
+        toc_file = "_toc.yml"
+        pdf_filename = "teachbook.pdf"
+        src_dir = os.path.abspath(BOOK_DIR)
+        temp_mode = False
+    else:
+        config_file = f"_config_{lang}.yml"
+        toc_file = f"_toc_{lang}.yml"
+        pdf_filename = f"teachbook_{lang}.pdf"
+        temp_mode = True
 
-    print("🚀 Iniciando generación de PDF (esto puede tardar)...")
-    
-    # 1. Generate LaTeX source
-    print("📝 Generando archivos LaTeX con Jupyter Book...", flush=True)
-    
-    # --- DIAGNOSTICS START ---
-    print("\n🔍 BUSCANDO CAUSA RAÍZ EN CI:", flush=True)
-    try:
-        print("1. Versión de Python:", sys.version, flush=True)
-        print("2. Paquetes instalados (pip freeze):", flush=True)
-        subprocess.run([sys.executable, "-m", "pip", "freeze"], check=False)
-        print("3. Ayuda de Jupyter Book (para ver opciones válidas):", flush=True)
-        subprocess.run([sys.executable, "-m", "jupyter_book", "build", "--help"], check=False)
-    except Exception as e:
-        print(f"⚠️ Error intentando diagnosticar: {e}", flush=True)
-    print("--------------------------------\n", flush=True)
-    # --- DIAGNOSTICS END ---
-
-    try:
-        # Build command: Invoke the Click app directly from Python
-        # This bypasses any issues with the `jupyter-book` executable script
-        from jupyter_book.cli.main import main as jb_main
-        from click.testing import CliRunner
-
-        print(f"🚀 Ejecutando jupyter-book build (direct module invoke)...", flush=True)
+    if temp_mode:
+        temp_root = os.path.abspath(os.path.join(BOOK_DIR, f"temp_pdf_{lang}"))
+        if os.path.exists(temp_root):
+            shutil.rmtree(temp_root)
+        os.makedirs(temp_root)
         
-        runner = CliRunner()
-        result = runner.invoke(jb_main, ["build", "--builder", "latex", BOOK_DIR])
-
-        if result.exit_code != 0:
-            print("❌ Error en jupyter-book build:", flush=True)
-            print("--- STDOUT ---", flush=True)
-            print(result.output, flush=True) # Click runner combines stdout/stderr
-            print("--- EXCEPTION ---", flush=True)
-            print(result.exception, flush=True)
-            return False
+        lang_src = os.path.join(BOOK_DIR, lang)
+        lang_dst = os.path.join(temp_root, lang)
+        print(f"📂 Preparando entorno standalone PDF: {temp_root}")
+        shutil.copytree(lang_src, lang_dst)
+        
+        static_src = os.path.join(BOOK_DIR, "_static")
+        if os.path.exists(static_src):
+            shutil.copytree(static_src, os.path.join(temp_root, "_static"))
             
-    except Exception as e:
-        print(f"❌ Error inesperado ejecutando jupyter-book: {e}", flush=True)
-        import traceback
-        traceback.print_exc()
+        shutil.copy2(os.path.join(BOOK_DIR, config_file), os.path.join(temp_root, "_config.yml"))
+        shutil.copy2(os.path.join(BOOK_DIR, toc_file), os.path.join(temp_root, "_toc.yml"))
+        src_dir = temp_root
+    else:
+        src_dir = os.path.abspath(BOOK_DIR)
+
+    build_dir = os.path.join(src_dir, "_build")
+    latex_build_dir = os.path.join(build_dir, "latex")
+    dest_pdf_path = os.path.join(STATIC_DIR, pdf_filename)
+    
+    if os.path.exists(build_dir):
+        shutil.rmtree(build_dir)
+
+    print("📝 Generando archivos LaTeX con Jupyter Book...", flush=True)
+    try:
+        cmd = ["jupyter-book", "build", "--builder", "latex", src_dir, "--all"]
+        subprocess.run(cmd, shell=(os.name == 'nt'), check=True)
+    except subprocess.CalledProcessError as e:
+        print(f"❌ Error en jupyter-book build ({lang}): {e}")
         return False
 
-    # 1.5 Copy LaTeX Templates (Custom USAL Style)
     print("🎨 Aplicando plantillas LaTeX personalizadas...", flush=True)
     templates_dir = os.path.abspath("latex_templates")
-    
-    if os.path.exists(templates_dir) and os.path.exists(BUILD_PDF_DIR):
-        print(f"   Copiando desde: {templates_dir}", flush=True)
-        count = 0
+    if os.path.exists(templates_dir) and os.path.exists(latex_build_dir):
         for item in os.listdir(templates_dir):
-            s = os.path.join(templates_dir, item)
-            d = os.path.join(BUILD_PDF_DIR, item)
-            try:
-                if os.path.isfile(s):
-                    shutil.copy2(s, d)
-                    count += 1
-            except Exception as ex:
-                print(f"   ⚠️ Error copiando {item}: {ex}", flush=True)
-        print(f"✅ {count} plantillas aplicadas.", flush=True)
-    else:
-        print("⚠️ No se encontraron plantillas personalizadas o carpeta de build.", flush=True)
+            if item.endswith(".tex") or item.endswith(".cls") or item.endswith(".png"):
+                shutil.copy2(os.path.join(templates_dir, item), os.path.join(latex_build_dir, item))
 
-    # 2. Compile PDF
-    print(f"📂 Archivos LaTeX generados en {BUILD_PDF_DIR}")
+    print(f"📂 Compilando con Tectonic en {latex_build_dir}...")
     current_dir = os.getcwd()
-    os.chdir(BUILD_PDF_DIR)
-    
     try:
-        # Find the main .tex file
+        os.chdir(latex_build_dir)
         tex_files = glob.glob("*.tex")
         if not tex_files:
-             print("❌ No se encontró ningún archivo .tex generado.")
-             return False
-        
-        main_tex = tex_files[0]
-        print(f"📄 Archivo principal encontrado: {main_tex}")
-
-        latex_path = check_latex_installed()
-        
-        # Priority 1: Tectonic
-        if latex_path and "tectonic" in str(latex_path).lower():
-            print(f"🔨 Compilando con Tectonic ({latex_path})...")
-            # Tectonic downloads packages on the fly, so we allow network access
-            # We run it on the .tex file directly
-            cmd = [latex_path, "-X", "compile", main_tex]
-            subprocess.run(cmd, check=True)
-            
-        # Priority 2: Make (Unix/Linux standard)
-        elif shutil.which("make"):
-            print("🔨 Compilando con Make...")
-            subprocess.run(["make"], check=True)
-            
-        # Priority 3: Latexmk (Windows standard if no make)
-        elif shutil.which("latexmk"):
-            current_tex = main_tex
-            print("🔨 Compilando con Latexmk...")
-            subprocess.run(["latexmk", "-pdf", "-f", "-interaction=nonstopmode", current_tex], check=True)
-            
-        else:
-            print("❌ Se detectó pdflatex pero no una herramienta de automatización compatible (tectonic/make/latexmk).")
+            print("❌ No se encontró archivo .tex.")
             return False
-
-        print("✅ Compilación terminada.")
+            
+        main_tex = tex_files[0]
+        tectonic_exe = check_latex_installed()
+        if not tectonic_exe:
+            print("❌ No hay motor LaTeX.")
+            return False
+            
+        subprocess.run([tectonic_exe, "-X", "compile", main_tex], check=True)
         
-        # 3. Copy to _static
-        # Tectonic produces the pdf in the same folder by default
-        pdf_source = glob_pdf()
-        if pdf_source:
-             os.chdir(current_dir) # Go back before copying
-             ensure_static_dir()
-             shutil.copy(pdf_source, DEST_PDF_PATH)
-             print(f"🎉 PDF exportado correctamente a:\n   {DEST_PDF_PATH}")
-             return True
+        found_pdf = glob_pdf(".")
+        if found_pdf:
+            os.chdir(current_dir)
+            ensure_static_dir()
+            shutil.copy(found_pdf, dest_pdf_path)
+            print(f"🎉 PDF de '{lang}' exportado a: {dest_pdf_path}")
+            return True
         else:
-             print("❌ No se encontró el archivo PDF final.")
-             return False
-
-    except subprocess.CalledProcessError:
-        print("❌ Error durante la compilación del PDF.")
-        print("   (Si usas Tectonic, asegúrate de tener conexión a Internet la primera vez).")
+            print("❌ No se generó el PDF final.")
+            return False
+    except Exception as e:
+        print(f"❌ Errror compilando {lang}: {e}")
         return False
     finally:
         os.chdir(current_dir)
+        if temp_mode and os.path.exists(src_dir):
+            shutil.rmtree(src_dir)
 
-def glob_pdf():
-    # Find the generated pdf in the current dir
-    for file in os.listdir("."):
-        if file.endswith(".pdf"):
-            return os.path.abspath(file)
-    return None
+def main():
+    print("📚 Iniciando exportación de PDF multi-idioma...")
+    if not check_latex_installed():
+        print("⚠️  No se detectó un motor LaTeX. Instala Tectonic o TeX Live.")
+        sys.exit(1)
+
+    languages = get_languages()
+    print(f"🔍 Idiomas detectados para PDF: {languages}")
+
+    success_count = 0
+    for lang in languages:
+        if build_pdf_for_lang(lang):
+            success_count += 1
+    
+    if success_count == len(languages):
+        print(f"\n✅ Todos los PDFs ({success_count}) se generaron correctamente.")
+        sys.exit(0)
+    else:
+        print(f"\n⚠️ Se generaron {success_count} de {len(languages)} PDFs.")
+        sys.exit(1)
 
 if __name__ == "__main__":
-    success = build_pdf()
-    if not success:
-        sys.exit(1)
+    main()

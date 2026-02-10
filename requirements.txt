@@ -7,3 +7,7 @@ sympy
 livereload==2.7.1
 sphinx-autobuild
 watchdog==3.0.0
+Babel
+sphinx-rtd-theme
+sphinx<8.0.0
+tectonic

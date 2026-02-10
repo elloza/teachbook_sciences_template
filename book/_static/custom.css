@@ -1,121 +1,130 @@
-/* Custom Sidebar Styles */
-
-/* Container for our injected buttons */
-.custom-sidebar-buttons {
-    margin: 1rem 1rem 1.5rem 1rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.8rem;
-    font-size: 0.9em;
+/* Global Layout Stability & Width */
+html {
+    scrollbar-gutter: stable;
 }
 
-/* Base button style */
-.sidebar-btn {
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    /* Align text to left */
-    width: 100%;
-    padding: 0.6rem 1rem;
-    border-radius: 6px;
-    background-color: var(--pst-color-surface);
-    /* Theme aware background */
-    border: 1px solid var(--pst-color-border);
-    /* Theme aware border */
-    color: var(--pst-color-text-base) !important;
-    text-decoration: none !important;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    font-family: inherit;
-    font-size: inherit;
+/* Base Styles & Layout Consistency */
+:root {
+    --pst-content-width: 60rem;
+    /* Stable width for all sections */
+    --usal-blue: #003153;
+    --usal-blue-light: #004a7c;
 }
 
-.sidebar-btn:hover {
-    background-color: var(--pst-color-surface-hover);
-    transform: translateY(-1px);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-}
-
-.sidebar-btn i {
-    margin-right: 0.8rem;
-    width: 1.2em;
-    /* Fixed width for icon alignment */
-    text-align: center;
-}
-
-/* Specific Button Styles */
-.pdf-btn {
-    border-left: 3px solid #e74c3c;
-}
-
-.pdf-btn i {
-    color: #e74c3c;
-}
-
-.lang-btn {
-    border-left: 3px solid #3498db;
-    justify-content: space-between;
-    /* Push arrow to right */
-}
-
-.lang-btn i:first-child {
-    color: #3498db;
-}
-
-.lang-btn .arrow-icon {
-    margin-right: 0;
+/* Ensure homogeneous article width across pages without breaking sidebar toggle */
+.bd-article-container {
+    max-width: var(--pst-content-width);
     margin-left: auto;
-    font-size: 0.8em;
-    transition: transform 0.2s ease;
+    margin-right: auto;
 }
 
-/* Language Dropdown Menu */
-.language-dropdown {
+/* Language Switcher Styling */
+.teachbook-lang-container {
+    display: inline-block;
+    height: 100%;
+    align-self: center;
     position: relative;
-    width: 100%;
+    /* CRITICAL for absolute positioning of child dropdown */
 }
 
-.lang-menu-content {
-    display: none;
-    /* Hidden by default */
-    margin-top: 0.5rem;
-    background-color: var(--pst-color-surface);
-    border: 1px solid var(--pst-color-border);
-    border-radius: 6px;
-    overflow: hidden;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    animation: fadeIn 0.2s ease;
+/* Hover Support */
+.teachbook-lang-container:hover .teachbook-lang-dropdown {
+    display: block;
 }
 
-.lang-option {
-    display: flex;
+.teachbook-lang-btn {
+    display: inline-flex !important;
     align-items: center;
-    padding: 0.6rem 1rem;
-    text-decoration: none !important;
-    color: var(--pst-color-text-base) !important;
-    border-bottom: 1px solid var(--pst-color-border-muted);
-    transition: background-color 0.15s;
+    gap: 0.4rem;
+    padding: 0 0.6rem !important;
+    height: 32px !important;
+    border: none !important;
+    /* Removed border as requested */
+    background-color: transparent !important;
+    color: var(--pst-color-text-main) !important;
+    font-size: 0.9em;
+    transition: background-color 0.2s ease;
 }
 
-.lang-option:last-child {
-    border-bottom: none;
+.teachbook-lang-btn:hover {
+    background-color: var(--pst-color-background-soft) !important;
+    border-radius: 4px;
 }
 
-.lang-option:hover {
-    background-color: var(--pst-color-surface-hover);
-}
-
-.lang-option.active {
-    background-color: rgba(52, 152, 219, 0.1);
+.teachbook-lang-btn .lang-text {
     font-weight: 600;
 }
 
-.flag {
-    margin-right: 0.8rem;
-    font-size: 1.1em;
+.teachbook-lang-dropdown {
+    display: none;
+    position: absolute;
+    right: 0;
+    left: auto;
+    top: 34.3px;
+    /* Precise alignment from user */
+    margin: 0 !important;
+    min-width: 160px;
+    z-index: 1000;
+    border: 1px solid var(--pst-color-border);
+    background-color: var(--pst-color-background-main);
+    box-shadow: var(--pst-box-shadow-medium, 0 4px 12px rgba(0, 0, 0, 0.1));
+    border-radius: 6px;
+    padding: 0.4rem 0;
 }
 
-@keyframes fadeIn {
+.teachbook-lang-dropdown.show {
+    display: block;
+    animation: fadeInDown 0.15s ease-out;
+}
+
+.teachbook-lang-dropdown .dropdown-item {
+    color: var(--pst-color-text-main) !important;
+    padding: 0.5rem 1rem;
+    font-size: 0.85em;
+    font-weight: 500;
+}
+
+.teachbook-lang-dropdown .dropdown-item:hover,
+.teachbook-lang-dropdown .dropdown-item.active {
+    background-color: var(--pst-color-background-soft) !important;
+    color: var(--pst-color-link) !important;
+    text-decoration: none;
+}
+
+/* Sidebar Footer PDF Button */
+.sidebar-footer-pdf {
+    padding: 1.2rem;
+    border-top: 1px solid var(--pst-color-border);
+    margin-top: auto;
+}
+
+.custom-sidebar-pdf-container a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    width: 100%;
+    padding: 0.7rem;
+    background-color: var(--usal-blue) !important;
+    color: white !important;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.9em;
+    text-decoration: none !important;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    border: none;
+}
+
+.custom-sidebar-pdf-container a:hover {
+    background-color: var(--usal-blue-light) !important;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.custom-sidebar-pdf-container a:active {
+    transform: scale(0.98);
+}
+
+@keyframes fadeInDown {
     from {
         opacity: 0;
         transform: translateY(-5px);

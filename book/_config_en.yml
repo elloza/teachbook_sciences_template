@@ -1,9 +1,9 @@
-title: TeachBook (Plantilla Ciencias Químicas) 
+title: TeachBook (Chemistry Sciences Template)
 author: Álvaro Lozano Murciego y André Sales Mendes (USAL)
 copyright: "2025, TeachBooks Project"
 logo: "_static/logo.png"
-language: es
-exclude_patterns: ["_build", "Thumbs.db", ".DS_Store", "**.ipynb_checkpoints", "_build_*"]
+language: en
+exclude_patterns: ["_build", "Thumbs.db", ".DS_Store", "**.ipynb_checkpoints", "_build_*", "es/"]
 execute:
   execute_notebooks: off
 parse:
@@ -22,7 +22,7 @@ parse:
       book: jupyterBook
 latex:
   latex_engine: xelatex
-  options: "spanish"
+  options: "english"
   preamble: |
-    \usepackage[spanish]{babel}
-    \selectlanguage{spanish}
+    \usepackage[english]{babel}
+    \selectlanguage{english}

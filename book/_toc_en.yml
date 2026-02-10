@@ -1,0 +1,25 @@
+format: jb-book
+root: en/intro
+parts:
+  - caption: Tutorial
+    chapters:
+    - file: en/01_tutorial/01_what_is_a_teachbook
+    - file: en/01_tutorial/02_workflow
+    - file: en/01_tutorial/03_ai_editing
+    - file: en/01_tutorial/04_publication
+  - caption: Examples by Degree
+    chapters:
+    - file: en/02_degrees/physics_degree/intro
+      sections:
+      - file: en/02_degrees/physics_degree/physics_example
+    - file: en/02_degrees/math_degree/intro
+      sections:
+      - file: en/02_degrees/math_degree/math_example
+    - file: en/02_degrees/stats_degree/intro
+      sections:
+      - file: en/02_degrees/stats_degree/stats_example
+  - caption: Information
+    chapters:
+    - file: en/90_about
+    - file: en/91_licenses
+    - file: en/92_how_to_cite

@@ -34,7 +34,7 @@ jobs:
 
       - name: Build HTML book
         run: |
-          jupyter-book build book/
+          python scripts/build_book.py
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

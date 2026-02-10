@@ -8,9 +8,9 @@ This is a template designed for the faculty of the **Faculty of Sciences at USAL
 ## Content
 In this book you will find:
 
-- [Tutorials](01_tutorial/01_que_es_un_teachbook.md) to learn how to use the template
-- [Examples by Degree](02_grados/grado_fisica/intro.md) to see real cases
-- Information on [how to citar](92_como_citar.md) and [licenses](91_licencias.md)
+- [Tutorials](01_tutorial/01_what_is_a_teachbook.md) to learn how to use the template
+- [Examples by Degree](02_degrees/physics_degree/intro.md) to see real cases
+- Information on [how to cite](92_how_to_cite.md) and [licenses](91_licenses.md)
 
 ```{note}
 This project is designed to be used with **VS Code** and **AI** assistants.

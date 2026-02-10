@@ -31,4 +31,6 @@ El template incluye generación automática de PDF.
 - **En la nube**: GitHub Actions generará el PDF automáticamente cada vez que subas cambios, y aparecerá un botón de "Descargar PDF" en la web.
 - **En local**: Si tienes LaTeX instalado, puedes ejecutar `python scripts/export_pdf.py` (o usar la Skill "Exportar PDF").
 
+    - Cada idioma generará su propio PDF independiente.
+
 ## 🤝 Contribuir
