@@ -80,18 +80,26 @@ def build_pdf():
         import traceback
         traceback.print_exc()
         return False
-        
-        if result.returncode != 0:
-            print("❌ Error en jupyter-book build:", flush=True)
-            print("--- STDOUT ---", flush=True)
-            print(result.stdout, flush=True)
-            print("--- STDERR ---", flush=True)
-            print(result.stderr, flush=True)
-            return False
-            
-    except Exception as e:
-        print(f"❌ Error inesperado ejecutando jupyter-book: {e}", flush=True)
-        return False
+
+    # 1.5 Copy LaTeX Templates (Custom USAL Style)
+    print("🎨 Aplicando plantillas LaTeX personalizadas...", flush=True)
+    templates_dir = os.path.abspath("latex_templates")
+    
+    if os.path.exists(templates_dir) and os.path.exists(BUILD_PDF_DIR):
+        print(f"   Copiando desde: {templates_dir}", flush=True)
+        count = 0
+        for item in os.listdir(templates_dir):
+            s = os.path.join(templates_dir, item)
+            d = os.path.join(BUILD_PDF_DIR, item)
+            try:
+                if os.path.isfile(s):
+                    shutil.copy2(s, d)
+                    count += 1
+            except Exception as ex:
+                print(f"   ⚠️ Error copiando {item}: {ex}", flush=True)
+        print(f"✅ {count} plantillas aplicadas.", flush=True)
+    else:
+        print("⚠️ No se encontraron plantillas personalizadas o carpeta de build.", flush=True)
 
     # 2. Compile PDF
     print(f"📂 Archivos LaTeX generados en {BUILD_PDF_DIR}")
