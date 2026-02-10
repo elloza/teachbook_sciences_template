@@ -171,20 +171,28 @@ def build_language(lang):
 
         # CRITICAL FIX: Merge the generated _static folder (containing theme assets)
         # from the temp build to the final root _static folder.
-        # Sphinx/JB puts _static at the root of the build output, not inside the 'en' folder.
         temp_static_dir = os.path.join(temp_build_root, "_build", "html", "_static")
         final_static_dir = os.path.join(FINAL_HTML_DIR, "_static")
         
         if os.path.exists(temp_static_dir):
             print(f"📦 Merging theme assets from temp build ({lang}) to global _static...")
+            
+            # DEBUG: List source files to verify we actually have something to copy
+            print(f"   🔍 Source _static content ({temp_static_dir}):")
+            try:
+                for item in os.listdir(temp_static_dir):
+                    print(f"      - {item}")
+            except Exception as e:
+                print(f"      ⚠️ Error listing source: {e}")
+
             if not os.path.exists(final_static_dir):
                 os.makedirs(final_static_dir)
             
-            # Use our safe merge function (definition needs to be accessible, or we inline simple copy)
-            # Since merge_dir_into is defined in main(), we can't call it here easily unless we move it 
-            # or use shutil.copytree with dirs_exist_ok=True (Py3.8+). 
-            # GitHub Actions uses Py3.11, so dirs_exist_ok=True is safe and cleaner.
-            shutil.copytree(temp_static_dir, final_static_dir, dirs_exist_ok=True)
+            # Use the robust merge_dir_into (now global)
+            merge_dir_into(temp_static_dir, final_static_dir)
+            
+            # DEBUG: Verify copy
+            print(f"   ✅ Merge complete. Final _static count: {len(os.listdir(final_static_dir))}")
 
     except subprocess.CalledProcessError:
         print(f"❌ Error compilando idioma standalone: {lang}")
@@ -193,6 +201,25 @@ def build_language(lang):
         # Cleanup temp directory
         if os.path.exists(temp_build_root):
             shutil.rmtree(temp_build_root)
+
+def merge_dir_into(src_dir, dst_dir):
+    """Merge src_dir into dst_dir without deleting dst_dir first.
+    Overwrites files that already exist. Skips locked files gracefully."""
+    print(f"   🔄 Merging '{src_dir}' -> '{dst_dir}'")
+    for root, dirs, files in os.walk(src_dir):
+        rel_path = os.path.relpath(root, src_dir)
+        target_dir = os.path.join(dst_dir, rel_path)
+        if not os.path.exists(target_dir):
+            os.makedirs(target_dir)
+        for file in files:
+            src_file = os.path.join(root, file)
+            dst_file = os.path.join(target_dir, file)
+            try:
+                shutil.copy2(src_file, dst_file)
+            except PermissionError:
+                print(f"      ⚠️  Skipped locked file: {dst_file}")
+            except Exception as e:
+                print(f"      ⚠️  Copy error: {e}")
 
 def create_redirect_index(default_lang="es"):
     """Creates a root index.html that redirects to the default language."""
@@ -229,22 +256,6 @@ def main():
     for lang in languages:
         build_language(lang)
     
-    def merge_dir_into(src_dir, dst_dir):
-        """Merge src_dir into dst_dir without deleting dst_dir first.
-        Overwrites files that already exist. Skips locked files gracefully."""
-        for root, dirs, files in os.walk(src_dir):
-            rel_path = os.path.relpath(root, src_dir)
-            target_dir = os.path.join(dst_dir, rel_path)
-            if not os.path.exists(target_dir):
-                os.makedirs(target_dir)
-            for file in files:
-                src_file = os.path.join(root, file)
-                dst_file = os.path.join(target_dir, file)
-                try:
-                    shutil.copy2(src_file, dst_file)
-                except PermissionError:
-                    print(f"⚠️  Skipped locked file: {dst_file}")
-
     # 1. Merge our custom static files into the root _static
     custom_static = os.path.join(BOOK_DIR, "_static")
     if os.path.exists(custom_static):
