@@ -145,5 +145,10 @@ html {
     to {
         opacity: 1;
         transform: translateY(0);
+
+        /* Ensure sidebar toggles are always on top and clickable */
+        .sidebar-toggle {
+            z-index: 1000 !important;
+            position: relative;
+        }
     }
-}

@@ -30,12 +30,25 @@ document.addEventListener("DOMContentLoaded", function () {
     injectPDFButton(rootPath);
 
     // 3. Fix Sidebar Toggle ID mismatch (Theme regression)
-    const toggleLabel = document.querySelector('label.sidebar-toggle.primary-toggle');
     const primaryCheckbox = document.getElementById('pst-primary-sidebar-checkbox');
-    if (toggleLabel && primaryCheckbox && toggleLabel.getAttribute('for') !== primaryCheckbox.id) {
-        console.log("TeachBook: Fixing sidebar toggle ID mismatch.");
-        toggleLabel.setAttribute('for', primaryCheckbox.id);
-    }
+    const secondaryCheckbox = document.getElementById('pst-secondary-sidebar-checkbox');
+
+    document.querySelectorAll('label.sidebar-toggle').forEach(label => {
+        const forAttr = label.getAttribute('for');
+        if (forAttr === '__primary' && primaryCheckbox) {
+            console.log("TeachBook: Fixing primary toggle label.");
+            label.setAttribute('for', primaryCheckbox.id);
+            // Manual fallback if native label behavior is blocked
+            label.addEventListener('click', (e) => {
+                primaryCheckbox.checked = !primaryCheckbox.checked;
+                // Dispatch event to trigger theme's JS listeners if any
+                primaryCheckbox.dispatchEvent(new Event('change'));
+            });
+        } else if (forAttr === '__secondary' && secondaryCheckbox) {
+            console.log("TeachBook: Fixing secondary toggle label.");
+            label.setAttribute('for', secondaryCheckbox.id);
+        }
+    });
 });
 
 function injectLanguageSwitcher(languages, rootPath) {
