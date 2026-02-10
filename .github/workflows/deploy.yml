@@ -4,6 +4,13 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
+    inputs:
+      build_pdf:
+        description: 'Build PDF?'
+        required: false
+        default: false
+        type: boolean
 
 jobs:
   deploy-book:
@@ -24,11 +31,13 @@ jobs:
           pip install -r requirements.txt
 
       - name: Install LaTeX (for PDF export)
+        if: ${{ github.event.inputs.build_pdf == 'true' || contains(github.event.head_commit.message, '[pdf]') }}
         run: |
           sudo apt-get update
           sudo apt-get install -y texlive-latex-recommended texlive-latex-extra texlive-fonts-recommended texlive-fonts-extra texlive-xetex latexmk texlive-lang-spanish
 
       - name: Generate PDF
+        if: ${{ github.event.inputs.build_pdf == 'true' || contains(github.event.head_commit.message, '[pdf]') }}
         run: |
           python scripts/export_pdf.py
 

@@ -161,5 +161,5 @@ html {
 /* Fix for the dropdown being behind content even with high z-index */
 /* Sometimes the parent container limits the stack */
 .article-header-buttons {
-    z-index: 10000 !important;
+    z-index: 500000 !important;
 }
