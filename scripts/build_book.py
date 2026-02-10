@@ -204,47 +204,54 @@ def main():
     for lang in languages:
         build_language(lang)
     
-    # After builds, ensure the root _static folder exists and contains ALL assets
-    # (both our custom ones and the theme's assets from any built language)
+    # After builds, ensure _static assets are available everywhere
     if not os.path.exists(FINAL_HTML_DIR):
         os.makedirs(FINAL_HTML_DIR)
         
     final_static = os.path.join(FINAL_HTML_DIR, "_static")
-    
-    # 1. Start with our custom static files
+    if not os.path.exists(final_static):
+        os.makedirs(final_static)
+
+    def merge_dir_into(src_dir, dst_dir):
+        """Merge src_dir into dst_dir without deleting dst_dir first.
+        Overwrites files that already exist. Skips locked files gracefully."""
+        for root, dirs, files in os.walk(src_dir):
+            rel_path = os.path.relpath(root, src_dir)
+            target_dir = os.path.join(dst_dir, rel_path)
+            if not os.path.exists(target_dir):
+                os.makedirs(target_dir)
+            for file in files:
+                src_file = os.path.join(root, file)
+                dst_file = os.path.join(target_dir, file)
+                try:
+                    shutil.copy2(src_file, dst_file)
+                except PermissionError:
+                    print(f"⚠️  Skipped locked file: {dst_file}")
+
+    # 1. Merge our custom static files into the root _static
     custom_static = os.path.join(BOOK_DIR, "_static")
     if os.path.exists(custom_static):
-        if os.path.exists(final_static):
-            shutil.rmtree(final_static)
-        shutil.copytree(custom_static, final_static)
-        print(f"📦 Custom static assets copied to: {final_static}")
+        merge_dir_into(custom_static, final_static)
+        print(f"📦 Custom static assets merged into: {final_static}")
 
-    # 2. Add theme assets from the first available language build
+    # 2. Merge theme assets from the first available language build
     if languages:
         first_lang = languages[0]
-        # We need to find where they WERE built before they were moved or deleted.
-        # Actually, let's just copy them from the first lang's final destination
         lang_static = os.path.join(FINAL_HTML_DIR, first_lang, "_static")
         if os.path.exists(lang_static):
-            print(f"📦 Merging theme assets from '{first_lang}'... ")
-            for root, dirs, files in os.walk(lang_static):
-                rel_path = os.path.relpath(root, lang_static)
-                target_dir = os.path.join(final_static, rel_path)
-                if not os.path.exists(target_dir):
-                    os.makedirs(target_dir)
-                for file in files:
-                    src_file = os.path.join(root, file)
-                    dst_file = os.path.join(target_dir, file)
-                    if not os.path.exists(dst_file):
-                        shutil.copy2(src_file, dst_file)
+            print(f"📦 Merging theme assets from '{first_lang}'...")
+            merge_dir_into(lang_static, final_static)
+
+    # 3. Regenerate languages.json in ALL _static directories
+    generate_languages_json(languages, final_static)
+    for lang in languages:
+        lang_static_dir = os.path.join(FINAL_HTML_DIR, lang, "_static")
+        if os.path.exists(lang_static_dir):
+            generate_languages_json(languages, lang_static_dir)
     
     if "default" not in languages and len(languages) > 0:
         default_lang = "es" if "es" in languages else languages[0]
         create_redirect_index(default_lang)
-    
-    # 3. Final step: Regenerate languages.json in the final static folder
-    # to be 100% sure it's there
-    generate_languages_json(languages, final_static)
         
     print("\n✅ ¡Construcción completa!")
     print(f"🌍 Web disponible en: {os.path.abspath(FINAL_HTML_DIR)}")
