@@ -31,29 +31,53 @@ document.addEventListener("DOMContentLoaded", function () {
     // 2. Inject PDF Button (Always, if configured)
     injectPDFButton(rootPath);
 
-    // 3. Fix Sidebar Toggle ID mismatch (Theme regression)
-    // The theme generates 'pst-primary-sidebar-checkbox' but the label targets '__primary'.
-    // We must correct this for the toggle to work.
+    // 3. Robust Sidebar Toggle (Manual Handler)
+    // The theme's native behavior is unreliable due to ID mismatches.
+    // We implement a manual toggle to guarantee functionality.
     const primaryCheckbox = document.getElementById('pst-primary-sidebar-checkbox');
+
+    // Find all primary toggles (desktop header icon + mobile overlay if any)
+    const primaryToggles = document.querySelectorAll('label[for="__primary"], .primary-toggle');
+
+    primaryToggles.forEach(toggle => {
+        // Remove 'for' attribute to prevent browser's native confused behavior
+        toggle.removeAttribute('for');
+
+        // Clone element to strip existing listeners (if any theme listeners are causing issues)
+        const newToggle = toggle.cloneNode(true);
+        toggle.parentNode.replaceChild(newToggle, toggle);
+
+        newToggle.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            if (primaryCheckbox) {
+                primaryCheckbox.checked = !primaryCheckbox.checked;
+                // Dispatch change event to trigger CSS/Theme reactions
+                primaryCheckbox.dispatchEvent(new Event('change', { bubbles: true }));
+                console.log("TeachBook: Primary sidebar toggled manually. State:", primaryCheckbox.checked);
+            }
+        });
+    });
+
+    // Secondary sidebar (if needed, same logic)
     const secondaryCheckbox = document.getElementById('pst-secondary-sidebar-checkbox');
+    const secondaryToggles = document.querySelectorAll('label[for="__secondary"], .secondary-toggle');
 
-    document.querySelectorAll('label.sidebar-toggle').forEach(label => {
-        const forAttr = label.getAttribute('for');
+    secondaryToggles.forEach(toggle => {
+        toggle.removeAttribute('for');
+        // Clone to strip listeners
+        const newToggle = toggle.cloneNode(true);
+        toggle.parentNode.replaceChild(newToggle, toggle);
 
-        // Fix for Primary Sidebar (Left)
-        if ((forAttr === '__primary' || label.classList.contains('primary-toggle')) && primaryCheckbox) {
-            if (label.getAttribute('for') !== primaryCheckbox.id) {
-                console.log("TeachBook: Fixing primary toggle label.");
-                label.setAttribute('for', primaryCheckbox.id);
+        newToggle.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            if (secondaryCheckbox) {
+                secondaryCheckbox.checked = !secondaryCheckbox.checked;
+                secondaryCheckbox.dispatchEvent(new Event('change', { bubbles: true }));
             }
-        }
-        // Fix for Secondary Sidebar (Right)
-        else if ((forAttr === '__secondary' || label.classList.contains('secondary-toggle')) && secondaryCheckbox) {
-            if (label.getAttribute('for') !== secondaryCheckbox.id) {
-                console.log("TeachBook: Fixing secondary toggle label.");
-                label.setAttribute('for', secondaryCheckbox.id);
-            }
-        }
+        });
     });
 });
 
