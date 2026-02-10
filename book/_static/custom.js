@@ -31,10 +31,9 @@ document.addEventListener("DOMContentLoaded", function () {
     // 2. Inject PDF Button (Always, if configured)
     injectPDFButton(rootPath);
 
-    /* 
-    // 3. Fix Sidebar Toggle ID mismatch (Theme regression) - EXPERIMENTAL
-    // Removing custom interference to let the theme handle events natively.
-    /*
+    // 3. Fix Sidebar Toggle ID mismatch (Theme regression)
+    // The theme generates 'pst-primary-sidebar-checkbox' but the label targets '__primary'.
+    // We must correct this for the toggle to work.
     const primaryCheckbox = document.getElementById('pst-primary-sidebar-checkbox');
     const secondaryCheckbox = document.getElementById('pst-secondary-sidebar-checkbox');
 
@@ -56,7 +55,6 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         }
     });
-    */
 });
 
 function injectLanguageSwitcher(languages, rootPath) {
