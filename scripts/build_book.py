@@ -325,6 +325,19 @@ def main():
 
     # 2. Regenerate languages.json in ALL _static directories (Just in case)
     generate_languages_json(languages, final_static)
+
+    # 3. Copy languages.json into each per-language _static directory
+    # Each standalone build has its own _static/ and the JS resolves relative to URL_ROOT
+    # which points to the per-language root (e.g., /es/), not the site root.
+    for lang in languages:
+        if lang == "default":
+            continue
+        lang_static = os.path.join(FINAL_HTML_DIR, lang, "_static")
+        if os.path.exists(lang_static):
+            lang_json_src = os.path.join(final_static, "languages.json")
+            lang_json_dst = os.path.join(lang_static, "languages.json")
+            shutil.copy2(lang_json_src, lang_json_dst)
+            print(f"📋 Copied languages.json to {lang_static}")
     
     if "default" not in languages and len(languages) > 0:
         default_lang = "es" if "es" in languages else languages[0]
