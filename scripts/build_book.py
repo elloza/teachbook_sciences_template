@@ -151,7 +151,7 @@ def build_language(lang):
     sanitize_config(dest_config)
     
     # 5. Build from the temp directory
-    cmd = ["jupyter-book", "build", temp_build_root, "--all"]
+    cmd = ["jupyter-book", "build", temp_build_root, "--all", "-v"]
     
     try:
         print(f"🚀 Ejecutando build STANDALONE ({lang}): {' '.join(cmd)}")
@@ -230,14 +230,30 @@ def merge_dir_into(src_dir, dst_dir):
             except Exception as e:
                 print(f"      ⚠️  Copy error: {e}")
 
+def debug_directory(path):
+    """Prints the directory structure for debugging."""
+    print(f"📂 [DEBUG] Listing contents of: {path}")
+    for root, dirs, files in os.walk(path):
+        level = root.replace(path, '').count(os.sep)
+        indent = ' ' * 4 * (level)
+        print(f"{indent}{os.path.basename(root)}/")
+        subindent = ' ' * 4 * (level + 1)
+        for f in files:
+            print(f"{subindent}{f}")
+
 def sanitize_config(config_path):
     """
     Removes exclusion patterns that might cause the build to fail
     when running inside a temporary directory (e.g., temp_build_*).
     """
     try:
+        debug_directory(os.path.dirname(config_path))
+        print(f"📄 [DEBUG] Reading config from: {config_path}")
         with open(config_path, 'r', encoding='utf-8') as f:
-            lines = f.readlines()
+            content = f.read()
+            print(content)
+            print("-" * 20)
+            lines = content.splitlines(keepends=True)
         
         new_lines = []
         for line in lines:
