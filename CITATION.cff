@@ -1,7 +1,11 @@
 cff-version: 1.2.0
 title: 'TeachBook Sciences Template'
 authors:
-  - name: 'Facultad de Ciencias'
+  - name: 'Álvaro Lozano Murciego'
+    affiliation: 'Universidad de Salamanca'
+    city: Salamanca
+    country: ES
+  - name: 'André Sales Mendes'
     affiliation: 'Universidad de Salamanca'
     city: Salamanca
     country: ES
@@ -9,7 +13,9 @@ message: 'If you use this teachbook, please cite it using these metadata.'
 preferred-citation:
   type: book
   authors:
-    - name: 'Facultad de Ciencias'
+    - name: 'Álvaro Lozano Murciego'
+      affiliation: 'Universidad de Salamanca'
+    - name: 'André Sales Mendes'
       affiliation: 'Universidad de Salamanca'
   title: 'TeachBook Sciences Template'
   year: 2026
@@ -31,4 +37,4 @@ preferred-citation:
     - Jupyter Book
   license: CC-BY-4.0
   contact:
-    - name: 'Facultad de Ciencias - Universidad de Salamanca'
+    - name: 'Álvaro Lozano Murciego - Universidad de Salamanca'
