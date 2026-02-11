@@ -157,6 +157,9 @@ def build_language(lang):
         print(f"🚀 Ejecutando build STANDALONE ({lang}): {' '.join(cmd)}")
         subprocess.check_call(cmd, shell=(os.name == 'nt'))
         
+        # DEBUG: See what was created
+        debug_directory(temp_build_root)
+        
         # The output will be in temp_build_root/_build/html/en/ (since en is a subfolder)
         built_html_path_nested = os.path.join(temp_build_root, "_build", "html", lang)
         final_dest = os.path.join(FINAL_HTML_DIR, lang)
