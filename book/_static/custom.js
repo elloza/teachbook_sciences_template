@@ -102,8 +102,10 @@ function injectLanguageSwitcher(languages, rootPath) {
 
     const dropdownHtml = `
         <div class="teachbook-lang-container">
-            <button class="btn btn-sm teachbook-lang-btn" 
+            <button class="btn btn-sm teachbook-lang-btn dropdown-toggle" 
                     type="button" 
+                    data-bs-toggle="dropdown"
+                    aria-expanded="false"
                     title="Change Language / Cambiar Idioma">
                 <i class="fa-solid fa-language"></i>
                 <span class="lang-text">${currentLangCode.toUpperCase()}</span>

@@ -114,3 +114,9 @@ _build/
 
 # poetry files
 pyproject.toml
+
+# Binaries
+*.exe
+
+# Test artifacts
+sidebar_verification.png

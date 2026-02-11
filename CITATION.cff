@@ -12,7 +12,7 @@ preferred-citation:
     - name: 'Facultad de Ciencias'
       affiliation: 'Universidad de Salamanca'
   title: 'TeachBook Sciences Template'
-  year: 2025
+  year: 2026
   publisher:
     name: 'Universidad de Salamanca'
   url: 'https://github.com/TeachBooks/template' # Pending specific URL
@@ -21,14 +21,14 @@ preferred-citation:
       value: 'https://teachbooks.github.io/template/' # Pending specific URL
       description: 'Published book on GitHub Pages'
   abstract: >-
-    Plantilla para la creación de libros docentes interactivos en la Facultad de Ciencias de la USAL.
+    Plantilla para la creación de libros docentes interactivos en la Facultad de Ciencias de la Universidad de Salamanca.
     Permite crear contenido educativo con texto, código y visualizaciones sin necesidad de conocimientos avanzados de programación.
   keywords:
     - TeachBook
-    - USAL
+    - Universidad de Salamanca
     - Ciencias
     - Docencia
     - Jupyter Book
   license: CC-BY-4.0
   contact:
-    - name: 'Facultad de Ciencias - USAL'
+    - name: 'Facultad de Ciencias - Universidad de Salamanca'

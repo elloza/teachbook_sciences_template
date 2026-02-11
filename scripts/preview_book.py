@@ -7,12 +7,10 @@ from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 try:
     # Try importing as if we are in the scripts directory or it's in path
-    import detect_languages
     import build_book
 except ImportError:
     # If we are running from root, add scripts to path explicitly if needed
     sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-    import detect_languages
     import build_book
 
 # Configuration
@@ -34,7 +32,8 @@ def generate_sphinx_config():
     """Generates a conf.py from _config.yml for sphinx-autobuild compatibility."""
     try:
         # Detect available languages first
-        detect_languages.detect_and_save_languages()
+        languages = build_book.get_languages()
+        build_book.generate_languages_json(languages)
         
         cmd = ["jupyter-book", "config", "sphinx", BOOK_DIR]
         # Run quietly
@@ -154,15 +153,23 @@ def main():
         t_err.start()
 
         # Wait for the process to finish
+        # Wait for the process to finish using a loop to keep main thread responsive to signals
         try:
-            process.wait()
+            while process.poll() is None:
+                time.sleep(0.5)
         except KeyboardInterrupt:
             # Forward the interrupt to the subprocess
-            print("\n🛑 Deteniendo servidor...")
+            print("\n🛑 Deteniendo servidor (Ctrl+C recibido)...")
+            
+            # Stop observer first
+            if 'observer' in locals():
+                observer.stop()
+                
             process.terminate()
             try:
                 process.wait(timeout=2)
             except subprocess.TimeoutExpired:
+                print("⚠️ Forzando detención...")
                 process.kill()
                 
         t_out.join(timeout=1)

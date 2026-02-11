@@ -23,10 +23,12 @@ def get_languages():
         
     return sorted(languages)
 
+# Determine script directory once, before any chdir
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+
 def check_latex_installed():
     """Checks if tectonic, latexmk or pdflatex is available."""
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    local_tectonic = os.path.join(script_dir, "tectonic.exe" if os.name == 'nt' else "tectonic")
+    local_tectonic = os.path.join(SCRIPT_DIR, "tectonic.exe" if os.name == 'nt' else "tectonic")
     
     if os.path.exists(local_tectonic):
         return local_tectonic
@@ -97,11 +99,28 @@ def build_pdf_for_lang(lang):
         return False
 
     print("🎨 Aplicando plantillas LaTeX personalizadas...", flush=True)
-    templates_dir = os.path.abspath("latex_templates")
-    if os.path.exists(templates_dir) and os.path.exists(latex_build_dir):
-        for item in os.listdir(templates_dir):
-            if item.endswith(".tex") or item.endswith(".cls") or item.endswith(".png"):
-                shutil.copy2(os.path.join(templates_dir, item), os.path.join(latex_build_dir, item))
+    print("🎨 Aplicando plantillas LaTeX personalizadas...", flush=True)
+    templates_root = os.path.abspath("latex_templates")
+    
+    # 1. Apply COMMON templates (base)
+    common_dir = os.path.join(templates_root, "common")
+    if os.path.exists(common_dir) and os.path.exists(latex_build_dir):
+        print("   🔹 Aplicando plantillas comunes (latex_templates/common)...")
+        for item in os.listdir(common_dir):
+            s = os.path.join(common_dir, item)
+            d = os.path.join(latex_build_dir, item)
+            if os.path.isfile(s):
+                shutil.copy2(s, d)
+
+    # 2. Apply LANGUAGE-SPECIFIC templates (overlay)
+    lang_dir = os.path.join(templates_root, lang)
+    if os.path.exists(lang_dir) and os.path.exists(latex_build_dir):
+        print(f"   🔹 Aplicando plantillas para '{lang}' (latex_templates/{lang})...")
+        for item in os.listdir(lang_dir):
+            s = os.path.join(lang_dir, item)
+            d = os.path.join(latex_build_dir, item)
+            if os.path.isfile(s):
+                shutil.copy2(s, d)
 
     print(f"📂 Compilando con Tectonic en {latex_build_dir}...")
     current_dir = os.getcwd()
@@ -155,7 +174,9 @@ def build_pdf_for_lang(lang):
 def main():
     print("📚 Iniciando exportación de PDF multi-idioma...")
     if not check_latex_installed():
-        print("⚠️  No se detectó un motor LaTeX. Instala Tectonic o TeX Live.")
+        print("⚠️  No se detectó un motor LaTeX.")
+        print("   Puedes instalarlo automáticamente ejecutando:")
+        print("   python scripts/setup_latex.py")
         sys.exit(1)
 
     languages = get_languages()

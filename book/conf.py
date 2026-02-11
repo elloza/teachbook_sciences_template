@@ -6,14 +6,14 @@
 author = 'Álvaro Lozano Murciego y André Sales Mendes (USAL)'
 comments_config = {'hypothesis': False, 'utterances': False}
 copyright = '2025, TeachBooks Project'
-exclude_patterns = ['**.ipynb_checkpoints', '.DS_Store', 'Thumbs.db', '_build', '_build_*', 'en', 'en/', 'en/*', 'en/**']
+exclude_patterns = ['**.ipynb_checkpoints', '.DS_Store', 'Thumbs.db', '_TRASH*', '_build', '_build_*', 'en', 'en/', 'en/*', 'en/**', 'latex_templates*', 'temp_build_*']
 extensions = ['sphinx_togglebutton', 'sphinx_copybutton', 'myst_nb', 'jupyter_book', 'sphinx_thebe', 'sphinx_comments', 'sphinx_external_toc', 'sphinx.ext.intersphinx', 'sphinx_design', 'sphinx_book_theme', 'sphinx_jupyterbook_latex']
 external_toc_exclude_missing = False
 external_toc_path = '_toc.yml'
 html_baseurl = ''
 html_css_files = ['custom.css']
 html_favicon = ''
-html_js_files = ['custom.js']
+html_js_files = ['custom.js', 'custom.js']
 html_logo = '_static/logo.png'
 html_sourcelink_suffix = ''
 html_static_path = ['_static']

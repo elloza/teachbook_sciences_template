@@ -7,16 +7,15 @@ import argparse
 VENV_DIR = ".venv"
 REQUIREMENTS_FILE = "requirements.txt"
 DEV_REQUIREMENTS_FILE = "requirements-dev.txt"
-MIN_PYTHON_VERSION = (3, 7)
+MIN_PYTHON_VERSION = (3, 10)
 
 def check_python_version():
     """Verifies that the current Python version meets the minimum requirement."""
     if sys.version_info < MIN_PYTHON_VERSION:
-        print(f"❌ Error: Python {MIN_PYTHON_VERSION[0]}.{MIN_PYTHON_VERSION[1]}+ is required.")
-        print(f"   Current version: {sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}")
-        print("   Please install a newer version of Python.")
-        sys.exit(1)
-    print(f"✅ Python version: {sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}")
+        print(f"⚠️  Warning: Current Python {sys.version_info.major}.{sys.version_info.minor} is older than recommended {MIN_PYTHON_VERSION[0]}.{MIN_PYTHON_VERSION[1]}.")
+        print("   We will attempt to locate a newer Python version to create the virtual environment.")
+    else:
+        print(f"✅ Python version: {sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}")
 
 def get_venv_python():
     """Returns the path to the Python executable within the virtual environment."""
@@ -34,8 +33,26 @@ def create_venv():
     """Creates the virtual environment if it doesn't exist."""
     if not os.path.exists(VENV_DIR):
         print(f"📦 Creating virtual environment in '{VENV_DIR}'...")
+        
+        # Determine which python executable to use
+        python_exe = sys.executable
+        
+        # If we are on Windows and the current python is too old, try to find a newer one with 'py'
+        if os.name == "nt" and sys.version_info < MIN_PYTHON_VERSION:
+            print(f"   Current Python is too old. Trying to find a newer version via 'py' launcher...")
+            try:
+                # Try to find the newest installed python
+                # We simply ask 'py' for the latest Python 3
+                # capture_output is 3.7+, but we might be running on 3.7 so we use check_output
+                out = subprocess.check_output(["py", "-3", "-c", "import sys; print(sys.executable)"], text=True).strip()
+                if out:
+                    print(f"   Found newer Python: {out}")
+                    python_exe = out
+            except Exception as e:
+                print(f"   Could not find newer python via 'py': {e}")
+
         try:
-            subprocess.check_call([sys.executable, "-m", "venv", VENV_DIR])
+            subprocess.check_call([python_exe, "-m", "venv", VENV_DIR])
             print("✅ Virtual environment created.")
         except subprocess.CalledProcessError:
             print("❌ Error creating virtual environment.")

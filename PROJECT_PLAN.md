@@ -57,28 +57,22 @@ Implementar exactamente esta estructura:
 
 teachbook_sciences_template/
 ├── book/
-│ ├── es/
-│ │ ├── intro.md
-│ │ ├── 01_tutorial/
-│ │ │ ├── 01_que_es_un_teachbook.md
-│ │ │ ├── 02_flujo_trabajo.md
-│ │ │ ├── 03_edicion_con_ia.md
-│ │ │ └── 04_publicacion.md
-│ │ ├── 02_grados/
-│ │ │ ├── grado_fisica/
-│ │ │ │ ├── intro.md
-│ │ │ │ └── ejemplo_fisica.ipynb
-│ │ │ ├── grado_matematicas/
-│ │ │ │ ├── intro.md
-│ │ │ │ └── ejemplo_matematicas.ipynb
-│ │ │ └── grado_estadistica/
-│ │ │ ├── intro.md
-│ │ │ └── ejemplo_estadistica.ipynb
-│ │ ├── 90_acerca_de.md
-│ │ ├── 91_licencias.md
-│ │ └── 92_como_citar.md
-│ ├── _toc.yml
-│ └── _config.yml
+│   ├── es/              # Contenido en Español
+│   │   ├── intro.md
+│   │   ├── ...
+│   ├── en/              # Contenido en Inglés
+│   │   ├── intro.md
+│   │   ├── ...
+│   ├── _toc_es.yml      # Índice Español
+│   ├── _config_es.yml   # Config Español
+│   ├── _toc_en.yml      # Índice Inglés
+│   ├── _config_en.yml   # Config Inglés
+│   └── _static/
+├── latex_templates/     # Plantillas para PDF
+│   ├── common/
+│   ├── es/
+│   └── en/
+├── scripts/             # Scripts de utilidad (build, export_pdf, preview)
 ├── Agent.md
 ├── PROJECT_PLAN.md
 ├── README.md
@@ -160,14 +154,12 @@ El agente debe:
 
 ---
 
-## 7. FUNCIONALIDADES AVANZADAS (NO IMPLEMENTAR AÚN)
+## 7. FUNCIONALIDADES AVANZADAS (ESTADO)
 
-Estas funcionalidades **NO deben activarse**, solo prepararse:
-
-- multidioma (estructura `book/en/`)
-- comentarios (giscus / utterances)
-- exportación a PDF (ebook)
-- DOI automático
+- [x] **Multidioma**: Estructura `book/es/` y `book/en/` implementada. Selector de idioma automático.
+- [x] **Exportación a PDF**: Script `export_pdf.py` y GitHub Actions configurados con soporte para `latex_templates` personalizados.
+- [ ] **Comentarios**: (giscus / utterances) - Pendiente de configuración por el usuario.
+- [ ] **DOI automático**: Pendiente (Zenodo).
 
 Solo documentar puntos de extensión si procede.
 

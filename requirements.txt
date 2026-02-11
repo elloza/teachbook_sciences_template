@@ -1,12 +1,13 @@
-jupyter-book==0.15.1
+jupyter-book>=0.15.1
+sphinx-jupyterbook-latex>=0.5.2
+sphinx-design
 matplotlib
 numpy
 pandas
 seaborn
 sympy
-livereload==2.7.1
+livereload
 sphinx-autobuild
-watchdog==3.0.0
+watchdog
 Babel
 sphinx-rtd-theme
-sphinx<8.0.0
