@@ -4,20 +4,67 @@ import os
 import glob
 import shutil
 import json
+import yaml
 
-# Mapping of language codes to display names
+# Mapping of language codes to display names (ISO 639-1)
 LANG_DISPLAY_NAMES = {
-    "es": "Español",
-    "en": "English",
-    "fr": "Français",
-    "pt": "Português",
+    "ar": "العربية",
+    "bg": "Български",
+    "ca": "Català",
+    "cs": "Čeština",
+    "da": "Dansk",
     "de": "Deutsch",
-    "it": "Italiano"
+    "el": "Ελληνικά",
+    "en": "English",
+    "es": "Español",
+    "et": "Eesti",
+    "eu": "Euskara",
+    "fi": "Suomi",
+    "fr": "Français",
+    "ga": "Gaeilge",
+    "gl": "Galego",
+    "he": "עברית",
+    "hi": "हिन्दी",
+    "hr": "Hrvatski",
+    "hu": "Magyar",
+    "id": "Bahasa Indonesia",
+    "it": "Italiano",
+    "ja": "日本語",
+    "ko": "한국어",
+    "lt": "Lietuvių",
+    "lv": "Latviešu",
+    "ms": "Bahasa Melayu",
+    "nl": "Nederlands",
+    "no": "Norsk",
+    "pl": "Polski",
+    "pt": "Português",
+    "ro": "Română",
+    "ru": "Русский",
+    "sk": "Slovenčina",
+    "sl": "Slovenščina",
+    "sq": "Shqip",
+    "sr": "Српски",
+    "sv": "Svenska",
+    "th": "ไทย",
+    "tr": "Türkçe",
+    "uk": "Українська",
+    "vi": "Tiếng Việt",
+    "zh": "中文",
 }
 
 BOOK_DIR = "book"
 BUILD_ROOT = os.path.join(BOOK_DIR, "_build")
 FINAL_HTML_DIR = os.path.join(BUILD_ROOT, "html")
+
+def get_project_default_language():
+    """Reads the default/primary language from _config.yml's 'language' field."""
+    config_path = os.path.join(BOOK_DIR, "_config.yml")
+    if os.path.exists(config_path):
+        with open(config_path, 'r', encoding='utf-8') as f:
+            config = yaml.safe_load(f)
+            if config and 'language' in config:
+                return config['language']
+    return 'es'  # Fallback
 
 def get_languages():
     """Detects languages based on _config_<lang>.yml files."""
@@ -340,7 +387,9 @@ def main():
             print(f"📋 Copied languages.json to {lang_static}")
     
     if "default" not in languages and len(languages) > 0:
-        default_lang = "es" if "es" in languages else languages[0]
+        default_lang = get_project_default_language()
+        if default_lang not in languages:
+            default_lang = languages[0]
         create_redirect_index(default_lang)
         
     print("\n✅ ¡Construcción completa!")

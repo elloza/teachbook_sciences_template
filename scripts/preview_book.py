@@ -2,7 +2,6 @@ import os
 import sys
 import subprocess
 import time
-import threading
 from watchdog.observers import Observer  # type: ignore
 from watchdog.events import FileSystemEventHandler  # type: ignore
 # Add current directory to sys.path to ensure local modules can be imported
@@ -97,91 +96,25 @@ def main():
                                       # The key is that we NEED to run the generation command.
     ]
     
-    print(f"\n⏳ Iniciando servidor de previsualización...")
-    
     try:
-        # Use Popen to capture stderr/stdout
-        process = subprocess.Popen(
-            cmd, 
-            stdout=subprocess.PIPE, 
-            stderr=subprocess.PIPE, 
-            text=True, 
-            bufsize=1, 
-            encoding='utf-8', 
-            errors='replace'
-        )
-
-        def echo_output(p):
-            for line in p.stdout:
-                # Watch for the "ready" signal to clear screen for a friendly view
-                if "Serving on" in line:
-                    # Clear screen on Windows or Unix
-                    os.system('cls' if os.name == 'nt' else 'clear')
-                    print("\n" + "="*50)
-                    print(f"✅  ¡Todo listo! El libro está funcionando.")
-                    print(f"🌍  Web local: http://localhost:{PORT}")
-                    print(f"⌨️   Pulsa Ctrl+C para detener.")
-                    print("="*50 + "\n")
-                else:
-                    sys.stdout.write(line)
-
-        def echo_stderr(p):
-            for line in p.stderr:
-                # Filter out the noisy asyncio connection reset errors (Multi-line traceback)
-                # We filter common lines found in that specific asyncio/proactor error dump
-                args_to_ignore = [
-                    "ConnectionResetError", "WinError 10054",
-                    "asyncio", "proactor_events.py",
-                    "_ProactorBasePipeTransport._call_connection_lost",
-                    "files in the same directory", # benign warning
-                    "self._context.run(self._callback",
-                    "self._sock.shutdown(socket.SHUT_RDWR",
-                    "Traceback (most recent call last):", # Risky, but usually part of the noise if accompanied by others
-                    "Exception in callback _ProactorBasePipeTransport"
-                ]
-                
-                # Check if line matches any ignored pattern
-                if any(ignored in line for ignored in args_to_ignore):
-                    continue
-                
-                sys.stderr.write(line)
-                sys.stderr.flush()
-
-        # Run readers in threads
-        t_out = threading.Thread(target=echo_output, args=(process,))
-        t_out.daemon = True
-        t_out.start()
+        # Run sphinx-autobuild in the foreground (no piping).
+        # This keeps Ctrl+C working naturally on Windows.
+        print(f"\n⏳ Iniciando servidor de previsualización en http://localhost:{PORT}...")
+        print("⌨️  Pulsa Ctrl+C para detener.\n")
         
-        t_err = threading.Thread(target=echo_stderr, args=(process,))
-        t_err.daemon = True
-        t_err.start()
+        process = subprocess.Popen(cmd, shell=True)
+        process.wait()
 
-        # Wait for the process to finish
-        # Wait for the process to finish using a loop to keep main thread responsive to signals
-        try:
-            while process.poll() is None:
-                time.sleep(0.5)
-        except KeyboardInterrupt:
-            # Forward the interrupt to the subprocess
-            print("\n🛑 Deteniendo servidor (Ctrl+C recibido)...")
-            
-            # Stop observer first
-            if 'observer' in locals():
-                observer.stop()
-                
+    except KeyboardInterrupt:
+        print("\n🛑 Deteniendo servidor (Ctrl+C recibido)...")
+        if 'observer' in locals(): observer.stop()
+        if 'process' in locals():
             process.terminate()
             try:
-                process.wait(timeout=2)
+                process.wait(timeout=3)
             except subprocess.TimeoutExpired:
                 print("⚠️ Forzando detención...")
                 process.kill()
-                
-        t_out.join(timeout=1)
-        t_err.join(timeout=1)
-
-    except KeyboardInterrupt:
-        print("\n🛑 Deteniendo servidor...")
-        if 'observer' in locals(): observer.stop()
     except Exception as e:
         print(f"\n❌ Error: {e}")
         if 'observer' in locals(): observer.stop()
