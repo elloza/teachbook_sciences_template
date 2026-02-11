@@ -181,7 +181,7 @@ def build_pdf_for_lang(lang):
     current_dir = os.getcwd()
     try:
         os.chdir(latex_build_dir)
-        tex_files = [f for f in glob.glob("*.tex") if f != "bookmetadata.tex"]
+        tex_files = [f for f in glob.glob("*.tex") if f not in ["bookmetadata.tex", "language_support.tex"]]
         if not tex_files:
             print("❌ No se encontró archivo .tex compatible.")
             return False
