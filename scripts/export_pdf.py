@@ -177,31 +177,28 @@ def build_pdf_for_lang(lang):
 
 def sanitize_config(config_path):
     """
-    Removes exclusion patterns that might cause the build to fail
-    when running inside a temporary directory (e.g., temp_build_*).
+    Removes exclusion patterns entirely to prevent EISDIR errors in temp environment.
     """
     try:
         with open(config_path, 'r', encoding='utf-8') as f:
             lines = f.readlines()
         
         new_lines = []
+        exclude_written = False
         for line in lines:
             if "exclude_patterns:" in line:
-                # Remove specific patterns
-                line = line.replace('"temp_build_*"', '').replace("'temp_build_*'", '')
-                # line = line.replace('"_build"', '').replace("'_build'", '') <--- REMOVED THIS LINE
-                
-                # Clean up commas
-                while ', ,' in line or ',,' in line:
-                    line = line.replace(', ,', ',').replace(',,', ',')
-                
-                line = line.replace('[,', '[').replace(', ]', ']')
-                line = line.replace(',]', ']')
+                # Force a safe, minimal exclusion list
+                new_lines.append('exclude_patterns: ["_build", "**.ipynb_checkpoints", ".git", ".github"]\n')
+                exclude_written = True
+                continue
             new_lines.append(line)
+        
+        if not exclude_written:
+             new_lines.append('exclude_patterns: ["_build", "**.ipynb_checkpoints", ".git", ".github"]\n')
             
         with open(config_path, 'w', encoding='utf-8') as f:
             f.writelines(new_lines)
-        print(f"🔧 Configuración saneada en: {config_path}")
+        print(f"🔧 Configuración saneada (excludes minimos seguros) en: {config_path}")
     except Exception as e:
         print(f"⚠️ Error saneando configuración: {e}")
 

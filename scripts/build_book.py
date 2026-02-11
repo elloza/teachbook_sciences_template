@@ -150,8 +150,12 @@ def build_language(lang):
     # Sanitize config to prevent self-exclusion
     sanitize_config(dest_config)
     
-    # 5. Build from the temp directory
-    cmd = ["jupyter-book", "build", temp_build_root, "--all", "-v"]
+    # 5. Build from the temp directory (Explicit config)
+    cmd = [
+        "jupyter-book", "build", temp_build_root,
+        "--config", dest_config,
+        "--all", "-v"
+    ]
     
     try:
         print(f"🚀 Ejecutando build STANDALONE ({lang}): {' '.join(cmd)}")
@@ -246,8 +250,8 @@ def debug_directory(path):
 
 def sanitize_config(config_path):
     """
-    Removes exclusion patterns that might cause the build to fail
-    when running inside a temporary directory (e.g., temp_build_*).
+    Removes exclusion patterns entirely to prevent EISDIR errors in temp environment.
+    Since we are in a clean temp dir, we don't need complex excludes.
     """
     try:
         debug_directory(os.path.dirname(config_path))
@@ -259,29 +263,22 @@ def sanitize_config(config_path):
             lines = content.splitlines(keepends=True)
         
         new_lines = []
+        exclude_written = False
         for line in lines:
             if "exclude_patterns:" in line:
-                # Remove specific patterns that clash with ROOT TEMP DIR?
-                # Actually, now that we are at root, we don't need to remove much.
-                # But definitely DO NOT remove _build!
-                line = line.replace('"temp_build_*"', '').replace("'temp_build_*'", '')
-                # line = line.replace('"_build"', '').replace("'_build'", '') <--- REMOVED THIS LINE
-                
-                # Clean up commas
-                # Replace double commas with single comma
-                while ', ,' in line or ',,' in line:
-                    line = line.replace(', ,', ',').replace(',,', ',')
-                
-                # Fix leading/trailing commas inside brackets
-                line = line.replace('[,', '[').replace(', ]', ']')
-                
-                # Fix orphaned commas (e.g. at end of list before closing bracket)
-                line = line.replace(',]', ']')
+                # Force a safe, minimal exclusion list
+                # This ensures _build is ignored (no EISDIR) and nothing else is accidentally ignored
+                new_lines.append('exclude_patterns: ["_build", "**.ipynb_checkpoints", ".git", ".github"]\n')
+                exclude_written = True
+                continue
             new_lines.append(line)
-            
+        
+        if not exclude_written:
+             new_lines.append('exclude_patterns: ["_build", "**.ipynb_checkpoints", ".git", ".github"]\n')
+
         with open(config_path, 'w', encoding='utf-8') as f:
             f.writelines(new_lines)
-        print(f"🔧 Configuración saneada en: {config_path}")
+        print(f"🔧 Configuración saneada (excludes minimos seguros) en: {config_path}")
     except Exception as e:
         print(f"⚠️ Error saneando configuración: {e}")
 
