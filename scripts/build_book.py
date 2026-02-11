@@ -143,8 +143,12 @@ def build_language(lang):
         shutil.copytree(static_src, static_dst)
         
     # 4. Copy and rename config/toc
-    shutil.copy2(os.path.join(BOOK_DIR, config_file), os.path.join(temp_build_root, "_config.yml"))
+    dest_config = os.path.join(temp_build_root, "_config.yml")
+    shutil.copy2(os.path.join(BOOK_DIR, config_file), dest_config)
     shutil.copy2(os.path.join(BOOK_DIR, toc_file), os.path.join(temp_build_root, "_toc.yml"))
+
+    # Sanitize config to prevent self-exclusion
+    sanitize_config(dest_config)
     
     # 5. Build from the temp directory
     cmd = ["jupyter-book", "build", temp_build_root, "--all"]
@@ -225,6 +229,40 @@ def merge_dir_into(src_dir, dst_dir):
                 print(f"      ⚠️  Skipped locked file: {dst_file}")
             except Exception as e:
                 print(f"      ⚠️  Copy error: {e}")
+
+def sanitize_config(config_path):
+    """
+    Removes exclusion patterns that might cause the build to fail
+    when running inside a temporary directory (e.g., temp_build_*).
+    """
+    try:
+        with open(config_path, 'r', encoding='utf-8') as f:
+            lines = f.readlines()
+        
+        new_lines = []
+        for line in lines:
+            if "exclude_patterns:" in line:
+                # Remove specific patterns
+                line = line.replace('"temp_build_*"', '').replace("'temp_build_*'", '')
+                line = line.replace('"_build"', '').replace("'_build'", '')
+                
+                # Clean up commas
+                # Replace double commas with single comma
+                while ', ,' in line or ',,' in line:
+                    line = line.replace(', ,', ',').replace(',,', ',')
+                
+                # Fix leading/trailing commas inside brackets
+                line = line.replace('[,', '[').replace(', ]', ']')
+                
+                # Fix orphaned commas (e.g. at end of list before closing bracket)
+                line = line.replace(',]', ']')
+            new_lines.append(line)
+            
+        with open(config_path, 'w', encoding='utf-8') as f:
+            f.writelines(new_lines)
+        print(f"🔧 Configuración saneada en: {config_path}")
+    except Exception as e:
+        print(f"⚠️ Error saneando configuración: {e}")
 
 def create_redirect_index(default_lang="es"):
     """Creates a root index.html that redirects to the default language."""

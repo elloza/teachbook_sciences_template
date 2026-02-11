@@ -78,8 +78,12 @@ def build_pdf_for_lang(lang):
         if os.path.exists(static_src):
             shutil.copytree(static_src, os.path.join(temp_root, "_static"))
             
-        shutil.copy2(os.path.join(BOOK_DIR, config_file), os.path.join(temp_root, "_config.yml"))
+        dest_config = os.path.join(temp_root, "_config.yml")
+        shutil.copy2(os.path.join(BOOK_DIR, config_file), dest_config)
         shutil.copy2(os.path.join(BOOK_DIR, toc_file), os.path.join(temp_root, "_toc.yml"))
+        
+        # Sanitize config to prevent self-exclusion
+        sanitize_config(dest_config)
         src_dir = temp_root
     else:
         src_dir = os.path.abspath(BOOK_DIR)
@@ -99,7 +103,6 @@ def build_pdf_for_lang(lang):
         print(f"❌ Error en jupyter-book build ({lang}): {e}")
         return False
 
-    print("🎨 Aplicando plantillas LaTeX personalizadas...", flush=True)
     print("🎨 Aplicando plantillas LaTeX personalizadas...", flush=True)
     templates_root = os.path.abspath("latex_templates")
     
@@ -171,6 +174,36 @@ def build_pdf_for_lang(lang):
         os.chdir(current_dir)
         if temp_mode and os.path.exists(src_dir):
             shutil.rmtree(src_dir)
+
+def sanitize_config(config_path):
+    """
+    Removes exclusion patterns that might cause the build to fail
+    when running inside a temporary directory (e.g., temp_build_*).
+    """
+    try:
+        with open(config_path, 'r', encoding='utf-8') as f:
+            lines = f.readlines()
+        
+        new_lines = []
+        for line in lines:
+            if "exclude_patterns:" in line:
+                # Remove specific patterns
+                line = line.replace('"temp_build_*"', '').replace("'temp_build_*'", '')
+                line = line.replace('"_build"', '').replace("'_build'", '')
+                
+                # Clean up commas
+                while ', ,' in line or ',,' in line:
+                    line = line.replace(', ,', ',').replace(',,', ',')
+                
+                line = line.replace('[,', '[').replace(', ]', ']')
+                line = line.replace(',]', ']')
+            new_lines.append(line)
+            
+        with open(config_path, 'w', encoding='utf-8') as f:
+            f.writelines(new_lines)
+        print(f"🔧 Configuración saneada en: {config_path}")
+    except Exception as e:
+        print(f"⚠️ Error saneando configuración: {e}")
 
 def main():
     print("📚 Iniciando exportación de PDF multi-idioma...")
