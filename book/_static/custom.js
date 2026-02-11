@@ -6,8 +6,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
     console.log(`TeachBook v${TEACHBOOK_VERSION}: Loading UI components...`);
 
-    // 1. Fetch Languages
-    const rootPath = (typeof DOCUMENTATION_OPTIONS !== 'undefined' && DOCUMENTATION_OPTIONS.URL_ROOT) ? DOCUMENTATION_OPTIONS.URL_ROOT : './';
+    // 1. Fetch Languages — detect root path from Sphinx's data attribute (most reliable)
+    const docOptionsEl = document.getElementById('documentation_options');
+    const rootPath = (docOptionsEl && docOptionsEl.getAttribute('data-url_root'))
+        ? docOptionsEl.getAttribute('data-url_root')
+        : (typeof DOCUMENTATION_OPTIONS !== 'undefined' && DOCUMENTATION_OPTIONS.URL_ROOT)
+            ? DOCUMENTATION_OPTIONS.URL_ROOT
+            : './';
 
     const tryFetch = (path) => fetch(path).then(res => {
         if (!res.ok) throw new Error("Not found: " + path);
