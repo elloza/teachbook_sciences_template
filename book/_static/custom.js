@@ -6,29 +6,42 @@ document.addEventListener("DOMContentLoaded", function () {
 
     console.log(`TeachBook v${TEACHBOOK_VERSION}: Loading UI components...`);
 
-    // 1. Fetch Languages — detect root path from Sphinx's data attribute (most reliable)
-    const docOptionsEl = document.getElementById('documentation_options');
-    const rootPath = (docOptionsEl && docOptionsEl.getAttribute('data-url_root'))
-        ? docOptionsEl.getAttribute('data-url_root')
-        : (typeof DOCUMENTATION_OPTIONS !== 'undefined' && DOCUMENTATION_OPTIONS.URL_ROOT)
-            ? DOCUMENTATION_OPTIONS.URL_ROOT
-            : './';
+    // 1. Detect book root from URL path (Sphinx-version-independent)
+    // Looks for known language segments (/es/, /en/, etc.) in the URL path
+    // and computes the root as the path before the language segment.
+    const KNOWN_LANGS = ['es', 'en', 'fr', 'pt', 'de', 'it'];
+    const pathParts = window.location.pathname.split('/');
+    let bookRootUrl = ''; // Absolute URL to the book root
+    let currentLangCode = 'es'; // Default
+
+    for (let i = 0; i < pathParts.length; i++) {
+        if (KNOWN_LANGS.includes(pathParts[i])) {
+            currentLangCode = pathParts[i];
+            // Root is everything BEFORE the language segment
+            bookRootUrl = pathParts.slice(0, i).join('/') + '/';
+            break;
+        }
+    }
+
+    // Fallback: use relative path if no language segment found
+    if (!bookRootUrl) {
+        bookRootUrl = './';
+    }
+
+    console.log(`TeachBook: bookRootUrl=${bookRootUrl}, lang=${currentLangCode}`);
 
     const tryFetch = (path) => fetch(path).then(res => {
         if (!res.ok) throw new Error("Not found: " + path);
         return res.json();
     });
 
-    // Try multiple paths to find languages.json:
-    // 1. Via Sphinx URL_ROOT (works in most builds)
-    // 2. Parent _static (for multi-language builds where page is in /es/ or /en/)
-    // 3. Same-level _static (fallback)
-    tryFetch(rootPath + '_static/languages.json')
+    // Fetch languages.json from the book root _static
+    tryFetch(bookRootUrl + '_static/languages.json')
         .catch(() => tryFetch('../_static/languages.json'))
         .catch(() => tryFetch('_static/languages.json'))
         .then(languages => {
             if (languages.length > 1) {
-                injectLanguageSwitcher(languages, rootPath);
+                injectLanguageSwitcher(languages, bookRootUrl);
             } else {
                 console.log("TeachBook: Single language detected. Hiding switcher.");
             }
@@ -38,7 +51,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
 
     // 2. Inject PDF Button (Always, if configured)
-    injectPDFButton(rootPath);
+    injectPDFButton(bookRootUrl);
 
     // 3. Robust Sidebar Toggle (Manual Handler with Polling)
     // The theme's native behavior is unreliable due to ID mismatches.
@@ -102,7 +115,7 @@ document.addEventListener("DOMContentLoaded", function () {
     setTimeout(() => clearInterval(intervalId), 5000);
 });
 
-function injectLanguageSwitcher(languages, rootPath) {
+function injectLanguageSwitcher(languages, bookRootUrl) {
     const path = window.location.pathname;
     let currentLangCode = "es";
     languages.forEach(lang => {
@@ -121,11 +134,8 @@ function injectLanguageSwitcher(languages, rootPath) {
             </button>
             <ul class="teachbook-lang-dropdown">
                 ${languages.map(l => {
-        // Use Sphinx's calculated root path to ensure we always get back to the project root
-        // regardless of current depth.
-        // Use Sphinx's calculated root path to ensure we always get back to the project root
-        // regardless of current depth.
-        const targetUrl = rootPath + `${l.code}/intro.html`;
+        // bookRootUrl is the absolute path to the book root (e.g., /teachbook_sciences_template/)
+        const targetUrl = bookRootUrl + `${l.code}/intro.html`;
 
         return `
                     <li>
@@ -148,7 +158,7 @@ function injectLanguageSwitcher(languages, rootPath) {
     }
 }
 
-function injectPDFButton(rootPath) {
+function injectPDFButton(bookRootUrl) {
     const sidebar = document.querySelector(".bd-sidebar-primary");
     if (sidebar) {
         if (document.getElementById("custom-pdf-btn")) return;
@@ -158,7 +168,7 @@ function injectPDFButton(rootPath) {
 
         // In standalone build, _static is at the root of the language folder
         const pdfFilename = `teachbook_${lang}.pdf`;
-        const pdfUrl = rootPath + `_static/${pdfFilename}`;
+        const pdfUrl = bookRootUrl + `_static/${pdfFilename}`;
 
         const langStrings = {
             "es": { "text": "Libro Completo (PDF)", "title": "Descargar PDF completo" },
