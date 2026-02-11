@@ -60,8 +60,15 @@ Lee los tutoriales incluidos en `book/es/01_tutorial/` para aprender más.
 ### 📄 Exportar a PDF
 El template incluye generación automática de PDF para cada idioma.
 
-- **En la nube**: GitHub Actions generará los PDFs automáticamente y añadirá un botón de descarga.
-- **En local**:
+- **En la nube (GitHub Actions)**: Los PDFs **no se generan en cada push** (para ahorrar tiempo de CI). Para regenerarlos, tienes dos opciones:
+  1. **Incluir `[pdf]` en el mensaje del commit**:
+     ```bash
+     git commit -m "Actualizar contenido [pdf]"
+     ```
+     Esto activará los pasos de instalación de LaTeX y generación de PDF en el workflow.
+  2. **Lanzar el workflow manualmente** desde la pestaña _Actions_ del repositorio en GitHub, marcando la opción _Build PDF_.
+
+- **En local** (requiere LaTeX instalado):
   ```bash
   python scripts/export_pdf.py
   ```
