@@ -1,0 +1,43 @@
+% Spanish localization support
+% We avoid loading babel/polyglossia here to prevent conflicts with Sphinx's automatic loading.
+% Instead, we override the commands robustly at the beginning of the document.
+
+\AtBeginDocument{
+  % Basic LaTeX overrides
+  \renewcommand{\contentsname}{Índice de contenidos}
+  \renewcommand{\chaptername}{Capítulo}
+  \renewcommand{\appendixname}{Anexo}
+  \renewcommand{\partname}{Parte}
+  \renewcommand{\figurename}{Figura}
+  \renewcommand{\tablename}{Tabla}
+  \renewcommand{\indexname}{Índice}
+  \renewcommand{\bibname}{Bibliografía}
+  
+  % Specific overrides for Sphinx caption hooks
+  \ifdefined\captionsspanish
+    \addto\captionsspanish{%
+      \renewcommand{\contentsname}{Índice de contenidos}%
+      \renewcommand{\chaptername}{Capítulo}%
+      \renewcommand{\appendixname}{Anexo}%
+      \renewcommand{\partname}{Parte}%
+      \renewcommand{\figurename}{Figura}%
+      \renewcommand{\tablename}{Tabla}%
+      \renewcommand{\indexname}{Índice}%
+      \renewcommand{\bibname}{Bibliografía}%
+    }
+  \fi
+  
+  % Even if Sphinx thinks it's English, we force Spanish terms for this build
+  \ifdefined\captionsenglish
+    \addto\captionsenglish{%
+      \renewcommand{\contentsname}{Índice de contenidos}%
+      \renewcommand{\chaptername}{Capítulo}%
+      \renewcommand{\appendixname}{Anexo}%
+      \renewcommand{\partname}{Parte}%
+      \renewcommand{\figurename}{Figura}%
+      \renewcommand{\tablename}{Tabla}%
+      \renewcommand{\indexname}{Índice}%
+      \renewcommand{\bibname}{Bibliografía}%
+    }
+  \fi
+}
