@@ -3,15 +3,19 @@ import sys
 import subprocess
 import time
 import threading
-from watchdog.observers import Observer
-from watchdog.events import FileSystemEventHandler
+from watchdog.observers import Observer  # type: ignore
+from watchdog.events import FileSystemEventHandler  # type: ignore
+# Add current directory to sys.path to ensure local modules can be imported
+# This is needed because the script might be run from root or from scripts/
+script_dir = os.path.dirname(os.path.abspath(__file__))
+if script_dir not in sys.path:
+    sys.path.append(script_dir)
+
 try:
-    # Try importing as if we are in the scripts directory or it's in path
-    import build_book
+    import build_book  # type: ignore
 except ImportError:
-    # If we are running from root, add scripts to path explicitly if needed
-    sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-    import build_book
+    # Fallback or re-raise if needed
+    raise
 
 # Configuration
 BOOK_DIR = "book"

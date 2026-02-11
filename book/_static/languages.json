@@ -1,12 +1,10 @@
 [
   {
     "code": "en",
-    "name": "English",
-    "flag": "🇬🇧"
+    "name": "English"
   },
   {
     "code": "es",
-    "name": "Español",
-    "flag": "🇪🇸"
+    "name": "Español"
   }
 ]
