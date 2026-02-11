@@ -5,7 +5,7 @@
 ###############################################################################
 author = 'Álvaro Lozano Murciego y André Sales Mendes (USAL)'
 comments_config = {'hypothesis': False, 'utterances': False}
-copyright = '2025, TeachBooks Project'
+copyright = '2025'
 exclude_patterns = ['**.ipynb_checkpoints', '.DS_Store', 'Thumbs.db', '_TRASH*', '_build', '_build_*', 'en', 'en/', 'en/*', 'en/**', 'latex_templates*', 'temp_build_*']
 extensions = ['sphinx_togglebutton', 'sphinx_copybutton', 'myst_nb', 'jupyter_book', 'sphinx_thebe', 'sphinx_comments', 'sphinx_external_toc', 'sphinx.ext.intersphinx', 'sphinx_design', 'sphinx_book_theme', 'sphinx_jupyterbook_latex']
 external_toc_exclude_missing = False
@@ -15,10 +15,11 @@ html_css_files = ['custom.css']
 html_favicon = ''
 html_js_files = ['custom.js', 'custom.js']
 html_logo = '_static/logo.png'
+html_show_copyright = False
 html_sourcelink_suffix = ''
 html_static_path = ['_static']
 html_theme = 'sphinx_book_theme'
-html_theme_options = {'search_bar_text': 'Search this book...', 'launch_buttons': {'notebook_interface': 'classic', 'binderhub_url': '', 'jupyterhub_url': '', 'thebe': False, 'colab_url': ''}, 'path_to_docs': '', 'repository_url': 'https://github.com/executablebooks/jupyter-book', 'repository_branch': 'master', 'extra_footer': '', 'home_page_in_toc': True, 'announcement': '', 'analytics': {'google_analytics_id': ''}, 'use_repository_button': False, 'use_edit_page_button': False, 'use_issues_button': False}
+html_theme_options = {'search_bar_text': 'Search this book...', 'launch_buttons': {'notebook_interface': 'classic', 'binderhub_url': '', 'jupyterhub_url': '', 'thebe': False, 'colab_url': ''}, 'path_to_docs': '', 'repository_url': 'https://github.com/executablebooks/jupyter-book', 'repository_branch': 'master', 'extra_footer': '<p>Construido con una versión modificada de <a href="https://teachbooks.io/">TeachBooks</a>, <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="license noopener noreferrer">CC BY 4.0<img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/cc.svg" alt=""><img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/by.svg" alt=""></a></p>\n', 'home_page_in_toc': True, 'announcement': '', 'analytics': {'google_analytics_id': ''}, 'use_repository_button': False, 'use_edit_page_button': False, 'use_issues_button': False}
 html_title = 'TeachBook (Plantilla Ciencias Químicas)'
 latex_engine = 'xelatex'
 myst_enable_extensions = ['colon_fence', 'dollarmath', 'linkify']
