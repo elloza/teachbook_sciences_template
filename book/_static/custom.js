@@ -10,13 +10,17 @@ document.addEventListener("DOMContentLoaded", function () {
     const rootPath = (typeof DOCUMENTATION_OPTIONS !== 'undefined' && DOCUMENTATION_OPTIONS.URL_ROOT) ? DOCUMENTATION_OPTIONS.URL_ROOT : './';
 
     const tryFetch = (path) => fetch(path).then(res => {
-        if (!res.ok) throw new Error("Not found");
+        if (!res.ok) throw new Error("Not found: " + path);
         return res.json();
     });
 
-    // Try relative to current page first (for local dev), then root (for prod)
+    // Try multiple paths to find languages.json:
+    // 1. Via Sphinx URL_ROOT (works in most builds)
+    // 2. Parent _static (for multi-language builds where page is in /es/ or /en/)
+    // 3. Same-level _static (fallback)
     tryFetch(rootPath + '_static/languages.json')
-        .catch(() => tryFetch('_static/languages.json')) // fallback for root-level access or different build structs
+        .catch(() => tryFetch('../_static/languages.json'))
+        .catch(() => tryFetch('_static/languages.json'))
         .then(languages => {
             if (languages.length > 1) {
                 injectLanguageSwitcher(languages, rootPath);
