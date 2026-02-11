@@ -8,12 +8,12 @@ from watchdog.events import FileSystemEventHandler
 try:
     # Try importing as if we are in the scripts directory or it's in path
     import detect_languages
+    import build_book
 except ImportError:
-    # If we are running from root, add scripts to path explicitly if needed, 
-    # but usually 'from scripts import ...' is what fails if scripts/ is in path.
-    # Let's try to add current dir to path and import
+    # If we are running from root, add scripts to path explicitly if needed
     sys.path.append(os.path.dirname(os.path.abspath(__file__)))
     import detect_languages
+    import build_book
 
 # Configuration
 BOOK_DIR = "book"
@@ -59,9 +59,21 @@ def start_config_watcher():
     return observer
 
 def main():
-    print("🚀 Iniciando Previsualización Robusta (sphinx-autobuild + config watch)...")
+    print("🚀 Iniciando Previsualización Robusta (Full Build + Watch)...")
     
-    # 1. Initial config generation
+    # 0. RUN FULL BUILD FIRST
+    # This ensures consistency, including English updates and static files.
+    print("\n🔨 Ejecutando construcción completa inicial (build_book.py)...")
+    try:
+        build_book.main()
+    except Exception as e:
+        print(f"❌ Error en la construcción inicial: {e}")
+        # We continue anyway to allow debugging via preview, or should we stop?
+        # User requested consistency, but blocking preview might be annoying.
+        # Let's pause to let them see the error.
+        time.sleep(2)
+
+    # 1. Initial config generation (for sphinx-autobuild internal use)
     generate_sphinx_config()
     
     # 2. Start Config Watcher
@@ -82,19 +94,90 @@ def main():
                                       # The key is that we NEED to run the generation command.
     ]
     
-    print(f"\n🌍 Servidor activo en: http://localhost:{PORT}")
-    print("⌨️  Pulsa Ctrl+C para detener.")
+    print(f"\n⏳ Iniciando servidor de previsualización...")
     
     try:
-        subprocess.call(cmd)
+        # Use Popen to capture stderr/stdout
+        process = subprocess.Popen(
+            cmd, 
+            stdout=subprocess.PIPE, 
+            stderr=subprocess.PIPE, 
+            text=True, 
+            bufsize=1, 
+            encoding='utf-8', 
+            errors='replace'
+        )
+
+        def echo_output(p):
+            for line in p.stdout:
+                # Watch for the "ready" signal to clear screen for a friendly view
+                if "Serving on" in line:
+                    # Clear screen on Windows or Unix
+                    os.system('cls' if os.name == 'nt' else 'clear')
+                    print("\n" + "="*50)
+                    print(f"✅  ¡Todo listo! El libro está funcionando.")
+                    print(f"🌍  Web local: http://localhost:{PORT}")
+                    print(f"⌨️   Pulsa Ctrl+C para detener.")
+                    print("="*50 + "\n")
+                else:
+                    sys.stdout.write(line)
+
+        def echo_stderr(p):
+            for line in p.stderr:
+                # Filter out the noisy asyncio connection reset errors (Multi-line traceback)
+                # We filter common lines found in that specific asyncio/proactor error dump
+                args_to_ignore = [
+                    "ConnectionResetError", "WinError 10054",
+                    "asyncio", "proactor_events.py",
+                    "_ProactorBasePipeTransport._call_connection_lost",
+                    "files in the same directory", # benign warning
+                    "self._context.run(self._callback",
+                    "self._sock.shutdown(socket.SHUT_RDWR",
+                    "Traceback (most recent call last):", # Risky, but usually part of the noise if accompanied by others
+                    "Exception in callback _ProactorBasePipeTransport"
+                ]
+                
+                # Check if line matches any ignored pattern
+                if any(ignored in line for ignored in args_to_ignore):
+                    continue
+                
+                sys.stderr.write(line)
+                sys.stderr.flush()
+
+        # Run readers in threads
+        t_out = threading.Thread(target=echo_output, args=(process,))
+        t_out.daemon = True
+        t_out.start()
+        
+        t_err = threading.Thread(target=echo_stderr, args=(process,))
+        t_err.daemon = True
+        t_err.start()
+
+        # Wait for the process to finish
+        try:
+            process.wait()
+        except KeyboardInterrupt:
+            # Forward the interrupt to the subprocess
+            print("\n🛑 Deteniendo servidor...")
+            process.terminate()
+            try:
+                process.wait(timeout=2)
+            except subprocess.TimeoutExpired:
+                process.kill()
+                
+        t_out.join(timeout=1)
+        t_err.join(timeout=1)
+
     except KeyboardInterrupt:
         print("\n🛑 Deteniendo servidor...")
-        observer.stop()
+        if 'observer' in locals(): observer.stop()
     except Exception as e:
         print(f"\n❌ Error: {e}")
-        observer.stop()
+        if 'observer' in locals(): observer.stop()
     
-    observer.join()
+    if 'observer' in locals():
+        observer.stop()
+        observer.join()
 
 if __name__ == "__main__":
     main()

@@ -6,7 +6,7 @@
 author = 'Álvaro Lozano Murciego y André Sales Mendes (USAL)'
 comments_config = {'hypothesis': False, 'utterances': False}
 copyright = '2025, TeachBooks Project'
-exclude_patterns = ['**.ipynb_checkpoints', '.DS_Store', 'Thumbs.db', '_build', '_build_*']
+exclude_patterns = ['**.ipynb_checkpoints', '.DS_Store', 'Thumbs.db', '_build', '_build_*', 'en/']
 extensions = ['sphinx_togglebutton', 'sphinx_copybutton', 'myst_nb', 'jupyter_book', 'sphinx_thebe', 'sphinx_comments', 'sphinx_external_toc', 'sphinx.ext.intersphinx', 'sphinx_design', 'sphinx_book_theme', 'sphinx_jupyterbook_latex']
 external_toc_exclude_missing = False
 external_toc_path = '_toc.yml'

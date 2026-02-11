@@ -3,7 +3,7 @@ author: Álvaro Lozano Murciego y André Sales Mendes (USAL)
 copyright: "2025, TeachBooks Project"
 logo: "_static/logo.png"
 language: es
-exclude_patterns: ["_build", "Thumbs.db", ".DS_Store", "**.ipynb_checkpoints", "_build_*"]
+exclude_patterns: ["_build", "Thumbs.db", ".DS_Store", "**.ipynb_checkpoints", "_build_*", "en/"]
 execute:
   execute_notebooks: off
 parse:

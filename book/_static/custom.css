@@ -23,7 +23,8 @@ html {
     height: 100%;
     align-self: center;
     position: relative;
-    z-index: 100000 !important;
+    /* Ensure it sits above EVERYTHING */
+    z-index: 2000000 !important;
 }
 
 /* Dropdown visibility on hover */
@@ -62,9 +63,11 @@ html {
     top: 32px;
     margin: 0 !important;
     min-width: 140px;
-    z-index: 110000 !important;
+    z-index: 1030 !important;
+    /* Slightly higher than header */
     border: 1px solid var(--pst-color-border);
-    background-color: var(--pst-color-background-main);
+    background-color: #ffffff !important;
+    /* Solid white background */
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     border-radius: 6px;
     padding: 0.4rem 0;
@@ -155,11 +158,74 @@ html {
 /* Force header components to stay above title text */
 .bd-header-article {
     position: relative;
-    z-index: 550000 !important;
+    z-index: 1020;
+    /* Standard Bootstrap/Theme z-index */
 }
 
-/* Fix for the dropdown being behind content even with high z-index */
-/* Sometimes the parent container limits the stack */
+/* Ensure the main container creates a stacking context context */
+.bd-content .bd-article-container {
+    isolation: isolate;
+    position: relative;
+    z-index: 0;
+}
+
+/* 
+   --------------------------------------------------------------
+   Desktop Sidebar Toggle Support 
+   --------------------------------------------------------------
+   We use a custom class 'teachbook-sidebar-hidden' toggled by custom.js
+   to force the sidebar to hide on desktop.
+*/
+@media (min-width: 992px) {
+
+    /* Hide the sidebar when the class is present */
+    html.teachbook-sidebar-hidden .bd-sidebar-primary {
+        display: none !important;
+    }
+
+    /* Expand the content area to fill the space */
+    html.teachbook-sidebar-hidden .bd-container .bd-main .bd-content .bd-article-container {
+        max-width: 90% !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
+    }
+}
+
+/* Fix for the dropdown being behind content */
 .article-header-buttons {
-    z-index: 560000 !important;
+    z-index: auto;
+}
+
+/* Force the article content to a lower layer */
+/* H1s and other content must sit below the header */
+.bd-article {
+    position: relative;
+    z-index: auto;
+}
+
+/* Just in case H1 has its own weirdness, keep it low */
+.bd-article h1 {
+    position: relative;
+    z-index: auto;
+}
+
+/* 
+   --------------------------------------------------------------
+   Desktop Sidebar Toggle Support 
+   --------------------------------------------------------------
+   (Removed to revert to initial state)
+*/
+
+/* 
+   --------------------------------------------------------------
+   Logo Styling Fix
+   --------------------------------------------------------------
+   Prevent the logo from getting a purple highlight/background on focus/active.
+*/
+.bd-sidebar-primary .navbar-brand:focus,
+.bd-sidebar-primary .navbar-brand:hover,
+.bd-sidebar-primary .navbar-brand:active {
+    background-color: transparent !important;
+    box-shadow: none !important;
+    outline: none !important;
 }

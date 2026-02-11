@@ -44,26 +44,24 @@ document.addEventListener("DOMContentLoaded", function () {
         primaryToggles.forEach(toggle => {
             console.log("TeachBook: Applying fix to primary toggle", toggle);
 
-            // Mark as fixed immediately to prevent double-processing
-            toggle.setAttribute('data-fixed', 'true');
+            primaryToggles.forEach(toggle => {
+                console.log("TeachBook: Attaching desktop fix to primary toggle", toggle);
 
-            // Remove 'for' attribute to prevent browser's native confused behavior
-            toggle.removeAttribute('for');
+                // Mark as fixed
+                toggle.setAttribute('data-fixed', 'true');
 
-            // Clone element to strip existing listeners
-            const newToggle = toggle.cloneNode(true);
-            toggle.parentNode.replaceChild(newToggle, toggle);
+                // Do NOT remove 'for' or clone node. Let native/theme behavior persist.
+                // Just ADD our listener for the desktop class toggle.
+                toggle.addEventListener('click', (e) => {
+                    // Do NOT prevent default or stop propagation.
+                    // Let the theme handle the mobile logic.
 
-            newToggle.addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-
-                if (primaryCheckbox) {
-                    primaryCheckbox.checked = !primaryCheckbox.checked;
-                    // Dispatch change event to trigger CSS/Theme reactions
-                    primaryCheckbox.dispatchEvent(new Event('change', { bubbles: true }));
-                    console.log("TeachBook: Primary sidebar toggled manually. State:", primaryCheckbox.checked);
-                }
+                    // Toggle custom class for desktop support
+                    // We typically only care about this on desktop, but toggling the class
+                    // is harmless on mobile because our CSS is media-queried.
+                    document.documentElement.classList.toggle('teachbook-sidebar-hidden');
+                    console.log("TeachBook: Toggled 'teachbook-sidebar-hidden'");
+                });
             });
         });
 
@@ -73,19 +71,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
         secondaryToggles.forEach(toggle => {
             console.log("TeachBook: Applying fix to secondary toggle", toggle);
-            toggle.setAttribute('data-fixed', 'true');
-            toggle.removeAttribute('for');
+            secondaryToggles.forEach(toggle => {
+                console.log("TeachBook: Attaching fix to secondary toggle", toggle);
+                toggle.setAttribute('data-fixed', 'true');
+                // Do NOT clone or strip. Just add listener if we needed custom logic.
+                // Currently we don't need custom logic for secondary, as it usually works fine?
+                // But if we wanted to be safe, we could add logic here.
 
-            const newToggle = toggle.cloneNode(true);
-            toggle.parentNode.replaceChild(newToggle, toggle);
-
-            newToggle.addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                if (secondaryCheckbox) {
-                    secondaryCheckbox.checked = !secondaryCheckbox.checked;
-                    secondaryCheckbox.dispatchEvent(new Event('change', { bubbles: true }));
-                }
+                // For now, removing the cloneNode is the most important part to restore mobile.
             });
         });
     }
@@ -117,6 +110,8 @@ function injectLanguageSwitcher(languages, rootPath) {
             </button>
             <ul class="teachbook-lang-dropdown">
                 ${languages.map(l => {
+        // Use Sphinx's calculated root path to ensure we always get back to the project root
+        // regardless of current depth.
         // Use Sphinx's calculated root path to ensure we always get back to the project root
         // regardless of current depth.
         const targetUrl = rootPath + `${l.code}/intro.html`;
