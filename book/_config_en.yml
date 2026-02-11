@@ -31,6 +31,12 @@ latex_docclass:
 latex:
   latex_engine: xelatex
   options: "english"
+  subtitle: "Faculty of Sciences"       # Optional
+  institution: "Universidad de Salamanca"  # Optional
+  edition: "1st Edition"                # Optional
+  publisher: "Ediciones Universidad de Salamanca"  # Optional
+  # isbn: "978-84-XXXXX-XX-X"          # Optional
+  # doi: "10.XXXX/xxxxx"               # Optional
   preamble: |
     \usepackage[english]{babel}
     \selectlanguage{english}

@@ -3,6 +3,7 @@ import os
 import shutil
 import sys
 import glob
+import yaml
 
 # Configuration
 BOOK_DIR = "book"
@@ -45,6 +46,53 @@ def glob_pdf(search_dir):
         if file.endswith(".pdf"):
             return os.path.abspath(os.path.join(search_dir, file))
     return None
+
+def generate_metadata_tex(lang, latex_build_dir):
+    """Reads metadata from the language YAML config and generates bookmetadata.tex."""
+    if lang == "default":
+        config_path = os.path.join(BOOK_DIR, "_config.yml")
+    else:
+        config_path = os.path.join(BOOK_DIR, f"_config_{lang}.yml")
+    
+    if not os.path.exists(config_path):
+        print(f"⚠️ No config found at {config_path}, skipping metadata.")
+        return
+    
+    with open(config_path, 'r', encoding='utf-8') as f:
+        config = yaml.safe_load(f)
+    
+    # Extract optional metadata from the latex section or top-level
+    latex_config = config.get('latex', {})
+    
+    metadata = {
+        'BookISBN': latex_config.get('isbn', ''),
+        'BookDOI': latex_config.get('doi', ''),
+        'BookEdition': latex_config.get('edition', ''),
+        'BookPublisher': latex_config.get('publisher', ''),
+        'BookYear': str(config.get('copyright', '')),
+        'BookSubtitle': latex_config.get('subtitle', ''),
+        'BookInstitution': latex_config.get('institution', ''),
+    }
+    
+    # Check for cover image (USAL logo)
+    logo_src = os.path.join(BOOK_DIR, "_static", "usal_logo.png")
+    if os.path.exists(logo_src):
+        logo_dest = os.path.join(latex_build_dir, "usal_logo.png")
+        shutil.copy2(logo_src, logo_dest)
+        metadata['BookCoverImage'] = 'usal_logo.png'
+        print(f"   📷 Logo USAL copiado a build dir.")
+    
+    # Write bookmetadata.tex
+    tex_path = os.path.join(latex_build_dir, "bookmetadata.tex")
+    with open(tex_path, 'w', encoding='utf-8') as f:
+        f.write("% Auto-generated metadata - do not edit manually\n")
+        for cmd, value in metadata.items():
+            if value:  # Only write non-empty values
+                # Escape LaTeX special characters
+                safe_value = str(value).replace('&', '\\&').replace('#', '\\#').replace('%', '\\%')
+                f.write(f"\\renewcommand{{\\{cmd}}}{{{safe_value}}}\n")
+    
+    print(f"   📝 Metadata TeX generado: {tex_path}")
 
 def build_pdf_for_lang(lang):
     """Builds the PDF for a specific language using a standalone temporary project."""
@@ -105,6 +153,9 @@ def build_pdf_for_lang(lang):
 
     print("🎨 Aplicando plantillas LaTeX personalizadas...", flush=True)
     templates_root = os.path.abspath("latex_templates")
+
+    # 0. Generate metadata tex file from YAML config
+    generate_metadata_tex(lang, latex_build_dir)
     
     # 1. Apply COMMON templates (base)
     common_dir = os.path.join(templates_root, "common")
@@ -130,12 +181,14 @@ def build_pdf_for_lang(lang):
     current_dir = os.getcwd()
     try:
         os.chdir(latex_build_dir)
-        tex_files = glob.glob("*.tex")
+        tex_files = [f for f in glob.glob("*.tex") if f != "bookmetadata.tex"]
         if not tex_files:
-            print("❌ No se encontró archivo .tex.")
+            print("❌ No se encontró archivo .tex compatible.")
             return False
             
-        main_tex = tex_files[0]
+        # Prioritize python.tex or the first file available
+        main_tex = "python.tex" if "python.tex" in tex_files else tex_files[0]
+        
         tex_engine_path = check_latex_installed()
         if not tex_engine_path:
             print("❌ No hay motor LaTeX.")
@@ -169,11 +222,12 @@ def build_pdf_for_lang(lang):
             return False
     except Exception as e:
         print(f"❌ Error compilando {lang}: {e}")
+        # print(f"DEBUG: log log log...")
         return False
     finally:
         os.chdir(current_dir)
         if temp_mode and os.path.exists(src_dir):
-            shutil.rmtree(src_dir)
+             shutil.rmtree(src_dir)
 
 def sanitize_config(config_path):
     """
