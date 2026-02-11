@@ -186,7 +186,7 @@ def main():
     success_count: int = 0
     for lang in languages:
         if build_pdf_for_lang(lang):
-            success_count = success_count + 1
+            success_count = success_count + 1  # type: ignore
     
     if success_count == len(languages):
         print(f"\n✅ Todos los PDFs ({success_count}) se generaron correctamente.")
