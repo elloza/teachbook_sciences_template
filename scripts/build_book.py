@@ -258,9 +258,11 @@ def sanitize_config(config_path):
         new_lines = []
         for line in lines:
             if "exclude_patterns:" in line:
-                # Remove specific patterns
+                # Remove specific patterns that clash with ROOT TEMP DIR?
+                # Actually, now that we are at root, we don't need to remove much.
+                # But definitely DO NOT remove _build!
                 line = line.replace('"temp_build_*"', '').replace("'temp_build_*'", '')
-                line = line.replace('"_build"', '').replace("'_build'", '')
+                # line = line.replace('"_build"', '').replace("'_build'", '') <--- REMOVED THIS LINE
                 
                 # Clean up commas
                 # Replace double commas with single comma

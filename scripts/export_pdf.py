@@ -189,7 +189,7 @@ def sanitize_config(config_path):
             if "exclude_patterns:" in line:
                 # Remove specific patterns
                 line = line.replace('"temp_build_*"', '').replace("'temp_build_*'", '')
-                line = line.replace('"_build"', '').replace("'_build'", '')
+                # line = line.replace('"_build"', '').replace("'_build'", '') <--- REMOVED THIS LINE
                 
                 # Clean up commas
                 while ', ,' in line or ',,' in line:
