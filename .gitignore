@@ -120,3 +120,7 @@ pyproject.toml
 
 # Test artifacts
 sidebar_verification.png
+ 
+# Root-level temp builds
+_temp_build_*
+_temp_pdf_*

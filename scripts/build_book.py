@@ -118,9 +118,9 @@ def build_language(lang):
     toc_file = f"_toc_{lang}.yml"
     pdf_name = f"teachbook_{lang}.pdf"
     
-    # 1. Create temporary standalone project inside _build to avoid recursion issues
-    # Use _build/temp_build_{lang}
-    temp_build_root = os.path.abspath(os.path.join(BOOK_DIR, "_build", f"temp_build_{lang}"))
+    # 1. Create temporary standalone project AT ROOT to avoid recursion/path issues
+    # Use _temp_build_{lang}
+    temp_build_root = os.path.abspath(os.path.join(os.getcwd(), f"_temp_build_{lang}"))
     if os.path.exists(temp_build_root):
         shutil.rmtree(temp_build_root)
     os.makedirs(temp_build_root)

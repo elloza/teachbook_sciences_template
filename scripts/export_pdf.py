@@ -63,8 +63,8 @@ def build_pdf_for_lang(lang):
         temp_mode = True
 
     if temp_mode:
-        # Use _build/temp_pdf_{lang} to avoid recursion/exclusion issues
-        temp_root = os.path.abspath(os.path.join(BOOK_DIR, "_build", f"temp_pdf_{lang}"))
+        # Use _temp_pdf_{lang} at ROOT to avoid recursion/exclusion issues
+        temp_root = os.path.abspath(os.path.join(os.getcwd(), f"_temp_pdf_{lang}"))
         if os.path.exists(temp_root):
             shutil.rmtree(temp_root)
         os.makedirs(temp_root)
