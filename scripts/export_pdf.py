@@ -183,7 +183,7 @@ def main():
     languages = get_languages()
     print(f"🔍 Idiomas detectados para PDF: {languages}")
 
-    success_count = 0
+    success_count: int = 0
     for lang in languages:
         if build_pdf_for_lang(lang):
             success_count += 1
