@@ -4,6 +4,13 @@ import subprocess
 import argparse
 import shutil
 import platform
+import io
+
+# Fix: Windows cp1252 can't encode emojis — force UTF-8
+if sys.stdout.encoding and sys.stdout.encoding.lower() not in ("utf-8", "utf8"):
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
+if sys.stderr.encoding and sys.stderr.encoding.lower() not in ("utf-8", "utf8"):
+    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8", errors="replace")
 
 VENV_DIR = ".venv"
 REQUIREMENTS_FILE = "requirements.txt"
@@ -302,9 +309,9 @@ def install_playwright_browsers(python_cmd):
 
 def verify_installation(dev_mode=False):
     print("\n🔍 Verificando paquetes instalados:")
-    pip_cmd = get_venv_pip()
+    python_cmd = get_venv_python()
     try:
-        result = subprocess.check_output([pip_cmd, "freeze"], text=True)
+        result = subprocess.check_output([python_cmd, "-m", "pip", "freeze"], text=True)
 
         required_packages = ["jupyter-book", "sphinx-autobuild", "watchdog"]
         if dev_mode:
