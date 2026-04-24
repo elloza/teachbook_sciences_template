@@ -5,6 +5,9 @@ Mermaid permite representar clases con sus atributos, métodos y relaciones de h
 
 ## Ejemplo: Jerarquía de Figuras Geométricas
 
+**Código:**
+
+````md
 ```{mermaid}
 classDiagram
     class Figura {
@@ -37,6 +40,49 @@ classDiagram
     Figura <|-- Circulo
     Figura <|-- Rectangulo
     Figura <|-- Triangulo
+```
+````
+
+**Resultado (solo HTML):**
+
+```{mermaid}
+classDiagram
+    class Figura {
+        <<abstract>>
+        +String color
+        +area() float
+        +perimetro() float
+    }
+
+    class Circulo {
+        +float radio
+        +area() float
+        +perimetro() float
+    }
+
+    class Rectangulo {
+        +float ancho
+        +float alto
+        +area() float
+        +perimetro() float
+    }
+
+    class Triangulo {
+        +float base
+        +float altura
+        +area() float
+        +perimetro() float
+    }
+
+    Figura <|-- Circulo
+    Figura <|-- Rectangulo
+    Figura <|-- Triangulo
+```
+
+```{raw} latex
+\begin{center}
+\textbf{Diagrama de Clases UML:} Jerarquía de figuras geométricas. La clase abstracta \texttt{Figura} define los métodos comunes \texttt{area()} y \texttt{perimetro()}. Las clases \texttt{Circulo}, \texttt{Rectangulo} y \texttt{Triangulo} heredan de \texttt{Figura} e implementan estos métodos según sus dimensiones específicas.
+\end{center}
 ```
 
 ## Notación de clases

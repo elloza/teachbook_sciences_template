@@ -5,6 +5,9 @@ With the MyST `{mermaid}` directive, you can include them directly in your book.
 
 ## Example: University database
 
+**Code:**
+
+````md
 ```{mermaid}
 erDiagram
     STUDENT {
@@ -31,6 +34,43 @@ erDiagram
     STUDENT ||--o{ ENROLLMENT : "enrolls in"
     COURSE ||--o{ ENROLLMENT : "has"
     PROFESSOR ||--o{ COURSE : "teaches"
+```
+````
+
+**Result (HTML only):**
+
+```{mermaid}
+erDiagram
+    STUDENT {
+        int id PK
+        string name
+        string email
+    }
+    COURSE {
+        int id PK
+        string name
+        int credits
+    }
+    PROFESSOR {
+        int id PK
+        string name
+        string department
+    }
+    ENROLLMENT {
+        int id PK
+        float grade
+        string term
+    }
+
+    STUDENT ||--o{ ENROLLMENT : "enrolls in"
+    COURSE ||--o{ ENROLLMENT : "has"
+    PROFESSOR ||--o{ COURSE : "teaches"
+```
+
+```{raw} latex
+\begin{center}
+\textbf{E-R Diagram:} University database with STUDENT, COURSE, PROFESSOR, and ENROLLMENT entities. Relationships: STUDENT enrolls in many ENROLLMENTS, COURSE has many ENROLLMENTS, PROFESSOR teaches many COURSES.
+\end{center}
 ```
 
 ## How to modify it

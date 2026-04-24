@@ -5,6 +5,9 @@ Con Mermaid podemos representar este ciclo como un diagrama de flujo.
 
 ## El ciclo
 
+**Código:**
+
+````md
 ```{mermaid}
 flowchart LR
     Magma["Magma"]
@@ -19,6 +22,31 @@ flowchart LR
     Ignea -->|"Calor y presión"| Metamorfica
     Metamorfica -->|"Meteorización y erosión"| Sedimentaria
     Sedimentaria -->|"Fusión"| Magma
+```
+````
+
+**Resultado (solo HTML):**
+
+```{mermaid}
+flowchart LR
+    Magma["Magma"]
+    Ignea["Roca Ígnea"]
+    Sedimentaria["Roca Sedimentaria"]
+    Metamorfica["Roca Metamórfica"]
+
+    Magma -->|"Enfriamiento y solidificación"| Ignea
+    Ignea -->|"Meteorización y erosión"| Sedimentaria
+    Sedimentaria -->|"Calor y presión"| Metamorfica
+    Metamorfica -->|"Fusión"| Magma
+    Ignea -->|"Calor y presión"| Metamorfica
+    Metamorfica -->|"Meteorización y erosión"| Sedimentaria
+    Sedimentaria -->|"Fusión"| Magma
+```
+
+```{raw} latex
+\begin{center}
+\textbf{Ciclo de las Rocas:} Red de transformaciones entre los tres tipos de rocas. El magma se enfría formando roca ígnea, que se meteoriza en sedimentaria, y esta se transforma en metamórfica por calor y presión. La roca metamórfica puede fundirse de nuevo en magma, completando el ciclo. Cualquier tipo de roca puede transformarse en cualquier otro.
+\end{center}
 ```
 
 ## Explicación de las transiciones

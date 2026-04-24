@@ -5,6 +5,9 @@ With Mermaid, we can represent this cycle as a flowchart.
 
 ## The cycle
 
+**Code:**
+
+````md
 ```{mermaid}
 flowchart LR
     Magma["Magma"]
@@ -19,6 +22,31 @@ flowchart LR
     Igneous -->|"Heat and pressure"| Metamorphic
     Metamorphic -->|"Weathering and erosion"| Sedimentary
     Sedimentary -->|"Melting"| Magma
+```
+````
+
+**Result (HTML only):**
+
+```{mermaid}
+flowchart LR
+    Magma["Magma"]
+    Igneous["Igneous Rock"]
+    Sedimentary["Sedimentary Rock"]
+    Metamorphic["Metamorphic Rock"]
+
+    Magma -->|"Cooling and solidification"| Igneous
+    Igneous -->|"Weathering and erosion"| Sedimentary
+    Sedimentary -->|"Heat and pressure"| Metamorphic
+    Metamorphic -->|"Melting"| Magma
+    Igneous -->|"Heat and pressure"| Metamorphic
+    Metamorphic -->|"Weathering and erosion"| Sedimentary
+    Sedimentary -->|"Melting"| Magma
+```
+
+```{raw} latex
+\begin{center}
+\textbf{Flowchart:} The rock cycle showing transformations between Magma, Igneous Rock, Sedimentary Rock, and Metamorphic Rock through processes like cooling/solidification, weathering/erosion, heat/pressure, and melting. Any rock type can transform into any other.
+\end{center}
 ```
 
 ## Transition explanation
