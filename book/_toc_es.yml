@@ -18,6 +18,7 @@ parts:
       sections:
       - file: es/02_grados/grado_fisica/ejemplo_fisica
       - file: es/02_grados/grado_fisica/circuitos_schemdraw
+      - file: es/02_grados/grado_fisica/circuitikz_avanzado
       - file: es/02_grados/grado_fisica/diagramas_kroki
       - file: es/02_grados/grado_fisica/ley_ohm_ajuste
       - file: es/02_grados/grado_fisica/oscilador_armonico

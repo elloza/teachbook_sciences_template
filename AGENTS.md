@@ -216,6 +216,32 @@ Para añadir título: usar `{kroki-figure}` con `:caption: Título`.
 
 **NO usar `{mermaid}`** (requiere sphinxcontrib-mermaid, no funciona en PDF). Usar siempre `{kroki}` con `:type: mermaid`.
 
+### CircuitikZ (opción avanzada para circuitos precisos)
+CircuitikZ usa LaTeX para generar esquemas eléctricos con acabado profesional. En TeachBook se usa como flujo **a imagen**:
+
+1. Crear un archivo `.tex` con el circuito.
+2. Renderizarlo con:
+
+```bash
+python scripts/render_circuitikz.py ruta/al/circuito.tex book/_static/generated/circuito.png
+```
+
+3. Insertar la imagen con `{figure}`.
+
+```md
+```{figure} _static/generated/circuito.png
+:alt: Circuito generado con CircuitikZ
+:width: 70%
+:align: center
+
+Circuito generado con CircuitikZ.
+```
+```
+
+- Funciona en HTML ✅ y PDF ✅ porque el resultado final es una imagen.
+- Requiere Tectonic (`python scripts/setup_latex.py`).
+- **SchemDraw** sigue siendo la opción sencilla; **CircuitikZ** es la opción avanzada.
+
 ### HTML interactivo autocontenido (SOLO HTML)
 ````md
 ```{raw} html
@@ -257,6 +283,7 @@ Todos los comandos se ejecutan desde la raíz del proyecto usando el Python del 
 | Vista previa | `python scripts/preview_book.py` | Servidor local con hot-reload en `localhost:8000` |
 | Exportar PDF | `python scripts/export_pdf.py` | Genera PDF para cada idioma en `book/_static/` |
 | Instalar LaTeX | `python scripts/setup_latex.py` | Instala Tectonic (motor LaTeX ligero) |
+| Renderizar CircuitikZ | `python scripts/render_circuitikz.py <entrada.tex> [salida.png]` | Compila CircuitikZ y genera una imagen PNG |
 | Convertir PDF a MD | `python scripts/pdf_to_markdown.py <ruta>` | Convierte PDFs a Markdown para el libro |
 | Guardar y publicar | `python scripts/git_helper.py` | git add + commit + push |
 
@@ -291,6 +318,7 @@ Las skills están en `.github/skills/` (fuente de verdad) y se sincronizan a `.c
 | `teachbook-pdf-to-markdown` | Convertir PDFs existentes a Markdown |
 | `teachbook-generate-diagram` | Crear diagramas Kroki (Mermaid, PlantUML, GraphViz, etc.) compatibles con HTML y PDF |
 | `teachbook-generate-schemdraw-circuit` | Crear diagramas de circuitos eléctricos |
+| `teachbook-generate-circuitikz` | Crear circuitos precisos con CircuitikZ exportados a imagen |
 | `teachbook-generate-teaching-notebook` | Crear notebooks docentes con código ejecutable |
 | `teachbook-generate-interactive-html` | Añadir HTML interactivo sin frameworks JS |
 | `teachbook-generate-quiz` | Crear cuestionarios con respuestas ocultas |
