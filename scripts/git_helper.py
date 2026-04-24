@@ -1,6 +1,14 @@
+import io
 import subprocess
 import sys
 import datetime
+
+# Fix: Windows cp1252 can't encode emojis — force UTF-8
+if sys.stdout.encoding and sys.stdout.encoding.lower() not in ("utf-8", "utf8"):
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
+if sys.stderr.encoding and sys.stderr.encoding.lower() not in ("utf-8", "utf8"):
+    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8", errors="replace")
+
 
 def run_git(args):
     try:
@@ -8,6 +16,7 @@ def run_git(args):
     except subprocess.CalledProcessError as e:
         print(f"❌ Error ejecutando: git {' '.join(args)}")
         sys.exit(1)
+
 
 def main():
     print("🚀 Iniciando proceso de guardado y publicación...")
@@ -35,6 +44,7 @@ def main():
     run_git(["push"])
 
     print("\n✨ ¡Todo guardado y publicado correctamente!")
+
 
 if __name__ == "__main__":
     main()

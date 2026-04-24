@@ -1,9 +1,16 @@
+import io
 import subprocess
 import os
 import shutil
 import sys
 import glob
 import yaml
+
+# Fix: Windows cp1252 can't encode emojis — force UTF-8
+if sys.stdout.encoding and sys.stdout.encoding.lower() not in ("utf-8", "utf8"):
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
+if sys.stderr.encoding and sys.stderr.encoding.lower() not in ("utf-8", "utf8"):
+    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8", errors="replace")
 
 
 def get_jupyter_book():
