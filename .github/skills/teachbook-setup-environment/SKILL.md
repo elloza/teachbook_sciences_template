@@ -3,10 +3,12 @@ name: teachbook-setup-environment
 description: >
   Prepara el entorno completo desde cero: detecta/instala Python, git, uv,
   crea el entorno virtual, instala dependencias y sincroniza skills.
+  Cubre Windows (x86 + ARM), macOS (Intel + Apple Silicon) y Linux.
   CRÍTICO: usar la primera vez que se abre el proyecto en cualquier ordenador.
   Trigger phrases: "prepara el entorno", "instala todo", "configura el proyecto",
   "setup", "primera vez", "no me funciona", "falta algo", "no compila",
-  "ModuleNotFoundError", "command not found", "no tengo python", "no tengo git".
+  "ModuleNotFoundError", "command not found", "no tengo python", "no tengo git",
+  "Mac", "MacBook", "Windows ARM", "Surface", "Apple Silicon", "M1", "M2", "M3", "M4".
 ---
 
 # Skill: Preparar Entorno Completo (Desde Cero)
@@ -25,19 +27,32 @@ description: >
 
 **OBLIGATORIO.** El agente DEBE ejecutar estos checks ANTES de hacer cualquier otra cosa:
 
-```
-Paso 0: Diagnóstico del sistema
-┌─────────────────────────────────────────────────────────────────┐
-│  El agente DEBE ejecutar estos comandos y anotar resultados:    │
-│                                                                  │
-│  Check 1: Python  →  python --version    (o py --version en Windows) │
-│  Check 2: git     →  git --version                                │
-│  Check 3: uv      →  uv --version                                 │
-│  Check 4: .venv   →  ¿Existe la carpeta .venv/?                   │
-└─────────────────────────────────────────────────────────────────┘
+```bash
+# Sistema operativo
+uname -a                    # Linux/macOS
+systeminfo | findstr /B /C:"OS Name" /C:"OS Architecture"   # Windows CMD
+# O en PowerShell:
+[System.Environment]::OSVersion.VersionString; $env:PROCESSOR_ARCHITECTURE
+
+# Herramientas
+python --version 2>&1 || python3 --version 2>&1 || py --version 2>&1 || echo "NO PYTHON"
+git --version 2>&1 || echo "NO GIT"
+uv --version 2>&1 || echo "NO UV"
+
+# Arquitectura del procesador
+uname -m                    # Linux/macOS: "arm64" = ARM, "x86_64" = Intel
+echo %PROCESSOR_ARCHITECTURE%  # Windows CMD: "AMD64" = Intel/AMD, "ARM64" = ARM
+
+# Entorno virtual
+test -d .venv && echo "VENV EXISTS" || echo "NO VENV"
 ```
 
-Ejecutar estos cuatro comandos y guardar los resultados. Según lo que falte, ir al paso correspondiente.
+**Tabla de arquitecturas:**
+
+| Resultado `uname -m` | Resultado Windows | Significado |
+|---|---|---|
+| `x86_64` / `amd64` | `AMD64` | Intel/AMD 64-bit (lo más común) |
+| `arm64` / `aarch64` | `ARM64` | ARM 64-bit (Apple Silicon M1-M4, Windows ARM) |
 
 ---
 
@@ -45,20 +60,25 @@ Ejecutar estos cuatro comandos y guardar los resultados. Según lo que falte, ir
 
 ### Escenario A: No hay Python
 
-**macOS:**
+**macOS (Intel y Apple Silicon):**
 ```bash
-# Si tiene Homebrew:
+# Opción 1: Homebrew (recomendado)
 brew install python@3.12
 
-# Si no tiene Homebrew, descargar de https://python.org
-# O instalar uv primero (ver Escenario C) y luego: uv python install 3.12
+# Opción 2: Descargar de https://python.org
+# Los instaladores de python.org detectan Apple Silicon automáticamente
+
+# Opción 3: Si ya tienes uv (ver Escenario C):
+uv python install 3.12
 ```
 
-**Windows:**
+**Windows (x86 y ARM):**
 1. Descargar desde https://python.org
-2. **CRÍTICO**: Marcar "Add Python to PATH" durante la instalación
+2. **CRÍTICO**: Marcar **"Add Python to PATH"** durante la instalación
 3. Verificar abriendo una NUEVA terminal: `py --version`
 4. Si `py` funciona pero `python` no, usar `py` en todos los comandos
+
+> **Windows ARM** (Surface Pro X, Snapdragon laptops): Los paquetes Python compilados (numpy, pandas) deberían funcionar vía emulación x86. Si fallan, usar `uv pip install` que maneja mejor las ruedas compatibles.
 
 **Linux (Ubuntu/Debian):**
 ```bash
@@ -80,6 +100,7 @@ xcode-select --install    # Instala herramientas de línea de comandos (incluye 
 
 **Windows:**
 - Descargar desde https://git-scm.com
+- En Windows ARM: funciona nativamente, no hay problema
 
 **Linux (Ubuntu/Debian):**
 ```bash
@@ -105,11 +126,14 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 - O cerrar y reabrir la terminal
 - Windows: cerrar y reabrir la terminal
 
+> **Nota**: uv funciona nativamente en Apple Silicon y Windows ARM.
+
 ### Escenario D: Python es demasiado antiguo (< 3.10)
 
 **Si uv está disponible:**
 ```bash
 uv python install 3.12    # uv descarga Python 3.12 automáticamente
+uv venv .venv --python 3.12   # Crea venv con la versión nueva
 ```
 
 **Si no:**
@@ -130,13 +154,14 @@ Solo después de que los prerrequisitos estén cubiertos (Python 3.10+ disponibl
 | Modo desarrollo (con herramientas de test) | `python scripts/setup_env.py --dev` |
 
 El script hace todo automáticamente:
-1. Verifica versión de Python
-2. Crea `.venv/`
-3. Instala dependencias con uv (preferido) o pip (fallback)
-4. Verifica paquetes clave
-5. Sincroniza skills a `.claude/skills/`, `.agents/skills/`, `.agent/skills/`
-6. Sincroniza `AGENTS.md` a `.github/copilot-instructions.md`
-7. Muestra resumen final con el estado de todo
+1. Verifica versión de Python y detecta OS/arquitectura
+2. Detecta/instala uv si es posible
+3. Crea `.venv/`
+4. Instala dependencias con uv (preferido) o pip (fallback)
+5. Verifica paquetes clave
+6. Sincroniza skills a `.claude/skills/`, `.agents/skills/`, `.agent/skills/`
+7. Sincroniza `AGENTS.md` a `.github/copilot-instructions.md`
+8. Muestra resumen final con el estado de todo
 
 ---
 
@@ -153,7 +178,7 @@ Después del setup, el agente DEBE verificar que todo está bien:
 .venv/bin/python -c "import jupyter_book; print('OK')"          # Linux/macOS
 .venv\Scripts\python.exe -c "import jupyter_book; print('OK')"  # Windows
 
-# 3. Skills sincronizadas (carpetas existen)
+# 3. Skills sincronizadas (carpetas existen con contenido)
 ls .claude/skills/ .agents/skills/ .agent/skills/
 ```
 
@@ -167,40 +192,83 @@ Resultado esperado:
 
 | Problema | Causa | Solución |
 |---|---|---|
-| `python: command not found` (Linux/Mac) | Python no instalado o no en PATH | Instalar Python o usar `python3` en vez de `python` |
+| `python: command not found` (Mac) | Python no instalado o no en PATH | Probar `python3`. Si tampoco: instalar via brew o python.org |
 | `python: command not found` (Windows) | Python no instalado o no en PATH | Probar `py`. Si tampoco: instalar desde python.org marcando "Add to PATH" |
 | `py: command not found` (Windows) | Python no instalado | Instalar desde python.org |
-| `git: command not found` | Git no instalado | Instalar desde git-scm.com |
-| `uv: command not found` después de instalar | Shell no recargó el PATH | Cerrar y reabrir la terminal. Mac/Linux: `source ~/.bashrc` o `source ~/.zshrc` |
+| `git: command not found` | Git no instalado | macOS: `xcode-select --install`. Windows: git-scm.com |
+| `uv: command not found` después de instalar | Shell no recargó el PATH | Cerrar y reabrir la terminal. Mac/Linux: `source ~/.zshrc` |
 | Error creating venv | Python no tiene venv (Linux) | `sudo apt install python3-venv` |
 | Error de permisos | Usando sudo | NO usar sudo. Todo se instala en el directorio del usuario |
-| `pip` falla con SSL | Certificados (macOS) | `/Applications/Python\ 3.12/Install\ Certificates.command` |
-| Deps fallan al instalar | Falta compilador (Linux) | `sudo apt install build-essential python3-dev` |
-| Windows: `Scripts` vs `bin` | Windows usa `Scripts\` | Usar `Scripts\python.exe` y `Scripts\pip.exe` |
+| `pip` falla con SSL (macOS) | Certificados no instalados | `/Applications/Python\ 3.12/Install\ Certificates.command` |
+| Deps fallan al instalar (Linux) | Falta compilador | `sudo apt install build-essential python3-dev` |
+| Windows: `Scripts` vs `bin` | Windows usa `Scripts\` | Usar `.venv\Scripts\python.exe` |
 | Windows: "cannot run scripts" | PowerShell execution policy | `Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned` |
 | Python < 3.10 y no hay uv | Versión antigua | Instalar Python 3.12+ desde python.org |
-| Python < 3.10 y hay uv | Versión antigua | `uv python install 3.12` (uv gestiona Python automáticamente) |
+| Python < 3.10 y hay uv | Versión antigua | `uv python install 3.12` |
+| numpy/pandas fallan en ARM | Ruedas binarias no disponibles | `uv pip install numpy pandas` (uv resuelve ruedas compatibles automáticamente) |
+| `jupyter-book: not found` tras setup | venv no activado o PATH | Usar siempre la ruta completa del venv: `.venv/bin/jupyter-book` o `.venv\Scripts\jupyter-book.exe` |
+| macOS: "developer tools" popup | Falta Xcode CLI | `xcode-select --install` y esperar a que termine |
+| Windows: CRLF vs LF | Git convierte saltos de línea | No afecta funcionalidad. Ignorar los warnings de git |
 
 ---
 
 ## Notas especiales por sistema operativo
 
-### Windows
+### Windows (x86_64 — Intel/AMD)
 - Después de instalar Python, el PATH puede no actualizarse hasta reiniciar la terminal
-- El launcher `py` es más fiable que `python` en Windows
+- El launcher `py` es más fiable que `python`
 - Si PowerShell bloquea scripts: `Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned`
 - Rutas del venv usan `Scripts\` en vez de `bin/`
+- Git Bash funciona como terminal alternativa
 
-### macOS
-- Después de instalar uv, recargar el shell: `source ~/.zshrc` (zsh) o `source ~/.bashrc` (bash)
-- Si Python se instaló via brew: `brew install python@3.12`, usar `python3`
-- Puede necesitar Xcode CLI: `xcode-select --install`
+### Windows (ARM64 — Surface Pro X, Snapdragon)
+- Python funciona via emulación x86_64 (transparente al usuario)
+- uv funciona nativamente en ARM
+- Los paquetes compilados (numpy, pandas, matplotlib) pueden tardar más la primera vez
+- Si un paquete falla: `uv pip install --force-reinstall <paquete>` para forzar recompilación
+
+### macOS (Intel — MacBook Pro/Air hasta 2020)
+- `python3` suele estar disponible por defecto
 - Si pip falla por SSL: ejecutar `Install Certificates.command` en `/Applications/Python 3.12/`
+- Homebrew recomendado: `brew install python@3.12 git`
 
-### Linux
+### macOS (Apple Silicon — M1/M2/M3/M4)
+- **Python**: Los instaladores de python.org son Universal2 (funcionan nativamente)
+- **Homebrew**: Instalar la versión nativa (no la de Rosetta): `brew install python@3.12 git`
+- **uv**: Funciona nativamente, muy rápido
+- **numpy/pandas/scipy**: Disponibles como wheels nativos ARM desde PyPI. No deberían dar problemas.
+- **Si Homebrew no se instaló nativo** (está en `/usr/local/` en vez de `/opt/homebrew/`):
+  ```bash
+  # Verificar: si dice /usr/local, es Rosetta (lento)
+  # Si dice /opt/homebrew, es nativo (rápido)
+  brew --prefix
+  ```
+- **Tectonic (LaTeX)**: Descarga el binario `aarch64-apple-darwin` nativo. El script `setup_latex.py` lo detecta automáticamente.
+
+### Linux (Ubuntu/Debian)
 - Puede necesitar `python3-venv`: `sudo apt install python3-venv`
 - Puede necesitar herramientas de compilación: `sudo apt install build-essential python3-dev`
 - El comando puede ser `python3` en vez de `python`
+
+---
+
+## Problemas conocidos no comprobables en todos los entornos
+
+El proyecto se prueba automáticamente en **Windows** y **macOS** mediante GitHub Actions. Sin embargo:
+
+| Plataforma | Estado tests | Notas |
+|---|---|---|
+| Windows x86_64 | ✅ Probado en CI | Funciona correctamente |
+| macOS Apple Silicon | ✅ Probado en CI | Funciona correctamente |
+| macOS Intel | ⚠️ No probado en CI | Debería funcionar igual que ARM |
+| Windows ARM | ⚠️ No probado | Emulación x86 debería funcionar |
+| Linux x86_64 | ✅ Probado en CI | Solo syntax check |
+| Linux ARM | ❌ No probado | Poco probable en docentes |
+
+Si un usuario tiene problemas en una plataforma no probada, el agente debe:
+1. Seguir la tabla de troubleshooting habitual
+2. Si no encuentra solución, sugerir instalar Python y uv desde cero
+3. Último recurso: abrir un issue en GitHub reportando el problema
 
 ---
 
@@ -209,6 +277,11 @@ Resultado esperado:
 El entorno está listo. Siguiente paso: compilar el libro.
 
 ```bash
-python scripts/build_book.py      # Compilar HTML multi-idioma
-python scripts/preview_book.py    # Vista previa en localhost:8000
+# Compilar HTML multi-idioma
+.venv/bin/python scripts/build_book.py          # Linux/macOS
+.venv\Scripts\python.exe scripts/build_book.py  # Windows
+
+# Vista previa en localhost:8000
+.venv/bin/python scripts/preview_book.py          # Linux/macOS
+.venv\Scripts\python.exe scripts/preview_book.py  # Windows
 ```

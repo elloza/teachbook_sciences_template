@@ -6,6 +6,14 @@ import shutil
 import json
 import yaml
 
+
+def get_jupyter_book():
+    """Returns the path to jupyter-book executable in the virtual environment."""
+    if os.name == "nt":
+        return os.path.join(".venv", "Scripts", "jupyter-book.exe")
+    return os.path.join(".venv", "bin", "jupyter-book")
+
+
 # Mapping of language codes to display names (ISO 639-1)
 LANG_DISPLAY_NAMES = {
     "ar": "العربية",
@@ -56,31 +64,34 @@ BOOK_DIR = "book"
 BUILD_ROOT = os.path.join(BOOK_DIR, "_build")
 FINAL_HTML_DIR = os.path.join(BUILD_ROOT, "html")
 
+
 def get_project_default_language():
     """Reads the default/primary language from _config.yml's 'language' field."""
     config_path = os.path.join(BOOK_DIR, "_config.yml")
     if os.path.exists(config_path):
-        with open(config_path, 'r', encoding='utf-8') as f:
+        with open(config_path, "r", encoding="utf-8") as f:
             config = yaml.safe_load(f)
-            if config and 'language' in config:
-                return config['language']
-    return 'es'  # Fallback
+            if config and "language" in config:
+                return config["language"]
+    return "es"  # Fallback
+
 
 def get_languages():
     """Detects languages based on _config_<lang>.yml files."""
     configs = glob.glob(os.path.join(BOOK_DIR, "_config_*.yml"))
     languages = []
-    
+
     for conf in configs:
         filename = os.path.basename(conf)
         # Extract 'es' from '_config_es.yml'
         lang_code = filename.replace("_config_", "").replace(".yml", "")
         languages.append(lang_code)
-    
+
     if not languages and os.path.exists(os.path.join(BOOK_DIR, "_config.yml")):
-        return ["default"] # Single language mode
-        
+        return ["default"]  # Single language mode
+
     return sorted(languages)
+
 
 def generate_languages_json(languages, output_static_dir=None):
     """Generates a JSON file with available languages for the JS switcher."""
@@ -88,51 +99,56 @@ def generate_languages_json(languages, output_static_dir=None):
     for lang in languages:
         if lang == "default":
             continue
-        lang_data.append({
-            "code": lang,
-            "name": LANG_DISPLAY_NAMES.get(lang, lang.upper())
-        })
-    
+        lang_data.append(
+            {"code": lang, "name": LANG_DISPLAY_NAMES.get(lang, lang.upper())}
+        )
+
     # Target directory: either source or specified build dir
-    target_dir = output_static_dir if output_static_dir else os.path.join(BOOK_DIR, "_static")
-    
+    target_dir = (
+        output_static_dir if output_static_dir else os.path.join(BOOK_DIR, "_static")
+    )
+
     if not os.path.exists(target_dir):
         os.makedirs(target_dir)
-        
+
     json_path = os.path.join(target_dir, "languages.json")
-    with open(json_path, 'w', encoding='utf-8') as f:
+    with open(json_path, "w", encoding="utf-8") as f:
         json.dump(lang_data, f, indent=2, ensure_ascii=False)
-    
+
     print(f"🌍 Archivo de idiomas generado en: {json_path}")
+
 
 def fix_pdf_paths(build_dir, pdf_filename):
     """Fixes relative paths for the PDF download button in HTML files within a specific build dir."""
     print(f"🔧 Corrigiendo rutas del botón PDF en {build_dir}...")
-    
+
     for html_file in glob.glob(os.path.join(build_dir, "**", "*.html"), recursive=True):
         rel_to_root = os.path.relpath(build_dir, os.path.dirname(html_file))
-        
+
         if rel_to_root == ".":
             correct_path = f"_static/{pdf_filename}"
         else:
             correct_path = f"{rel_to_root}/_static/{pdf_filename}".replace("\\", "/")
-        
-        with open(html_file, 'r', encoding='utf-8') as f:
+
+        with open(html_file, "r", encoding="utf-8") as f:
             content = f.read()
-        
-        target_string = f'_static/{pdf_filename}'
-        
+
+        target_string = f"_static/{pdf_filename}"
+
         if target_string in content:
-            new_content = content.replace(f'href="{target_string}"', f'href="{correct_path}"')
-            
+            new_content = content.replace(
+                f'href="{target_string}"', f'href="{correct_path}"'
+            )
+
             if new_content != content:
-                with open(html_file, 'w', encoding='utf-8') as f:
+                with open(html_file, "w", encoding="utf-8") as f:
                     f.write(new_content)
+
 
 def build_language(lang):
     """Builds the book for a specific language using a standalone temporary directory."""
     print(f"\n🔨 Construyendo versión STANDALONE: {lang.upper()}...")
-    
+
     if lang == "default":
         # Default behavior: build the root book (usually Spanish)
         config_file = "_config.yml"
@@ -140,20 +156,24 @@ def build_language(lang):
         build_cache_dir = os.path.join(BOOK_DIR, "_build")
         final_dest = FINAL_HTML_DIR
         pdf_name = "teachbook.pdf"
-        
+
         # Standard build logic for default
         if os.path.exists(build_cache_dir):
             shutil.rmtree(build_cache_dir)
-            
+
         cmd = [
-            "jupyter-book", "build", os.path.abspath(BOOK_DIR),
-            "--config", os.path.abspath(os.path.join(BOOK_DIR, config_file)),
-            "--toc", os.path.abspath(os.path.join(BOOK_DIR, toc_file)),
-            "--all"
+            get_jupyter_book(),
+            "build",
+            os.path.abspath(BOOK_DIR),
+            "--config",
+            os.path.abspath(os.path.join(BOOK_DIR, config_file)),
+            "--toc",
+            os.path.abspath(os.path.join(BOOK_DIR, toc_file)),
+            "--all",
         ]
         try:
             print(f"🚀 Ejecutando build DEFAULT: {' '.join(cmd)}")
-            subprocess.check_call(cmd, shell=(os.name == 'nt'))
+            subprocess.check_call(cmd, shell=(os.name == "nt"))
             print(f"✅ Versión default lista en: {final_dest}")
         except subprocess.CalledProcessError:
             print(f"❌ Error compilando idioma: {lang}")
@@ -164,59 +184,67 @@ def build_language(lang):
     config_file = f"_config_{lang}.yml"
     toc_file = f"_toc_{lang}.yml"
     pdf_name = f"teachbook_{lang}.pdf"
-    
+
     # 1. Create temporary standalone project AT ROOT to avoid recursion/path issues
     # Use _temp_build_{lang}
     temp_build_root = os.path.abspath(os.path.join(os.getcwd(), f"_temp_build_{lang}"))
     if os.path.exists(temp_build_root):
         shutil.rmtree(temp_build_root)
     os.makedirs(temp_build_root)
-    
+
     # 2. Copy localized content AS A SUBFOLDER to keep paths valid (e.g., temp_en/en/intro.md)
     lang_src_dir = os.path.join(BOOK_DIR, lang)
     lang_dst_dir = os.path.join(temp_build_root, lang)
     if not os.path.exists(lang_src_dir):
-        print(f"❌ Error: No existe la carpeta de contenido para '{lang}': {lang_src_dir}")
+        print(
+            f"❌ Error: No existe la carpeta de contenido para '{lang}': {lang_src_dir}"
+        )
         return
 
     print(f"📂 Preparando entorno standalone en: {temp_build_root}")
     print(f"📂 Copiando contenido de '{lang}' a carpeta interna para mantener rutas...")
     shutil.copytree(lang_src_dir, lang_dst_dir)
-            
+
     # 3. Copy _static folder (required for logo, css, js)
     static_src = os.path.join(BOOK_DIR, "_static")
     static_dst = os.path.join(temp_build_root, "_static")
     if os.path.exists(static_src):
         shutil.copytree(static_src, static_dst)
-        
+
     # 4. Copy and rename config/toc
     dest_config = os.path.join(temp_build_root, "_config.yml")
     shutil.copy2(os.path.join(BOOK_DIR, config_file), dest_config)
-    shutil.copy2(os.path.join(BOOK_DIR, toc_file), os.path.join(temp_build_root, "_toc.yml"))
+    shutil.copy2(
+        os.path.join(BOOK_DIR, toc_file), os.path.join(temp_build_root, "_toc.yml")
+    )
 
     # Sanitize config to prevent self-exclusion
     sanitize_config(dest_config)
-    
+
     # 5. Build from the temp directory (Explicit config)
     cmd = [
-        "jupyter-book", "build", temp_build_root,
-        "--config", dest_config,
-        "--all", "-v"
+        get_jupyter_book(),
+        "build",
+        temp_build_root,
+        "--config",
+        dest_config,
+        "--all",
+        "-v",
     ]
-    
+
     try:
         print(f"🚀 Ejecutando build STANDALONE ({lang}): {' '.join(cmd)}")
-        subprocess.check_call(cmd, shell=(os.name == 'nt'))
-        
+        subprocess.check_call(cmd, shell=(os.name == "nt"))
+
         # DEBUG: See what was created
         debug_directory(temp_build_root)
-        
+
         # The output will be in temp_build_root/_build/html/en/ (since en is a subfolder)
         built_html_path_nested = os.path.join(temp_build_root, "_build", "html", lang)
         final_dest = os.path.join(FINAL_HTML_DIR, lang)
 
         if not os.path.exists(built_html_path_nested):
-             built_html_path_nested = os.path.join(temp_build_root, "_build", "html")
+            built_html_path_nested = os.path.join(temp_build_root, "_build", "html")
 
         # Fix PDF paths BEFORE moving
         if os.path.exists(built_html_path_nested):
@@ -225,10 +253,10 @@ def build_language(lang):
         print(f"🚚 Moviendo de {built_html_path_nested} a {final_dest}")
         if os.path.exists(final_dest):
             shutil.rmtree(final_dest)
-        
+
         # Ensure parent dir exists
         os.makedirs(os.path.dirname(final_dest), exist_ok=True)
-            
+
         shutil.copytree(built_html_path_nested, final_dest)
         print(f"✅ Versión {lang} movida correctamente.")
 
@@ -236,10 +264,12 @@ def build_language(lang):
         # from the temp build to the final root _static folder.
         temp_static_dir = os.path.join(temp_build_root, "_build", "html", "_static")
         final_static_dir = os.path.join(FINAL_HTML_DIR, "_static")
-        
+
         if os.path.exists(temp_static_dir):
-            print(f"📦 Merging theme assets from temp build ({lang}) to global _static...")
-            
+            print(
+                f"📦 Merging theme assets from temp build ({lang}) to global _static..."
+            )
+
             # DEBUG: List source files to verify we actually have something to copy
             print(f"   🔍 Source _static content ({temp_static_dir}):")
             try:
@@ -250,12 +280,14 @@ def build_language(lang):
 
             if not os.path.exists(final_static_dir):
                 os.makedirs(final_static_dir)
-            
+
             # Use the robust merge_dir_into (now global)
             merge_dir_into(temp_static_dir, final_static_dir)
-            
+
             # DEBUG: Verify copy
-            print(f"   ✅ Merge complete. Final _static count: {len(os.listdir(final_static_dir))}")
+            print(
+                f"   ✅ Merge complete. Final _static count: {len(os.listdir(final_static_dir))}"
+            )
 
     except subprocess.CalledProcessError:
         print(f"❌ Error compilando idioma standalone: {lang}")
@@ -264,6 +296,7 @@ def build_language(lang):
         # Cleanup temp directory
         if os.path.exists(temp_build_root):
             shutil.rmtree(temp_build_root)
+
 
 def merge_dir_into(src_dir, dst_dir):
     """Merge src_dir into dst_dir without deleting dst_dir first.
@@ -284,16 +317,18 @@ def merge_dir_into(src_dir, dst_dir):
             except Exception as e:
                 print(f"      ⚠️  Copy error: {e}")
 
+
 def debug_directory(path):
     """Prints the directory structure for debugging."""
     print(f"📂 [DEBUG] Listing contents of: {path}")
     for root, dirs, files in os.walk(path):
-        level = root.replace(path, '').count(os.sep)
-        indent = ' ' * 4 * (level)
+        level = root.replace(path, "").count(os.sep)
+        indent = " " * 4 * (level)
         print(f"{indent}{os.path.basename(root)}/")
-        subindent = ' ' * 4 * (level + 1)
+        subindent = " " * 4 * (level + 1)
         for f in files:
             print(f"{subindent}{f}")
+
 
 def sanitize_config(config_path):
     """
@@ -303,31 +338,36 @@ def sanitize_config(config_path):
     try:
         debug_directory(os.path.dirname(config_path))
         print(f"📄 [DEBUG] Reading config from: {config_path}")
-        with open(config_path, 'r', encoding='utf-8') as f:
+        with open(config_path, "r", encoding="utf-8") as f:
             content = f.read()
             print(content)
             print("-" * 20)
             lines = content.splitlines(keepends=True)
-        
+
         new_lines = []
         exclude_written = False
         for line in lines:
             if "exclude_patterns:" in line:
                 # Force a safe, minimal exclusion list
                 # This ensures _build is ignored (no EISDIR) and nothing else is accidentally ignored
-                new_lines.append('exclude_patterns: ["_build", "**.ipynb_checkpoints", ".git", ".github"]\n')
+                new_lines.append(
+                    'exclude_patterns: ["_build", "**.ipynb_checkpoints", ".git", ".github"]\n'
+                )
                 exclude_written = True
                 continue
             new_lines.append(line)
-        
-        if not exclude_written:
-             new_lines.append('exclude_patterns: ["_build", "**.ipynb_checkpoints", ".git", ".github"]\n')
 
-        with open(config_path, 'w', encoding='utf-8') as f:
+        if not exclude_written:
+            new_lines.append(
+                'exclude_patterns: ["_build", "**.ipynb_checkpoints", ".git", ".github"]\n'
+            )
+
+        with open(config_path, "w", encoding="utf-8") as f:
             f.writelines(new_lines)
         print(f"🔧 Configuración saneada (excludes minimos seguros) en: {config_path}")
     except Exception as e:
         print(f"⚠️ Error saneando configuración: {e}")
+
 
 def create_redirect_index(default_lang="es"):
     """Creates a root index.html that redirects to the default language."""
@@ -343,15 +383,16 @@ def create_redirect_index(default_lang="es"):
     </body>
     </html>
     """
-    with open(os.path.join(FINAL_HTML_DIR, "index.html"), 'w', encoding='utf-8') as f:
+    with open(os.path.join(FINAL_HTML_DIR, "index.html"), "w", encoding="utf-8") as f:
         f.write(redirect_html)
     print(f"🔀 Redirección raíz creada apuntando a: /{default_lang}/")
+
 
 def main():
     print("📚 Iniciando proceso de construcción multi-idioma...")
     languages = get_languages()
     print(f"🔍 Idiomas detectados: {languages}")
-    
+
     # Pre-create root _static to avoid race conditions or missing dirs
     if not os.path.exists(FINAL_HTML_DIR):
         os.makedirs(FINAL_HTML_DIR)
@@ -360,10 +401,10 @@ def main():
         os.makedirs(final_static)
 
     generate_languages_json(languages)
-    
+
     for lang in languages:
         build_language(lang)
-    
+
     # 1. Merge our custom static files into the root _static
     custom_static = os.path.join(BOOK_DIR, "_static")
     if os.path.exists(custom_static):
@@ -385,22 +426,23 @@ def main():
             lang_json_dst = os.path.join(lang_static, "languages.json")
             shutil.copy2(lang_json_src, lang_json_dst)
             print(f"📋 Copied languages.json to {lang_static}")
-    
+
     if "default" not in languages and len(languages) > 0:
         default_lang = get_project_default_language()
         if default_lang not in languages:
             default_lang = languages[0]
         create_redirect_index(default_lang)
-        
+
     print("\n✅ ¡Construcción completa!")
     print(f"🌍 Web disponible en: {os.path.abspath(FINAL_HTML_DIR)}")
 
     # Ensure .nojekyll exists to prevent GitHub Pages from ignoring _static
     nojekyll_path = os.path.join(FINAL_HTML_DIR, ".nojekyll")
     if not os.path.exists(nojekyll_path):
-        with open(nojekyll_path, 'w') as f:
+        with open(nojekyll_path, "w") as f:
             pass
         print("✅ Archivo .nojekyll creado para GitHub Pages.")
+
 
 if __name__ == "__main__":
     main()
