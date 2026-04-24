@@ -3,53 +3,100 @@
 **Thebe** allows readers to run Python code directly in their browser, without installing anything. It works thanks to **Pyodide**, a version of Python compiled to WebAssembly.
 
 ```{warning}
-Thebe is an **HTML-only** feature. It is not available in PDF export. It also requires the `sphinx-thebe` extension configured in your `_config.yml`.
+Thebe is an **HTML-only** feature. It is not available in PDF export.
 ```
 
 ## How does it work?
 
-1. The reader clicks the **"Live Code"** button on the page.
+1. Click the **"Live Code"** button below.
 2. Pyodide loads in the browser (may take a few seconds the first time).
-3. Code cells become editable and executable.
+3. Code cells become editable and executable — try it!
 
-## Activation button
+---
 
-To show the "Live Code" button on a page, add the directive:
+## Try it: executable code
 
-````md
+Click the button to activate interactive mode. Then you can edit and run the cells.
+
 ```{thebe-button}
 ```
-````
 
-## Example: executable cell
-
-````md
+````{div} full-width
 ```{code-block} python
 :class: thebe
 
 import numpy as np
-import matplotlib.pyplot as plt
 
+# Create an array from 0 to 2π
 x = np.linspace(0, 2 * np.pi, 100)
-y = np.sin(x)
 
-plt.figure(figsize=(8, 4))
-plt.plot(x, y, label='sin(x)')
-plt.title('Sine wave')
-plt.xlabel('x')
-plt.ylabel('y')
-plt.grid(True)
+# Calculate sine and cosine
+y_sin = np.sin(x)
+y_cos = np.cos(x)
+
+print(f"Mean of sine: {np.mean(y_sin):.4f}")
+print(f"Mean of cosine: {np.mean(y_cos):.4f}")
+print(f"Max value of sine: {np.max(y_sin):.4f}")
+print("It works! Try changing np.sin to another function.")
+```
+````
+
+````{div} full-width
+```{code-block} python
+:class: thebe
+
+import matplotlib.pyplot as plt
+import numpy as np
+
+# Modifiable parameters
+frequency = 2    # Hz
+amplitude = 1.0  # Scale
+phase = 0        # Radians
+
+t = np.linspace(0, 2*np.pi, 200)
+signal = amplitude * np.sin(frequency * t + phase)
+
+plt.figure(figsize=(8, 3))
+plt.plot(t, signal, 'b-', linewidth=2, label=f'{amplitude}·sin({frequency}t + {phase})')
+plt.title('Interactive Sine Wave')
+plt.xlabel('Time (rad)')
+plt.ylabel('Amplitude')
+plt.grid(True, alpha=0.3)
 plt.legend()
 plt.tight_layout()
 plt.show()
 ```
 ````
 
-The reader can modify parameters (e.g., change `np.sin` to `np.cos`) and re-run the cell.
+---
 
-## Required configuration
+## How to add this to your pages
 
-To enable Thebe, your `_config.yml` must include:
+### 1. Activation button
+
+Add this directive where you want the "Live Code" button to appear:
+
+````md
+```{thebe-button}
+```
+````
+
+### 2. Executable cell
+
+Use `code-block` with the `thebe` class:
+
+````md
+```{code-block} python
+:class: thebe
+
+import numpy as np
+print("Hello from the browser!")
+```
+````
+
+### 3. `_config.yml` configuration
+
+Your `_config.yml` must include the `sphinx-thebe` extension:
 
 ```yaml
 sphinx:
@@ -61,7 +108,7 @@ sphinx:
       always_load: false
 ```
 
-This configuration uses **Thebe Lite** with Pyodide, which loads Python directly in the browser without needing Binder. This is ideal for books that don't need actual notebooks in the repository.
+This configuration uses **Thebe Lite** with Pyodide, which loads Python directly in the browser without needing Binder.
 
 ```{admonition} Simpler alternative
 :class: tip

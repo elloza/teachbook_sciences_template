@@ -110,10 +110,17 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Accessibility: OpenDyslexic Toggle
     (function() {
+        // Load OpenDyslexic font from CDN (lazy — only when needed, but preloaded for instant toggle)
+        const fontLink = document.createElement("link");
+        fontLink.rel = "stylesheet";
+        fontLink.href = "https://fonts.cdnfonts.com/css/opendyslexic";
+        fontLink.id = "opendyslexic-font-link";
+        document.head.appendChild(fontLink);
+
+        // Create toggle button
         const header = document.querySelector(".article-header-buttons");
         if (!header) return;
 
-        // Create button
         const btn = document.createElement("button");
         btn.className = "btn btn-sm teachbook-a11y-btn";
         btn.title = "Modo accesibilidad (OpenDyslexic) / Accessibility mode";
@@ -133,7 +140,7 @@ document.addEventListener("DOMContentLoaded", function () {
             btn.classList.toggle("active", isActive);
         });
 
-        // Insert before language switcher (at the beginning of header buttons)
+        // Insert at the beginning of header buttons (before language switcher)
         header.prepend(btn);
     })();
 });

@@ -233,9 +233,7 @@ html {
 /* ========================================
    OpenDyslexic Accessibility Mode
    ======================================== */
-
-/* Import OpenDyslexic font from CDN */
-@import url('https://fonts.cdnfonts.com/css/opendyslexic');
+/* Font is loaded via JS to avoid @import-after-rules (CSS spec violation) */
 
 /* When accessibility mode is active */
 html.opendyslexic-mode {

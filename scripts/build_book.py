@@ -157,6 +157,45 @@ def fix_pdf_paths(build_dir, pdf_filename):
                     f.write(new_content)
 
 
+def fix_html_asset_paths(html_file):
+    """Fix asset paths in HTML files moved from build root to language subdirectory.
+
+    Sphinx generates search.html/genindex.html at the build root where _static/
+    is a sibling directory. When we move these files into /es/ or /en/,
+    all _static/ references must be prefixed with ../ to point to the root _static/.
+
+    Also fixes _sources/ paths and data-content_root attribute.
+    """
+    with open(html_file, "r", encoding="utf-8") as f:
+        content = f.read()
+
+    original = content
+
+    # Fix data-content_root: "./" → "../" (points from /es/ to root)
+    content = content.replace('data-content_root="./"', 'data-content_root="../"')
+
+    # Fix all relative _static/ references: href="_static/..." → href="../_static/..."
+    # and src="_static/..." → src="../_static/..."
+    # Be careful not to double-fix: don't match already-correct ../_static/
+    import re
+
+    content = re.sub(r'(href|src)="(_static/)', r'\1="../\2', content)
+    content = re.sub(r'(href|src)="(\./_static/)', r'\1="../\2', content)
+
+    # Fix _sources/ paths similarly
+    content = re.sub(r'(href|src)="(_sources/)', r'\1="../\2', content)
+
+    # Fix _downloads/ paths
+    content = re.sub(r'(href|src)="(_downloads/)', r'\1="../\2', content)
+
+    if content != original:
+        with open(html_file, "w", encoding="utf-8") as f:
+            f.write(content)
+        print(f"   🔧 Fixed asset paths in {os.path.basename(html_file)}")
+    else:
+        print(f"   ℹ️ No path fixes needed in {os.path.basename(html_file)}")
+
+
 def build_language(lang):
     """Builds the book for a specific language using a standalone temporary directory."""
     print(f"\n🔨 Construyendo versión STANDALONE: {lang.upper()}...")
@@ -283,6 +322,12 @@ def build_language(lang):
                 dst = os.path.join(final_dest, search_file)
                 shutil.copy2(src, dst)
                 print(f"📋 Copied {search_file} to {final_dest}")
+
+                # CRITICAL: Fix asset paths in HTML files
+                # Sphinx generated these files at the build root where _static/ is
+                # a sibling. Now they're inside /es/ so _static/ is at ../_static/
+                if search_file.endswith(".html"):
+                    fix_html_asset_paths(dst)
 
         # CRITICAL FIX: Merge the generated _static folder (containing theme assets)
         # from the temp build to the final root _static folder.
