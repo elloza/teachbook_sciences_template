@@ -2,6 +2,8 @@ jupyter-book>=0.15.1,<2.0
 sphinx-jupyterbook-latex>=0.5.2
 sphinx-design
 sphinxcontrib-bibtex
+sphinx-thebe
+jupyterquiz
 matplotlib
 numpy
 pandas

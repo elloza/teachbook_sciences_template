@@ -51,6 +51,32 @@ parts:
       - file: es/03_ejemplos_transferibles/educacion_rubrica_secuencia
       - file: es/03_ejemplos_transferibles/medicina_datos_simulados
       - file: es/03_ejemplos_transferibles/ingenieria_quimica_balance
+  - caption: Contenidos Básicos
+    chapters:
+    - file: es/05_contenidos_basicos/intro
+    - file: es/05_contenidos_basicos/figuras
+    - file: es/05_contenidos_basicos/ecuaciones
+    - file: es/05_contenidos_basicos/citas_bibliografia
+    - file: es/05_contenidos_basicos/referencias_cruzadas
+    - file: es/05_contenidos_basicos/tablas
+    - file: es/05_contenidos_basicos/admonitions_dropdowns
+    - file: es/05_contenidos_basicos/tabs_cards
+    - file: es/05_contenidos_basicos/codigo
+    - file: es/05_contenidos_basicos/videos
+    - file: es/05_contenidos_basicos/mermaid
+    - file: es/05_contenidos_basicos/compatibilidad_html_pdf
+  - caption: Interactividad y Evaluación
+    chapters:
+    - file: es/06_interactividad/intro
+      sections:
+      - file: es/06_interactividad/thebe_pyodide
+      - file: es/06_interactividad/notebooks_interactivos
+      - file: es/06_interactividad/widgets
+      - file: es/06_interactividad/quizzes_jupyterquiz
+      - file: es/06_interactividad/preguntas_parametricas
+      - file: es/06_interactividad/ejercicios_con_solucion
+      - file: es/06_interactividad/html_interactivo
+      - file: es/06_interactividad/h5p_opcional
   - caption: Información
     chapters:
     - file: es/90_acerca_de

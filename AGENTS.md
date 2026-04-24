@@ -101,6 +101,20 @@ Cuando añadas un capítulo o sección, DEBES seguir estos pasos EN ORDEN:
 - Ubicación: `book/_static/` (compartido) o junto al `.md`.
 - Funciona en HTML ✅ y PDF ✅.
 
+### Figuras con etiqueta y referencia
+```md
+```{figure} _static/mi_imagen.png
+---
+width: 70%
+name: fig-ejemplo
+align: center
+---
+Descripción de la figura.
+```
+
+Como se ve en {numref}`fig-ejemplo`, la figura puede citarse.
+```
+
 ### Videos de YouTube (compatible HTML + PDF)
 Usa SIEMPRE este patrón para que funcione en ambos formatos:
 
@@ -128,18 +142,99 @@ Usa SIEMPRE este patrón para que funcione en ambos formatos:
 ```md
 Ecuación inline: $E = mc^2$
 
-Ecuación display:
+Ecuación display numerada:
 $$
 \int_0^\infty e^{-x^2} dx = \frac{\sqrt{\pi}}{2}
-$$
+$$ (eq-gaussiana)
+
+Referencia: la ecuación {eq}`eq-gaussiana` calcula...
 ```
 - Funciona en HTML ✅ y PDF ✅ (requiere `dollarmath` en `myst_enable_extensions`, ya configurado).
 
 ### Citas Bibliográficas (BibTeX)
 - Archivo de referencias: `book/_static/references.bib`.
-- Citar en el texto: `{cite}`\`clave_cita\``.
+- Citar en el texto: `{cite:t}`\`clave_cita\` (textual) o `{cite:p}`\`clave_cita\` (parentética).
 - Añadir bibliografía al final: ````{bibliography}` / ````.
-- Requiere `sphinxcontrib-bibtex` en dependencias.
+
+### Admonitions (cajas de información)
+```md
+```{admonition} Título
+:class: tip
+
+Contenido de la caja.
+```
+```
+Clases disponibles: `tip`, `warning`, `note`, `important`, `caution`, `dropdown` (colapsable), `error`, `seealso`.
+
+### Dropdowns (contenido colapsable)
+```md
+```{admonition} Solución
+:class: dropdown
+
+Aquí va la solución que el estudiante puede desplegar.
+```
+```
+
+### Tabs (pestañas, requiere sphinx-design)
+````md
+```{tabbed} Python
+```python
+print("Hola")
+```
+```
+
+```{tabbed} R
+```r
+print("Hola")
+```
+```
+````
+
+### Referencias cruzadas
+- Secciones: `(mi-seccion)=` antes del título, luego `{ref}`\`mi-seccion\`
+- Figuras: `{numref}`\`fig-ejemplo\`
+- Ecuaciones: `{eq}`\`eq-gaussiana\`
+- Tablas: `{numref}`\`tabla-ejemplo\`
+
+### Mermaid (diagramas, SOLO HTML)
+````md
+```{mermaid}
+flowchart LR
+    A[Inicio] --> B[Proceso]
+    B --> C[Fin]
+```
+````
+
+- **NO funciona en PDF**. Añadir siempre texto alternativo describiendo el diagrama.
+- Tipos: `flowchart`, `sequenceDiagram`, `classDiagram`, `erDiagram`, `stateDiagram`.
+
+### HTML interactivo autocontenido (SOLO HTML)
+````md
+```{raw} html
+<details>
+<summary>Ver pista</summary>
+<p>Texto oculto que se despliega.</p>
+</details>
+```
+
+```{raw} latex
+\textbf{Pista:} Texto alternativo para PDF.
+```
+````
+
+### Tabla de compatibilidad HTML/PDF
+
+| Elemento | HTML | PDF | Regla |
+|---|---|---|---|
+| Texto, listas, imágenes | ✅ | ✅ | Usar libremente |
+| Ecuaciones LaTeX | ✅ | ✅ | Usar libremente |
+| Admonitions | ✅ | ✅ | Usar libremente |
+| Dropdowns | ✅ | ✅ expandido | Usar libremente |
+| Mermaid | ✅ | ❌ | Añadir descripción textual |
+| iframe/YouTube | ✅ | ❌ | Añadir `{raw} latex` con URL |
+| Thebe live code | ✅ | ❌ | Código visible como texto |
+| Tabs | ✅ | ❌ | Añadir alternativa sin tabs |
+| HTML personalizado | ✅ | ❌ | Añadir `{raw} latex` fallback |
 
 ## Comandos Disponibles
 
@@ -191,7 +286,9 @@ Las skills están en `.github/skills/` (fuente de verdad) y se sincronizan a `.c
 | `teachbook-generate-teaching-notebook` | Crear notebooks docentes con código ejecutable |
 | `teachbook-generate-interactive-html` | Añadir HTML interactivo sin frameworks JS |
 | `teachbook-generate-quiz` | Crear cuestionarios con respuestas ocultas |
+| `teachbook-generate-thebe-pyodide-page` | Crear páginas con código ejecutable en navegador |
 | `teachbook-review-teaching-quality` | Revisar calidad docente del contenido |
+| `teachbook-review-html-pdf-compatibility` | Verificar que contenido funciona en HTML y PDF |
 
 ## Tono de Comunicación
 

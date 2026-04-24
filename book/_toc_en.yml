@@ -51,6 +51,32 @@ parts:
       - file: en/03_transferable_examples/education_rubric_sequence
       - file: en/03_transferable_examples/medicine_simulated_data
       - file: en/03_transferable_examples/chemical_engineering_balance
+  - caption: Basic Content
+    chapters:
+    - file: en/05_basic_content/intro
+    - file: en/05_basic_content/figures
+    - file: en/05_basic_content/equations
+    - file: en/05_basic_content/citations_bibliography
+    - file: en/05_basic_content/cross_references
+    - file: en/05_basic_content/tables
+    - file: en/05_basic_content/admonitions_dropdowns
+    - file: en/05_basic_content/tabs_cards
+    - file: en/05_basic_content/code
+    - file: en/05_basic_content/videos
+    - file: en/05_basic_content/mermaid
+    - file: en/05_basic_content/html_pdf_compatibility
+  - caption: Interactivity and Assessment
+    chapters:
+    - file: en/06_interactivity/intro
+      sections:
+      - file: en/06_interactivity/thebe_pyodide
+      - file: en/06_interactivity/interactive_notebooks
+      - file: en/06_interactivity/widgets
+      - file: en/06_interactivity/jupyterquiz_quizzes
+      - file: en/06_interactivity/parametric_questions
+      - file: en/06_interactivity/exercises_with_solution
+      - file: en/06_interactivity/interactive_html
+      - file: en/06_interactivity/h5p_optional
   - caption: Information
     chapters:
     - file: en/90_about
