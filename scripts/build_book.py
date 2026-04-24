@@ -272,6 +272,18 @@ def build_language(lang):
         shutil.copytree(built_html_path_nested, final_dest)
         print(f"✅ Versión {lang} movida correctamente.")
 
+        # CRITICAL FIX: Copy search files from temp build root to language dir
+        # Sphinx generates search.html, genindex.html, and searchindex.js at the HTML root,
+        # but pages reference them with relative paths like "../search.html"
+        temp_html_root = os.path.join(temp_build_root, "_build", "html")
+        search_files = ["search.html", "genindex.html", "searchindex.js"]
+        for search_file in search_files:
+            src = os.path.join(temp_html_root, search_file)
+            if os.path.isfile(src):
+                dst = os.path.join(final_dest, search_file)
+                shutil.copy2(src, dst)
+                print(f"📋 Copied {search_file} to {final_dest}")
+
         # CRITICAL FIX: Merge the generated _static folder (containing theme assets)
         # from the temp build to the final root _static folder.
         temp_static_dir = os.path.join(temp_build_root, "_build", "html", "_static")
@@ -444,6 +456,23 @@ def main():
         if default_lang not in languages:
             default_lang = languages[0]
         create_redirect_index(default_lang)
+
+        # Create root search.html that redirects to default language search
+        search_redirect = f"""<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="refresh" content="0; url={default_lang}/search.html" />
+    <script>window.location.href = "{default_lang}/search.html";</script>
+</head>
+<body>
+    <p>Redirecting to <a href="{default_lang}/search.html">search</a>...</p>
+</body>
+</html>"""
+        with open(
+            os.path.join(FINAL_HTML_DIR, "search.html"), "w", encoding="utf-8"
+        ) as f:
+            f.write(search_redirect)
+        print(f"🔍 Root search redirect created.")
 
     print("\n✅ ¡Construcción completa!")
     print(f"🌍 Web disponible en: {os.path.abspath(FINAL_HTML_DIR)}")

@@ -24,8 +24,8 @@ Para mostrar el botón "Live Code" en una página, añade la directiva:
 ## Ejemplo: celda ejecutable
 
 ````md
-```{code-cell} python
-:tags: [thebe]
+```{code-block} python
+:class: thebe
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -53,13 +53,15 @@ Para activar Thebe, tu `_config.yml` debe incluir:
 
 ```yaml
 sphinx:
-  extensions:
+  extra_extensions:
     - sphinx_thebe
   config:
     thebe_config:
-      repository_url: "https://github.com/tu-usuario/tu-repo"
-      repository_branch: "main"
+      use_thebe_lite: true
+      always_load: false
 ```
+
+Esta configuración usa **Thebe Lite** con Pyodide, que carga Python directamente en el navegador sin necesidad de Binder. Esto es ideal para libros que no necesitan notebooks reales en el repositorio.
 
 ```{admonition} Alternativa más sencilla
 :class: tip

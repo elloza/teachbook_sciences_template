@@ -229,3 +229,65 @@ html {
     box-shadow: none !important;
     outline: none !important;
 }
+
+/* ========================================
+   OpenDyslexic Accessibility Mode
+   ======================================== */
+
+/* Import OpenDyslexic font from CDN */
+@import url('https://fonts.cdnfonts.com/css/opendyslexic');
+
+/* When accessibility mode is active */
+html.opendyslexic-mode {
+    --dyslexic-font: 'OpenDyslexic', sans-serif;
+}
+
+html.opendyslexic-mode body,
+html.opendyslexic-mode p,
+html.opendyslexic-mode li,
+html.opendyslexic-mode td,
+html.opendyslexic-mode th,
+html.opendyslexic-mode span,
+html.opendyslexic-mode div,
+html.opendyslexic-mode a,
+html.opendyslexic-mode h1,
+html.opendyslexic-mode h2,
+html.opendyslexic-mode h3,
+html.opendyslexic-mode h4,
+html.opendyslexic-mode h5,
+html.opendyslexic-mode h6,
+html.opendyslexic-mode label,
+html.opendyslexic-mode input,
+html.opendyslexic-mode textarea,
+html.opendyslexic-mode button,
+html.opendyslexic-mode pre,
+html.opendyslexic-mode code {
+    font-family: var(--dyslexic-font) !important;
+    letter-spacing: 0.05em;
+    word-spacing: 0.1em;
+    line-height: 1.8 !important;
+}
+
+/* Accessibility toggle button */
+.teachbook-a11y-btn {
+    display: inline-flex !important;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0 0.6rem !important;
+    height: 32px !important;
+    border: none !important;
+    background-color: transparent !important;
+    color: var(--pst-color-text-main) !important;
+    font-size: 0.9em;
+    transition: background-color 0.2s ease;
+    cursor: pointer;
+}
+
+.teachbook-a11y-btn:hover {
+    background-color: var(--pst-color-background-soft) !important;
+    border-radius: 4px;
+}
+
+.teachbook-a11y-btn.active {
+    color: var(--pst-color-link) !important;
+}

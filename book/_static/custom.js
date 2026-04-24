@@ -107,6 +107,35 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Stop polling after 5 seconds to save resources
     setTimeout(() => clearInterval(intervalId), 5000);
+
+    // Accessibility: OpenDyslexic Toggle
+    (function() {
+        const header = document.querySelector(".article-header-buttons");
+        if (!header) return;
+
+        // Create button
+        const btn = document.createElement("button");
+        btn.className = "btn btn-sm teachbook-a11y-btn";
+        btn.title = "Modo accesibilidad (OpenDyslexic) / Accessibility mode";
+        btn.innerHTML = '<i class="fa-solid fa-universal-access"></i>';
+        btn.setAttribute("aria-label", "Toggle accessibility font");
+
+        // Check saved state
+        if (localStorage.getItem("teachbook-opendyslexic") === "true") {
+            document.documentElement.classList.add("opendyslexic-mode");
+            btn.classList.add("active");
+        }
+
+        btn.addEventListener("click", function() {
+            document.documentElement.classList.toggle("opendyslexic-mode");
+            const isActive = document.documentElement.classList.contains("opendyslexic-mode");
+            localStorage.setItem("teachbook-opendyslexic", isActive);
+            btn.classList.toggle("active", isActive);
+        });
+
+        // Insert before language switcher (at the beginning of header buttons)
+        header.prepend(btn);
+    })();
 });
 
 function injectLanguageSwitcher(languages, rootPrefix) {
