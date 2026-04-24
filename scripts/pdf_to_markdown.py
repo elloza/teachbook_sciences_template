@@ -52,7 +52,7 @@ def ensure_dependency():
     try:
         if use_uv:
             subprocess.check_call(
-                ["uv", "pip", "install", "pymupdf4llm"],
+                ["uv", "pip", "install", "--python", python_cmd, "pymupdf4llm"],
                 cwd=PROJECT_ROOT,
             )
         else:

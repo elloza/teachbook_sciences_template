@@ -191,6 +191,11 @@ def get_venv_pip():
     return os.path.join(VENV_DIR, "bin", "pip")
 
 
+def get_uv_python_args():
+    """Force uv pip installs into the project virtualenv."""
+    return ["--python", get_venv_python()]
+
+
 def create_venv(use_uv=False):
     if os.path.exists(VENV_DIR):
         print(f"✅ Entorno virtual '{VENV_DIR}' ya existe.")
@@ -259,7 +264,9 @@ def install_requirements(dev_mode=False, use_uv=False):
         print(f"⬇️  Instalando dependencias desde '{REQUIREMENTS_FILE}'...")
         try:
             if use_uv:
-                subprocess.check_call(["uv", "pip", "install", "-r", REQUIREMENTS_FILE])
+                subprocess.check_call(
+                    ["uv", "pip", "install", *get_uv_python_args(), "-r", REQUIREMENTS_FILE]
+                )
             else:
                 subprocess.check_call([pip_cmd, "install", "-r", REQUIREMENTS_FILE])
             print("✅ Dependencias principales instaladas.")
@@ -277,7 +284,14 @@ def install_requirements(dev_mode=False, use_uv=False):
             try:
                 if use_uv:
                     subprocess.check_call(
-                        ["uv", "pip", "install", "-r", DEV_REQUIREMENTS_FILE]
+                        [
+                            "uv",
+                            "pip",
+                            "install",
+                            *get_uv_python_args(),
+                            "-r",
+                            DEV_REQUIREMENTS_FILE,
+                        ]
                     )
                 else:
                     subprocess.check_call(
@@ -313,7 +327,18 @@ def verify_installation(dev_mode=False):
     try:
         result = subprocess.check_output([python_cmd, "-m", "pip", "freeze"], text=True)
 
-        required_packages = ["jupyter-book", "sphinx-autobuild", "watchdog"]
+        required_packages = [
+            "jupyter-book",
+            "sphinx-autobuild",
+            "watchdog",
+            "sphinx-thebe",
+            "sphinx-kroki",
+            "jupyterquiz",
+            "schemdraw",
+            "pymupdf4llm",
+            "PyMuPDF",
+            "manim",
+        ]
         if dev_mode:
             required_packages.append("playwright")
 
@@ -326,6 +351,30 @@ def verify_installation(dev_mode=False):
 
     except subprocess.CalledProcessError:
         print("❌ Error en la verificación.")
+
+
+def verify_runtime_tools():
+    print("\n🧰 Verificando herramientas externas:")
+
+    tools = [
+        (
+            "ffmpeg",
+            "vídeos Manim",
+            "Instala FFmpeg si quieres usar la skill de vídeos con Manim.",
+        ),
+        (
+            "tectonic",
+            "PDF y CircuitikZ",
+            "Ejecuta: python scripts/setup_latex.py",
+        ),
+    ]
+
+    for tool, purpose, hint in tools:
+        if shutil.which(tool):
+            print(f"  ✅ {tool} disponible ({purpose})")
+        else:
+            print(f"  ⚠️  {tool} no encontrado ({purpose})")
+            print(f"     {hint}")
 
 
 def sync_skills():
@@ -449,6 +498,7 @@ def main():
     create_venv(use_uv=use_uv)
     install_requirements(dev_mode=args.dev, use_uv=use_uv)
     verify_installation(dev_mode=args.dev)
+    verify_runtime_tools()
 
     sync_skills()
     sync_instructions()

@@ -162,9 +162,15 @@ Si quieres generar un vídeo matemático o físico por código, usa **Manim Comm
 Flujo recomendado:
 
 1. Crear una escena en Python con `from manim import *`
-2. Renderizarla con `manim`
-3. Copiar el `.mp4` a `book/_static/videos/`
-4. Insertarlo con el patrón de vídeo local HTML5 anterior
+2. Guardar el script en `manim_videos/YYYY-MM-DD_nombre/`
+3. Renderizarla con `manim`
+4. Copiar el `.mp4` a `book/_static/videos/`
+5. Insertarlo con el patrón de vídeo local HTML5 anterior
+
+Convención recomendada para mantener el repo ordenado:
+
+- `manim_videos/2026-04-25_onda_senoidal/scene.py`
+- una carpeta por animación o conjunto pequeño de animaciones relacionadas
 
 **NO usar ManimGL** en este proyecto. Solo **Manim Community**.
 

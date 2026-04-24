@@ -83,6 +83,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // Inject PDF Button
         injectPDFButton(languages, rootPrefix);
+
+        // Search page fix: Sphinx search sometimes generates duplicated language prefixes
+        // like /es/es/page.html or sidebar links like es/intro.html inside /es/search.html.
+        // We normalize those links client-side to keep search usable even if Sphinx emits
+        // inconsistent paths in standalone multilingual builds.
+        fixSearchPageLinks(rootPrefix, languages);
     });
 
     // 3. Robust Sidebar Toggle (Manual Handler with Polling)
@@ -182,6 +188,59 @@ document.addEventListener("DOMContentLoaded", function () {
         header.prepend(btn);
     })();
 });
+
+function fixSearchPageLinks(rootPrefix, languages) {
+    if (!window.location.pathname.endsWith('/search.html')) return;
+
+    const langCodes = languages.map(l => l.code);
+
+    function normalizeHref(href) {
+        if (!href || href.startsWith('http://') || href.startsWith('https://') || href.startsWith('#')) {
+            return href;
+        }
+
+        let fixed = href;
+
+        // Fix duplicated lang prefix: es/es/foo.html -> es/foo.html
+        langCodes.forEach(code => {
+            const doubled = `${code}/${code}/`;
+            if (fixed.includes(doubled)) {
+                fixed = fixed.replace(doubled, `${code}/`);
+            }
+        });
+
+        // On /es/search.html, sidebar links may incorrectly be rendered as es/foo.html
+        // when they should be just foo.html relative to the language root.
+        const currentPath = window.location.pathname;
+        const currentLang = langCodes.find(code => currentPath.includes(`/${code}/`));
+        if (currentLang && fixed.startsWith(`${currentLang}/`)) {
+            fixed = fixed.slice(currentLang.length + 1);
+        }
+
+        return fixed;
+    }
+
+    function patchLinks(container) {
+        const links = container.querySelectorAll('a[href]');
+        links.forEach(link => {
+            const href = link.getAttribute('href');
+            const fixed = normalizeHref(href);
+            if (fixed !== href) {
+                link.setAttribute('href', fixed);
+            }
+        });
+    }
+
+    // Patch current DOM immediately
+    patchLinks(document);
+
+    // Patch search results as they are injected dynamically
+    const target = document.getElementById('search-results') || document.body;
+    const observer = new MutationObserver(() => patchLinks(document));
+    observer.observe(target, { childList: true, subtree: true });
+
+    console.log('TeachBook: search link fixer enabled');
+}
 
 function injectLanguageSwitcher(languages, rootPrefix) {
     const path = window.location.pathname;
