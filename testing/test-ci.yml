@@ -142,7 +142,9 @@ jobs:
       - name: Test pdf_to_markdown
         shell: pwsh
         run: |
-          .venv\Scripts\python.exe -c "import fitz; doc=fitz.open(); page=doc.new_page(); page.insert_text((72,72),'Test'); doc.save('C:\Temp\test.pdf'); doc.close()"
-          .venv\Scripts\python.exe scripts/pdf_to_markdown.py C:\Temp\test.pdf --output C:\Temp\test_md
-          if (Test-Path "C:\Temp\test_md\test.md") { Write-Output "✅ PDF→MD OK" }
+          $testPdf = Join-Path $env:RUNNER_TEMP "test.pdf"
+          $testOut = Join-Path $env:RUNNER_TEMP "test_md"
+          .venv\Scripts\python.exe -c "import fitz; doc=fitz.open(); page=doc.new_page(); page.insert_text((72,72),'Test'); doc.save(r'$testPdf'); doc.close()"
+          .venv\Scripts\python.exe scripts/pdf_to_markdown.py $testPdf --output $testOut
+          if (Test-Path "$testOut\test.md") { Write-Output "✅ PDF→MD OK" }
           else { Write-Error "❌ PDF→MD failed"; exit 1 }
