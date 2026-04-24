@@ -1,16 +1,15 @@
 (mermaid)=
-# Mermaid Diagrams
+# Diagrams with Kroki (Mermaid)
 
-**Mermaid** lets you create diagrams directly in Markdown without external tools. Diagrams render automatically in HTML.
-
-```{warning}
-Mermaid **only works in HTML**. It does not render in PDF. You must always add a text description as an alternative.
-```
+**Kroki** converts text into SVG diagrams during the book build. If you use `:type: mermaid`, you can write Mermaid syntax and get a diagram that works in both **HTML** and **PDF**.
 
 ## Flowchart (`flowchart`)
 
 ````md
-```{mermaid}
+```{kroki}
+:type: mermaid
+:align: center
+
 flowchart LR
     A[Sample] --> B[Preparation]
     B --> C[Measurement]
@@ -19,9 +18,12 @@ flowchart LR
 ```
 ````
 
-Result (HTML):
+Result:
 
-```{mermaid}
+```{kroki}
+:type: mermaid
+:align: center
+
 flowchart LR
     A[Sample] --> B[Preparation]
     B --> C[Measurement]
@@ -34,7 +36,10 @@ Description: The flow goes left to right: Sample → Preparation → Measurement
 ## Sequence diagram (`sequenceDiagram`)
 
 ````md
-```{mermaid}
+```{kroki}
+:type: mermaid
+:align: center
+
 sequenceDiagram
     participant S as Student
     participant T as Teacher
@@ -46,9 +51,12 @@ sequenceDiagram
 ```
 ````
 
-Result (HTML):
+Result:
 
-```{mermaid}
+```{kroki}
+:type: mermaid
+:align: center
+
 sequenceDiagram
     participant S as Student
     participant T as Teacher
@@ -64,7 +72,10 @@ Description: The student submits a report to the teacher, receives corrections, 
 ## Class diagram (`classDiagram`)
 
 ````md
-```{mermaid}
+```{kroki}
+:type: mermaid
+:align: center
+
 classDiagram
     class Experiment {
         +string name
@@ -81,9 +92,12 @@ classDiagram
 ```
 ````
 
-Result (HTML):
+Result:
 
-```{mermaid}
+```{kroki}
+:type: mermaid
+:align: center
+
 classDiagram
     class Experiment {
         +string name
@@ -102,7 +116,10 @@ classDiagram
 ## Entity-relationship diagram (`erDiagram`)
 
 ````md
-```{mermaid}
+```{kroki}
+:type: mermaid
+:align: center
+
 erDiagram
     STUDENT ||--o{ ENROLLMENT : makes
     ENROLLMENT }o--|| COURSE : belongs_to
@@ -110,9 +127,12 @@ erDiagram
 ```
 ````
 
-Result (HTML):
+Result:
 
-```{mermaid}
+```{kroki}
+:type: mermaid
+:align: center
+
 erDiagram
     STUDENT ||--o{ ENROLLMENT : makes
     ENROLLMENT }o--|| COURSE : belongs_to
@@ -122,7 +142,10 @@ erDiagram
 ## State diagram (`stateDiagram-v2`)
 
 ````md
-```{mermaid}
+```{kroki}
+:type: mermaid
+:align: center
+
 stateDiagram-v2
     [*] --> Pending
     Pending --> InProgress : start
@@ -133,9 +156,12 @@ stateDiagram-v2
 ```
 ````
 
-Result (HTML):
+Result:
 
-```{mermaid}
+```{kroki}
+:type: mermaid
+:align: center
+
 stateDiagram-v2
     [*] --> Pending
     Pending --> InProgress : start
@@ -155,5 +181,5 @@ stateDiagram-v2
 | `flowchart BT` | Bottom to top |
 
 ```{tip}
-If your diagram is key to understanding the content, consider using an externally generated image (PNG/SVG) with the `{figure}` directive instead of Mermaid. That way it will also work in PDF.
+Always use `{kroki}` with `:type: mermaid` instead of `{mermaid}`. This makes the diagram work in both HTML and PDF without manual fallbacks.
 ```

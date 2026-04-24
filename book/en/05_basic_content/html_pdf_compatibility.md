@@ -16,7 +16,7 @@ Your TeachBook is published in two formats: **HTML** (interactive web) and **PDF
 | Syntax-highlighted code | ✅ | ✅ | Use freely |
 | BibTeX citations | ✅ | ✅ | Use freely |
 | Cross-references | ✅ | ✅ | Use freely |
-| Mermaid (diagrams) | ✅ | ❌ | Add text description |
+| Kroki diagrams (Mermaid, PlantUML, etc.) | ✅ | ✅ | Use `{kroki}` with `:type: mermaid` |
 | Videos (iframe/YouTube) | ✅ | ❌ | Use `{raw} latex` with URL |
 | Tabs (`{tabbed}`, `{tab-set}`) | ✅ | ❌ | In PDF: sequential content |
 | Interactive HTML (`<details>`) | ✅ | ❌ | Use `{raw} latex` alternative |
@@ -53,23 +53,25 @@ Alternative text for the PDF.
 ```
 ````
 
-## Example: Mermaid with fallback
+## Example: diagram with Kroki
 
 ````md
-```{mermaid}
+```{kroki}
+:type: mermaid
+:align: center
+
 flowchart LR
     A --> B --> C
 ```
-
-The diagram shows a three-step flow: A → B → C.
 ````
 
 ## Practical rules
 
 1. **If it is text, image, equation, or table**: do not worry, it works in both.
-2. **If it is interactive (video, Mermaid, HTML)**: ALWAYS add a text alternative.
-3. **If it is a dropdown**: in PDF it appears expanded (no problem).
-4. **If it uses tabs**: in PDF everything appears sequentially (verify it still makes sense).
+2. **If it is interactive (video, custom HTML)**: ALWAYS add a text alternative.
+3. **If it is a diagram**: use Kroki. It works in both HTML and PDF.
+4. **If it is a dropdown**: in PDF it appears expanded (no problem).
+5. **If it uses tabs**: in PDF everything appears sequentially (verify it still makes sense).
 
 ```{tip}
 Before publishing, always build both formats (`build_book.py` for HTML and `export_pdf.py` for PDF) and verify the content is coherent in both.

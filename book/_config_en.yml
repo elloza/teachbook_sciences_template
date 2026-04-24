@@ -22,7 +22,7 @@ sphinx:
   extra_extensions:
     - sphinx_thebe
     - sphinxcontrib.bibtex
-    - sphinxcontrib.mermaid
+    - sphinx_kroki
   config:
     html_show_copyright: false
     html_js_files:

@@ -1,16 +1,15 @@
 (mermaid)=
-# Diagramas Mermaid
+# Diagramas con Kroki (Mermaid)
 
-**Mermaid** permite crear diagramas directamente en Markdown sin herramientas externas. Los diagramas se renderizan automáticamente en HTML.
-
-```{warning}
-Mermaid **solo funciona en HTML**. En PDF no se renderiza. Siempre debes añadir una descripción textual como alternativa.
-```
+**Kroki** permite convertir texto en diagramas SVG durante la compilación del libro. Si usas `:type: mermaid`, puedes escribir sintaxis Mermaid y obtener un diagrama que funciona tanto en **HTML** como en **PDF**.
 
 ## Diagrama de flujo (`flowchart`)
 
 ````md
-```{mermaid}
+```{kroki}
+:type: mermaid
+:align: center
+
 flowchart LR
     A[Muestra] --> B[Preparación]
     B --> C[Medición]
@@ -19,9 +18,12 @@ flowchart LR
 ```
 ````
 
-Resultado (HTML):
+Resultado:
 
-```{mermaid}
+```{kroki}
+:type: mermaid
+:align: center
+
 flowchart LR
     A[Muestra] --> B[Preparación]
     B --> C[Medición]
@@ -34,7 +36,10 @@ Descripción: El flujo va de izquierda a derecha: Muestra → Preparación → M
 ## Diagrama de secuencia (`sequenceDiagram`)
 
 ````md
-```{mermaid}
+```{kroki}
+:type: mermaid
+:align: center
+
 sequenceDiagram
     participant E as Estudiante
     participant P as Profesor
@@ -46,9 +51,12 @@ sequenceDiagram
 ```
 ````
 
-Resultado (HTML):
+Resultado:
 
-```{mermaid}
+```{kroki}
+:type: mermaid
+:align: center
+
 sequenceDiagram
     participant E as Estudiante
     participant P as Profesor
@@ -64,7 +72,10 @@ Descripción: El estudiante entrega un informe al profesor, recibe correcciones,
 ## Diagrama de clases (`classDiagram`)
 
 ````md
-```{mermaid}
+```{kroki}
+:type: mermaid
+:align: center
+
 classDiagram
     class Experimento {
         +string nombre
@@ -81,9 +92,12 @@ classDiagram
 ```
 ````
 
-Resultado (HTML):
+Resultado:
 
-```{mermaid}
+```{kroki}
+:type: mermaid
+:align: center
+
 classDiagram
     class Experimento {
         +string nombre
@@ -102,7 +116,10 @@ classDiagram
 ## Diagrama entidad-relación (`erDiagram`)
 
 ````md
-```{mermaid}
+```{kroki}
+:type: mermaid
+:align: center
+
 erDiagram
     ESTUDIANTE ||--o{ INSCRIPCION : realiza
     INSCRIPCION }o--|| ASIGNATURA : corresponde
@@ -110,9 +127,12 @@ erDiagram
 ```
 ````
 
-Resultado (HTML):
+Resultado:
 
-```{mermaid}
+```{kroki}
+:type: mermaid
+:align: center
+
 erDiagram
     ESTUDIANTE ||--o{ INSCRIPCION : realiza
     INSCRIPCION }o--|| ASIGNATURA : corresponde
@@ -122,7 +142,10 @@ erDiagram
 ## Diagrama de estados (`stateDiagram-v2`)
 
 ````md
-```{mermaid}
+```{kroki}
+:type: mermaid
+:align: center
+
 stateDiagram-v2
     [*] --> Pendiente
     Pendiente --> EnProgreso : iniciar
@@ -133,9 +156,12 @@ stateDiagram-v2
 ```
 ````
 
-Resultado (HTML):
+Resultado:
 
-```{mermaid}
+```{kroki}
+:type: mermaid
+:align: center
+
 stateDiagram-v2
     [*] --> Pendiente
     Pendiente --> EnProgreso : iniciar
@@ -155,5 +181,5 @@ stateDiagram-v2
 | `flowchart BT` | Abajo a arriba |
 
 ```{tip}
-Si tu diagrama es clave para entender el contenido, considera usar una imagen generada externamente (PNG/SVG) con la directiva `{figure}` en lugar de Mermaid. Así funcionará también en PDF.
+Usa siempre `{kroki}` con `:type: mermaid` en lugar de `{mermaid}`. Así el diagrama funcionará en HTML y PDF sin fallbacks manuales.
 ```

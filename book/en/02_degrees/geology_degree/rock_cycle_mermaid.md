@@ -1,14 +1,17 @@
-# The Rock Cycle with Mermaid
+# The Rock Cycle with Kroki (Mermaid)
 
 The rock cycle describes the transformations between the three main rock types.
-With Mermaid, we can represent this cycle as a flowchart.
+With Kroki and `:type: mermaid`, we can represent this cycle as a flowchart that works in both HTML and PDF.
 
 ## The cycle
 
 **Code:**
 
 ````md
-```{mermaid}
+```{kroki}
+:type: mermaid
+:align: center
+
 flowchart LR
     Magma["Magma"]
     Igneous["Igneous Rock"]
@@ -25,9 +28,12 @@ flowchart LR
 ```
 ````
 
-**Result (HTML only):**
+**Result:**
 
-```{mermaid}
+```{kroki}
+:type: mermaid
+:align: center
+
 flowchart LR
     Magma["Magma"]
     Igneous["Igneous Rock"]
@@ -41,12 +47,6 @@ flowchart LR
     Igneous -->|"Heat and pressure"| Metamorphic
     Metamorphic -->|"Weathering and erosion"| Sedimentary
     Sedimentary -->|"Melting"| Magma
-```
-
-```{raw} latex
-\begin{center}
-\textbf{Flowchart:} The rock cycle showing transformations between Magma, Igneous Rock, Sedimentary Rock, and Metamorphic Rock through processes like cooling/solidification, weathering/erosion, heat/pressure, and melting. Any rock type can transform into any other.
-\end{center}
 ```
 
 ## Transition explanation

@@ -18,6 +18,7 @@ parts:
       sections:
       - file: es/02_grados/grado_fisica/ejemplo_fisica
       - file: es/02_grados/grado_fisica/circuitos_schemdraw
+      - file: es/02_grados/grado_fisica/diagramas_kroki
       - file: es/02_grados/grado_fisica/ley_ohm_ajuste
       - file: es/02_grados/grado_fisica/oscilador_armonico
     - file: es/02_grados/grado_matematicas/intro
@@ -35,6 +36,7 @@ parts:
       sections:
       - file: es/02_grados/grado_informatica/diagrama_er_mermaid
       - file: es/02_grados/grado_informatica/uml_clases_mermaid
+      - file: es/02_grados/grado_informatica/diagramas_kroki
       - file: es/02_grados/grado_informatica/complejidad_algoritmica
     - file: es/02_grados/grado_geologia/intro
       sections:

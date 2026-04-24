@@ -1,14 +1,17 @@
-# Entity-Relationship Diagram with Mermaid
+# Entity-Relationship Diagram with Kroki (Mermaid)
 
 E-R diagrams are fundamental in database design.
-With the MyST `{mermaid}` directive, you can include them directly in your book.
+With Kroki and `:type: mermaid`, you can include them directly in your book and make them work in both HTML and PDF.
 
 ## Example: University database
 
 **Code:**
 
 ````md
-```{mermaid}
+```{kroki}
+:type: mermaid
+:align: center
+
 erDiagram
     STUDENT {
         int id PK
@@ -37,9 +40,12 @@ erDiagram
 ```
 ````
 
-**Result (HTML only):**
+**Result:**
 
-```{mermaid}
+```{kroki}
+:type: mermaid
+:align: center
+
 erDiagram
     STUDENT {
         int id PK
@@ -65,12 +71,6 @@ erDiagram
     STUDENT ||--o{ ENROLLMENT : "enrolls in"
     COURSE ||--o{ ENROLLMENT : "has"
     PROFESSOR ||--o{ COURSE : "teaches"
-```
-
-```{raw} latex
-\begin{center}
-\textbf{E-R Diagram:} University database with STUDENT, COURSE, PROFESSOR, and ENROLLMENT entities. Relationships: STUDENT enrolls in many ENROLLMENTS, COURSE has many ENROLLMENTS, PROFESSOR teaches many COURSES.
-\end{center}
 ```
 
 ## How to modify it

@@ -1,14 +1,17 @@
-# Ciclo de las Rocas con Mermaid
+# Ciclo de las Rocas con Kroki (Mermaid)
 
 El ciclo de las rocas describe las transformaciones entre los tres tipos principales de rocas.
-Con Mermaid podemos representar este ciclo como un diagrama de flujo.
+Con Kroki y `:type: mermaid` podemos representar este ciclo como un diagrama de flujo compatible con HTML y PDF.
 
 ## El ciclo
 
 **Código:**
 
 ````md
-```{mermaid}
+```{kroki}
+:type: mermaid
+:align: center
+
 flowchart LR
     Magma["Magma"]
     Ignea["Roca Ígnea"]
@@ -25,9 +28,12 @@ flowchart LR
 ```
 ````
 
-**Resultado (solo HTML):**
+**Resultado:**
 
-```{mermaid}
+```{kroki}
+:type: mermaid
+:align: center
+
 flowchart LR
     Magma["Magma"]
     Ignea["Roca Ígnea"]
@@ -41,12 +47,6 @@ flowchart LR
     Ignea -->|"Calor y presión"| Metamorfica
     Metamorfica -->|"Meteorización y erosión"| Sedimentaria
     Sedimentaria -->|"Fusión"| Magma
-```
-
-```{raw} latex
-\begin{center}
-\textbf{Ciclo de las Rocas:} Red de transformaciones entre los tres tipos de rocas. El magma se enfría formando roca ígnea, que se meteoriza en sedimentaria, y esta se transforma en metamórfica por calor y presión. La roca metamórfica puede fundirse de nuevo en magma, completando el ciclo. Cualquier tipo de roca puede transformarse en cualquier otro.
-\end{center}
 ```
 
 ## Explicación de las transiciones

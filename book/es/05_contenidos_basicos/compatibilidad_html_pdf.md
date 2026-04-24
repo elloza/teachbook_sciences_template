@@ -16,7 +16,7 @@ Tu TeachBook se publica en dos formatos: **HTML** (web interactiva) y **PDF** (v
 | Código con resaltado | ✅ | ✅ | Usar libremente |
 | Citas BibTeX | ✅ | ✅ | Usar libremente |
 | Referencias cruzadas | ✅ | ✅ | Usar libremente |
-| Mermaid (diagramas) | ✅ | ❌ | Añadir descripción textual |
+| Diagramas Kroki (Mermaid, PlantUML, etc.) | ✅ | ✅ | Usar `{kroki}` con `:type: mermaid` |
 | Vídeos (iframe/YouTube) | ✅ | ❌ | Usar `{raw} latex` con URL |
 | Pestañas (`{tabbed}`, `{tab-set}`) | ✅ | ❌ | En PDF: contenido secuencial |
 | HTML interactivo (`<details>`) | ✅ | ❌ | Usar `{raw} latex` alternativo |
@@ -53,23 +53,25 @@ Texto alternativo para el PDF.
 ```
 ````
 
-## Ejemplo: Mermaid con fallback
+## Ejemplo: diagrama con Kroki
 
 ````md
-```{mermaid}
+```{kroki}
+:type: mermaid
+:align: center
+
 flowchart LR
     A --> B --> C
 ```
-
-El diagrama muestra un flujo de tres pasos: A → B → C.
 ````
 
 ## Reglas prácticas
 
 1. **Si es texto, imagen, ecuación o tabla**: no te preocupes, funciona en ambos.
-2. **Si es interactivo (vídeo, Mermaid, HTML)**: añade SIEMPRE una alternativa textual.
-3. **Si es un dropdown**: en PDF se muestra expandido (no hay problema).
-4. **Si son pestañas**: en PDF se muestra todo seguido (verifica que tenga sentido).
+2. **Si es interactivo (vídeo, HTML personalizado)**: añade SIEMPRE una alternativa textual.
+3. **Si es un diagrama**: usa Kroki. Funciona en HTML y PDF.
+4. **Si es un dropdown**: en PDF se muestra expandido (no hay problema).
+5. **Si son pestañas**: en PDF se muestra todo seguido (verifica que tenga sentido).
 
 ```{tip}
 Antes de publicar, compila siempre ambos formatos (`build_book.py` para HTML y `export_pdf.py` para PDF) y revisa que el contenido es coherente en ambos.

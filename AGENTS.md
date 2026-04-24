@@ -196,17 +196,25 @@ print("Hola")
 - Ecuaciones: `{eq}`\`eq-gaussiana\`
 - Tablas: `{numref}`\`tabla-ejemplo\`
 
-### Mermaid (diagramas, SOLO HTML)
+### Diagramas con Kroki (HTML ✅ y PDF ✅)
+Kroki convierte texto en diagramas SVG. Funciona en **HTML y PDF**. Usa Mermaid por defecto.
+
 ````md
-```{mermaid}
+```{kroki}
+:type: mermaid
+:align: center
+
 flowchart LR
     A[Inicio] --> B[Proceso]
     B --> C[Fin]
 ```
 ````
 
-- **NO funciona en PDF**. Añadir siempre texto alternativo describiendo el diagrama.
-- Tipos: `flowchart`, `sequenceDiagram`, `classDiagram`, `erDiagram`, `stateDiagram`.
+Tipos disponibles: `mermaid` (recomendado), `plantuml`, `graphviz`, `excalidraw`, `vegalite`, `wavedrom`, `ditaa`, y 15+ más.
+Requiere internet durante el build (no al leer). GitHub Actions siempre tiene internet.
+Para añadir título: usar `{kroki-figure}` con `:caption: Título`.
+
+**NO usar `{mermaid}`** (requiere sphinxcontrib-mermaid, no funciona en PDF). Usar siempre `{kroki}` con `:type: mermaid`.
 
 ### HTML interactivo autocontenido (SOLO HTML)
 ````md
@@ -230,7 +238,7 @@ flowchart LR
 | Ecuaciones LaTeX | ✅ | ✅ | Usar libremente |
 | Admonitions | ✅ | ✅ | Usar libremente |
 | Dropdowns | ✅ | ✅ expandido | Usar libremente |
-| Mermaid | ✅ | ❌ | Añadir descripción textual |
+| Diagramas Kroki (Mermaid, etc.) | ✅ | ✅ | Usar `{kroki}` con `:type: mermaid` |
 | iframe/YouTube | ✅ | ❌ | Añadir `{raw} latex` con URL |
 | Thebe live code | ✅ | ❌ | Código visible como texto |
 | Tabs | ✅ | ❌ | Añadir alternativa sin tabs |
@@ -281,7 +289,7 @@ Las skills están en `.github/skills/` (fuente de verdad) y se sincronizan a `.c
 | `teachbook-add-content` | Añadir nuevos capítulos o secciones |
 | `teachbook-multimedia` | Insertar imágenes, videos, ecuaciones |
 | `teachbook-pdf-to-markdown` | Convertir PDFs existentes a Markdown |
-| `teachbook-generate-mermaid-diagram` | Crear diagramas de flujo, ER, UML con Mermaid |
+| `teachbook-generate-diagram` | Crear diagramas Kroki (Mermaid, PlantUML, GraphViz, etc.) compatibles con HTML y PDF |
 | `teachbook-generate-schemdraw-circuit` | Crear diagramas de circuitos eléctricos |
 | `teachbook-generate-teaching-notebook` | Crear notebooks docentes con código ejecutable |
 | `teachbook-generate-interactive-html` | Añadir HTML interactivo sin frameworks JS |

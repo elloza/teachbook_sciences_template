@@ -18,6 +18,7 @@ parts:
       sections:
       - file: en/02_degrees/physics_degree/physics_example
       - file: en/02_degrees/physics_degree/rc_circuit_schemdraw
+      - file: en/02_degrees/physics_degree/kroki_diagrams
       - file: en/02_degrees/physics_degree/ohms_law_fit
       - file: en/02_degrees/physics_degree/harmonic_oscillator
     - file: en/02_degrees/math_degree/intro
@@ -35,6 +36,7 @@ parts:
       sections:
       - file: en/02_degrees/computer_science_degree/er_diagram_mermaid
       - file: en/02_degrees/computer_science_degree/uml_class_diagram_mermaid
+      - file: en/02_degrees/computer_science_degree/kroki_diagrams
       - file: en/02_degrees/computer_science_degree/algorithm_complexity
     - file: en/02_degrees/geology_degree/intro
       sections:

@@ -1,14 +1,17 @@
-# UML Class Diagram with Mermaid
+# UML Class Diagram with Kroki (Mermaid)
 
 Class diagrams are essential for modeling object-oriented systems.
-Mermaid allows you to represent classes with their attributes, methods, and inheritance relationships.
+With Kroki and `:type: mermaid`, you can represent classes, attributes, methods, and inheritance in both HTML and PDF.
 
 ## Example: Geometric Shape Hierarchy
 
 **Code:**
 
 ````md
-```{mermaid}
+```{kroki}
+:type: mermaid
+:align: center
+
 classDiagram
     class Shape {
         <<abstract>>
@@ -43,9 +46,12 @@ classDiagram
 ```
 ````
 
-**Result (HTML only):**
+**Result:**
 
-```{mermaid}
+```{kroki}
+:type: mermaid
+:align: center
+
 classDiagram
     class Shape {
         <<abstract>>
@@ -77,12 +83,6 @@ classDiagram
     Shape <|-- Circle
     Shape <|-- Rectangle
     Shape <|-- Triangle
-```
-
-```{raw} latex
-\begin{center}
-\textbf{UML Class Diagram:} Abstract Shape class with color attribute and area(), perimeter() methods. Circle, Rectangle, and Triangle inherit from Shape and implement these methods with their specific attributes.
-\end{center}
 ```
 
 ## Class notation

@@ -1,14 +1,17 @@
-# Diagrama de Clases UML con Mermaid
+# Diagrama de Clases UML con Kroki (Mermaid)
 
 Los diagramas de clases son esenciales para modelar sistemas orientados a objetos.
-Mermaid permite representar clases con sus atributos, métodos y relaciones de herencia.
+Con Kroki y `:type: mermaid` puedes representar clases, atributos, métodos y herencia en HTML y PDF.
 
 ## Ejemplo: Jerarquía de Figuras Geométricas
 
 **Código:**
 
 ````md
-```{mermaid}
+```{kroki}
+:type: mermaid
+:align: center
+
 classDiagram
     class Figura {
         <<abstract>>
@@ -43,9 +46,12 @@ classDiagram
 ```
 ````
 
-**Resultado (solo HTML):**
+**Resultado:**
 
-```{mermaid}
+```{kroki}
+:type: mermaid
+:align: center
+
 classDiagram
     class Figura {
         <<abstract>>
@@ -77,12 +83,6 @@ classDiagram
     Figura <|-- Circulo
     Figura <|-- Rectangulo
     Figura <|-- Triangulo
-```
-
-```{raw} latex
-\begin{center}
-\textbf{Diagrama de Clases UML:} Jerarquía de figuras geométricas. La clase abstracta \texttt{Figura} define los métodos comunes \texttt{area()} y \texttt{perimetro()}. Las clases \texttt{Circulo}, \texttt{Rectangulo} y \texttt{Triangulo} heredan de \texttt{Figura} e implementan estos métodos según sus dimensiones específicas.
-\end{center}
 ```
 
 ## Notación de clases
