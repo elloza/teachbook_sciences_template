@@ -6,6 +6,11 @@ import sys
 import glob
 import yaml
 
+
+# Determine script/project directories once, before any chdir.
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.dirname(SCRIPT_DIR)
+
 # Fix: Windows cp1252 can't encode emojis — force UTF-8
 if sys.stdout.encoding and sys.stdout.encoding.lower() not in ("utf-8", "utf8"):
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
@@ -16,9 +21,9 @@ if sys.stderr.encoding and sys.stderr.encoding.lower() not in ("utf-8", "utf8"):
 def get_jupyter_book():
     """Returns the path to jupyter-book executable. Prefers venv, falls back to system."""
     if os.name == "nt":
-        venv_jb = os.path.join(".venv", "Scripts", "jupyter-book.exe")
+        venv_jb = os.path.join(PROJECT_ROOT, ".venv", "Scripts", "jupyter-book.exe")
     else:
-        venv_jb = os.path.join(".venv", "bin", "jupyter-book")
+        venv_jb = os.path.join(PROJECT_ROOT, ".venv", "bin", "jupyter-book")
     if os.path.isfile(venv_jb):
         return venv_jb
     return shutil.which("jupyter-book")
@@ -45,10 +50,6 @@ def get_languages():
     return sorted(languages)
 
 
-# Determine script directory once, before any chdir
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-
-
 def check_latex_installed():
     """Checks if tectonic, latexmk or pdflatex is available."""
     executable_name = "tectonic.exe" if os.name == "nt" else "tectonic"
@@ -57,14 +58,14 @@ def check_latex_installed():
     if os.name == "nt":
         candidates.extend(
             [
-                os.path.join(".venv", "Scripts", executable_name),
+                os.path.join(PROJECT_ROOT, ".venv", "Scripts", executable_name),
                 os.path.join(os.environ.get("APPDATA", os.path.expanduser("~")), "teachbook", executable_name),
             ]
         )
     else:
         candidates.extend(
             [
-                os.path.join(".venv", "bin", executable_name),
+                os.path.join(PROJECT_ROOT, ".venv", "bin", executable_name),
                 os.path.expanduser(os.path.join("~", ".local", "bin", executable_name)),
             ]
         )
@@ -282,30 +283,59 @@ def build_pdf_for_lang(lang):
         print(f"🔧 Usando motor: {tex_engine_path}")
         env = latex_env(tex_engine_path)
 
-        # Determine commands based on engine
+        # Determine commands based on engine.  Tectonic has two CLIs:
+        # - classic: `tectonic book.tex`
+        # - v2:      `tectonic -X compile book.tex`
+        #
+        # In GitHub Actions, the v2 CLI has been observed to segfault on some
+        # larger Jupyter Book outputs.  Prefer the classic CLI for plain .tex
+        # files and keep v2 as a fallback instead of making deploy fragile.
         engine_name = os.path.basename(tex_engine_path).lower()
         if "tectonic" in engine_name:
-            cmd = [tex_engine_path, "-X", "compile", main_tex]
+            commands = [
+                [tex_engine_path, "--keep-logs", "--keep-intermediates", main_tex],
+                [tex_engine_path, "-X", "compile", main_tex],
+            ]
         elif "latexmk" in engine_name:
             # Use xelatex as per project config
-            cmd = [
-                tex_engine_path,
-                "-xelatex",
-                "-interaction=nonstopmode",
-                "-halt-on-error",
-                main_tex,
+            commands = [
+                [
+                    tex_engine_path,
+                    "-xelatex",
+                    "-interaction=nonstopmode",
+                    "-halt-on-error",
+                    main_tex,
+                ]
             ]
         else:
             # Fallback to pdflatex
-            cmd = [
-                tex_engine_path,
-                "-interaction=nonstopmode",
-                "-halt-on-error",
-                main_tex,
+            commands = [
+                [
+                    tex_engine_path,
+                    "-interaction=nonstopmode",
+                    "-halt-on-error",
+                    main_tex,
+                ]
             ]
 
-        print(f"🚀 Ejecutando: {' '.join(cmd)}")
-        subprocess.run(cmd, check=True, env=env)
+        last_error = None
+        for attempt, cmd in enumerate(commands, start=1):
+            try:
+                print(f"🚀 Ejecutando ({attempt}/{len(commands)}): {' '.join(cmd)}")
+                subprocess.run(cmd, check=True, env=env)
+                last_error = None
+                break
+            except subprocess.CalledProcessError as exc:
+                last_error = exc
+                print(f"⚠️  Falló el intento {attempt}: {exc}")
+                if exc.returncode < 0:
+                    print(
+                        "   El motor LaTeX terminó por señal del sistema "
+                        f"({-exc.returncode}). Se probará el siguiente modo si existe."
+                    )
+
+        if last_error is not None:
+            raise last_error
 
         found_pdf = glob_pdf(".")
         if found_pdf:

@@ -141,6 +141,8 @@ latex_templates/
 | `UnicodeEncodeError` / caracteres raros en Windows | Usa los scripts actualizados; fuerzan salida UTF-8 segura |
 | Error con videos de YouTube | Usar el patrón dual `{raw} html` + `{raw} latex` (ver skill `teachbook-multimedia`) |
 | Error con imágenes SVG | Convertir a PNG; LaTeX no soporta SVG nativamente |
+| Error `convert` / ImageMagick no encontrado en CI | Instalar `imagemagick` antes de exportar PDF o convertir SVG a PNG |
+| Tectonic termina con `SIGSEGV` en CI | Usar los scripts actualizados: prueban primero la CLI clásica de Tectonic y dejan `-X compile` como fallback |
 | Fórmulas mal renderizadas | Verificar que `dollarmath` está en `myst_enable_extensions` del config |
 | Error "Font not found" | Verificar conexión a internet: Tectonic descarga paquetes/fuentes bajo demanda. Si persiste, evitar fuentes del sistema y usar paquetes LaTeX estándar |
 | Error con `fontspec` o fuentes del sistema | No dependas de fuentes instaladas en Windows. Usa las fuentes por defecto de Sphinx/Tectonic o paquetes incluidos en TeX |
