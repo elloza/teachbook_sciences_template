@@ -75,7 +75,8 @@ Resultado:
 
 1. Añade las entradas BibTeX a `_static/references.bib`.
 2. Cita con `{cite:t}` o `{cite:p}` en cualquier página.
-3. Añade `{bibliography}` donde quieras que aparezca la lista de referencias.
+3. Si quieres una bibliografía local, añade `{bibliography}` al final de esa página.
+4. Si quieres una bibliografía general del libro, usa la página `Referencias` incluida al final del índice.
 
 ```{warning}
 Cada clave de cita (ej: `einstein1920`) debe ser única en todo el archivo `.bib`. Si se duplica, la compilación fallará.

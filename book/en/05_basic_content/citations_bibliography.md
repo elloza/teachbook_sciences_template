@@ -75,7 +75,8 @@ Result:
 
 1. Add BibTeX entries to `_static/references.bib`.
 2. Cite with `{cite:t}` or `{cite:p}` on any page.
-3. Add `{bibliography}` where you want the reference list to appear.
+3. If you want a local bibliography, add `{bibliography}` at the end of that page.
+4. If you want a global bibliography for the whole book, use the `References` page included at the end of the table of contents.
 
 ```{warning}
 Each citation key (e.g., `einstein1920`) must be unique across the entire `.bib` file. Duplicates will cause a build failure.

@@ -150,6 +150,7 @@ teachbook_sciences_template/
 - `book/_toc_es.yml` y `book/_toc_en.yml` — índice del libro
 - `book/_config_es.yml` y `book/_config_en.yml` — título, autor, etc.
 - `book/_static/` — imágenes y logos
+- `book/_static/references.bib` — bibliografía global del libro
 
 ### Archivos que NO debes tocar:
 - `scripts/` — los ejecuta el agente automáticamente
@@ -167,6 +168,22 @@ El libro genera versiones en **español** e **inglés** automáticamente con un 
 > **"Añade un nuevo capítulo de Biología al libro"**
 
 El agente se encargará de crear el contenido en `book/es/` Y `book/en/`, y de actualizar ambos índices.
+
+---
+
+## 📚 Bibliografía y referencias
+
+La forma más simple de gestionar bibliografía en esta plantilla es:
+
+1. guardar todas las entradas BibTeX en:
+   - `book/_static/references.bib`
+2. citar en cualquier página con:
+   - `{cite:t}`
+   - `{cite:p}`
+3. usar la página final de:
+   - `Referencias` / `References`
+
+Esa página imprime la bibliografía global del libro y sirve también para la exportación a PDF/LaTeX.
 
 ---
 
