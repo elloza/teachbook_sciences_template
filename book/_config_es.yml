@@ -30,8 +30,9 @@ sphinx:
     bibtex_bibfiles:
     - _static/references.bib
     thebe_config:
-      use_thebe_lite: true
       always_load: false
+      repository_url: https://github.com/binder-examples/jupyter-stacks-datascience
+      repository_branch: master
       selector: ".thebe,.cell"
       selector_input: "pre"
       selector_output: ".output, .cell_output"

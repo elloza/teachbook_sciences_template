@@ -363,7 +363,7 @@ Las skills están en `.github/skills/` (fuente de verdad) y se sincronizan a `.c
 | `teachbook-generate-teaching-notebook` | Crear notebooks docentes con código ejecutable |
 | `teachbook-generate-interactive-html` | Añadir HTML interactivo sin frameworks JS |
 | `teachbook-generate-quiz` | Crear cuestionarios con respuestas ocultas |
-| `teachbook-generate-thebe-pyodide-page` | Crear páginas con código ejecutable en navegador |
+| `teachbook-generate-thebe-binder-page` | Crear páginas con código ejecutable mediante Thebe + Binder |
 | `teachbook-review-teaching-quality` | Revisar calidad docente del contenido |
 | `teachbook-review-html-pdf-compatibility` | Verificar que contenido funciona en HTML y PDF |
 

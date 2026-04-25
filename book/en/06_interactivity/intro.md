@@ -8,7 +8,7 @@ Interactivity in a TeachBook ranges from simple dropdowns to live executable cod
 
 | Resource | Type | Works in PDF? |
 |----------|------|---------------|
-| Thebe + Pyodide | Live code in browser | No |
+| Thebe + Binder | Live code with a remote kernel | No |
 | Interactive notebooks | Code executed at build time | Partial |
 | Widgets (ipywidgets) | Interactive controls | No |
 | Quizzes (jupyterquiz) | Self-correcting questions | No |

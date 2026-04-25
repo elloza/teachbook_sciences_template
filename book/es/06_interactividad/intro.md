@@ -8,7 +8,7 @@ La interactividad en un TeachBook abarca desde elementos tan simples como un des
 
 | Recurso | Tipo | ¿Funciona en PDF? |
 |---------|------|--------------------|
-| Thebe + Pyodide | Código ejecutable en navegador | No |
+| Thebe + Binder | Código ejecutable desde un kernel remoto | No |
 | Notebooks interactivos | Código ejecutable al compilar | Parcial |
 | Widgets (ipywidgets) | Controles interactivos | No |
 | Cuestionarios (jupyterquiz) | Preguntas autocorrectivas | No |

@@ -1,6 +1,6 @@
-# Thebe + Pyodide: Código en Vivo
+# Thebe + Binder: Código en Vivo
 
-**Thebe** permite ejecutar código Python directamente en el navegador del lector, sin necesidad de instalar nada. Funciona gracias a **Pyodide**, una versión de Python compilada a WebAssembly.
+**Thebe** permite ejecutar código Python desde la versión web del libro. En este proyecto, lo hace conectándose a un **kernel remoto en Binder**.
 
 ```{warning}
 Thebe es una funcionalidad **solo HTML**. No está disponible en la exportación PDF.
@@ -9,7 +9,7 @@ Thebe es una funcionalidad **solo HTML**. No está disponible en la exportación
 ## ¿Cómo funciona?
 
 1. Pulsa el botón **"Live Code"** que aparece debajo.
-2. Se carga Pyodide en el navegador (puede tardar unos segundos la primera vez).
+2. Binder arranca un entorno remoto (puede tardar unos segundos la primera vez).
 3. Las celdas de código se vuelven editables y ejecutables — ¡pruébalo!
 
 ---
@@ -104,11 +104,12 @@ sphinx:
     - sphinx_thebe
   config:
     thebe_config:
-      use_thebe_lite: true
       always_load: false
+      repository_url: https://github.com/binder-examples/jupyter-stacks-datascience
+      repository_branch: master
 ```
 
-Esta configuración usa **Thebe Lite** con Pyodide, que carga Python directamente en el navegador sin necesidad de Binder.
+Esta configuración usa **Thebe + Binder**, es decir, el código se ejecuta en un entorno remoto preparado por Binder.
 
 ```{admonition} Alternativa más sencilla
 :class: tip

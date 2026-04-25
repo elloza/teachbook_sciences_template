@@ -232,6 +232,40 @@ def fix_searchindex_paths(searchindex_file, lang):
         )
 
 
+def fix_duplicate_thebe_scripts(html_file):
+    """Remove duplicated inline Thebe config script declarations.
+
+    Some generated pages include duplicate inline script blocks declaring
+    THEBE_JS_URL / selectors twice, which triggers a browser SyntaxError.
+    Keep only the first occurrence.
+    """
+    import re
+
+    with open(html_file, "r", encoding="utf-8") as f:
+        content = f.read()
+
+    original = content
+
+    pattern = re.compile(
+        r'<script>const THEBE_JS_URL = ".*?"; const thebe_selector = ".*?"; const thebe_selector_input = ".*?"; const thebe_selector_output = ".*?"</script>',
+        re.DOTALL,
+    )
+    matches = pattern.findall(content)
+    if len(matches) > 1:
+        first = matches[0]
+        content = pattern.sub("", content)
+        insert_after = '<script src="../_static/design-tabs.js?v=f930bc37"></script>'
+        if insert_after in content:
+            content = content.replace(insert_after, insert_after + "\n    " + first, 1)
+        else:
+            content = first + "\n" + content
+
+    if content != original:
+        with open(html_file, "w", encoding="utf-8") as f:
+            f.write(content)
+        print(f"   🔧 Removed duplicated Thebe script in {os.path.basename(html_file)}")
+
+
 def build_language(lang):
     """Builds the book for a specific language using a standalone temporary directory."""
     print(f"\n🔨 Construyendo versión STANDALONE: {lang.upper()}...")
@@ -346,6 +380,12 @@ def build_language(lang):
 
         shutil.copytree(built_html_path_nested, final_dest)
         print(f"✅ Versión {lang} movida correctamente.")
+
+        # Fix duplicated inline Thebe config blocks on all generated pages
+        for root, _dirs, files in os.walk(final_dest):
+            for filename in files:
+                if filename.endswith(".html"):
+                    fix_duplicate_thebe_scripts(os.path.join(root, filename))
 
         # CRITICAL FIX: Copy search files from temp build root to language dir
         # Sphinx generates search.html, genindex.html, and searchindex.js at the HTML root,

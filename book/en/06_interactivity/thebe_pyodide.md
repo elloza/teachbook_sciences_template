@@ -1,6 +1,6 @@
-# Thebe + Pyodide: Live Code
+# Thebe + Binder: Live Code
 
-**Thebe** allows readers to run Python code directly in their browser, without installing anything. It works thanks to **Pyodide**, a version of Python compiled to WebAssembly.
+**Thebe** allows readers to run Python code from the web version of the book. In this project it connects to a **remote Binder kernel**.
 
 ```{warning}
 Thebe is an **HTML-only** feature. It is not available in PDF export.
@@ -9,7 +9,7 @@ Thebe is an **HTML-only** feature. It is not available in PDF export.
 ## How does it work?
 
 1. Click the **"Live Code"** button below.
-2. Pyodide loads in the browser (may take a few seconds the first time).
+2. Binder starts a remote environment (this may take a few seconds the first time).
 3. Code cells become editable and executable — try it!
 
 ---
@@ -104,11 +104,12 @@ sphinx:
     - sphinx_thebe
   config:
     thebe_config:
-      use_thebe_lite: true
       always_load: false
+      repository_url: https://github.com/binder-examples/jupyter-stacks-datascience
+      repository_branch: master
 ```
 
-This configuration uses **Thebe Lite** with Pyodide, which loads Python directly in the browser without needing Binder.
+This configuration uses **Thebe + Binder**, meaning the code runs in a remote Binder environment.
 
 ```{admonition} Simpler alternative
 :class: tip
