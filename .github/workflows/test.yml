@@ -4,7 +4,10 @@
 name: Test Clean Setup
 
 on:
-  workflow_dispatch:  # Run tests only when explicitly requested
+  workflow_dispatch:  # Run tests explicitly when validating a clean machine
+  pull_request:
+    branches:
+      - main
 
 jobs:
   # Quick syntax check first
@@ -129,6 +132,69 @@ jobs:
           if (-Not (Test-Path "book\_build\html\es")) { Write-Error "No es/"; exit 1 }
           if (-Not (Test-Path "book\_build\html\en")) { Write-Error "No en/"; exit 1 }
           Write-Output "✅ Build OK"
+
+      - name: Test preview launcher and HTTP server
+        shell: pwsh
+        timeout-minutes: 10
+        run: |
+          $ErrorActionPreference = "Stop"
+          $port = 8765
+          $baseUrl = "http://127.0.0.1:$port"
+
+          function Show-PreviewLog {
+            if (Test-Path ".preview.log") {
+              Write-Output "--- .preview.log (tail) ---"
+              Get-Content ".preview.log" -Tail 80
+              Write-Output "--- end .preview.log ---"
+            } else {
+              Write-Output "No .preview.log found yet."
+            }
+          }
+
+          try {
+            Write-Output "Starting preview through the same command agents use..."
+            .venv\Scripts\python.exe scripts\launch_preview.py --background --no-browser --no-watch --port $port
+
+            $deadline = (Get-Date).AddMinutes(6)
+            $ready = $false
+
+            while ((Get-Date) -lt $deadline) {
+              Start-Sleep -Seconds 5
+
+              Write-Output "Checking preview process status..."
+              .venv\Scripts\python.exe scripts\launch_preview.py --status
+
+              try {
+                $response = Invoke-WebRequest -Uri "$baseUrl/" -UseBasicParsing -TimeoutSec 5
+                if ($response.StatusCode -eq 200) {
+                  $ready = $true
+                  break
+                }
+              } catch {
+                Write-Output "Preview not ready yet: $($_.Exception.Message)"
+              }
+            }
+
+            if (-not $ready) {
+              Show-PreviewLog
+              throw "Preview server did not answer HTTP 200 at $baseUrl/ in time."
+            }
+
+            foreach ($path in @("/", "/es/", "/en/")) {
+              $url = "$baseUrl$path"
+              Write-Output "Checking $url"
+              $response = Invoke-WebRequest -Uri $url -UseBasicParsing -TimeoutSec 10
+              if ($response.StatusCode -ne 200) {
+                throw "Preview returned HTTP $($response.StatusCode) for $url"
+              }
+            }
+
+            Write-Output "✅ Preview server responded correctly on Windows."
+          }
+          finally {
+            Show-PreviewLog
+            .venv\Scripts\python.exe scripts\launch_preview.py --stop
+          }
 
       - name: Test setup_latex (non-interactive)
         shell: pwsh

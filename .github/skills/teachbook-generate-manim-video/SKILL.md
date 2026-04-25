@@ -9,7 +9,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: gentleman-programming
-  version: "2.0"
+  version: "2.1"
 ---
 
 ## Cuándo usar
@@ -134,6 +134,117 @@ Siempre que puedas:
 
 ---
 
+## Gestión de escenas: evitar superposiciones
+
+Manim NO borra automáticamente lo anterior por ti. Si cambias de bloque visual sin retirar o transformar los objetos anteriores, se quedan en pantalla y la escena acaba con elementos superpuestos.
+
+### Regla obligatoria
+
+Antes de introducir una idea nueva, decide explícitamente qué pasa con los objetos anteriores:
+
+1. **Transformar** si hay continuidad conceptual.
+2. **FadeOut/Uncreate** si la idea anterior ya terminó.
+3. **Agrupar y retirar** si varios objetos forman una etapa completa.
+4. **Mantener solo un ancla visual** si ayuda a orientarse, por ejemplo el título o los ejes.
+
+### Patrón recomendado por etapas
+
+```python
+class MyScene(Scene):
+    def construct(self):
+        title = Text("Idea principal", font_size=42).to_edge(UP)
+        self.play(Write(title))
+
+        # Etapa 1
+        step_1 = VGroup(
+            MathTex("ax^2 + bx + c = 0"),
+            Text("Forma general", font_size=28),
+        ).arrange(DOWN, buff=0.4)
+        self.play(FadeIn(step_1))
+        self.wait(1)
+
+        # Retirar la etapa 1 antes de crear la etapa 2
+        self.play(FadeOut(step_1))
+
+        # Etapa 2
+        step_2 = VGroup(
+            MathTex(r"\Delta = b^2 - 4ac", color=YELLOW),
+            Text("El discriminante decide el número de soluciones", font_size=28),
+        ).arrange(DOWN, buff=0.4)
+        self.play(FadeIn(step_2))
+        self.wait(1)
+```
+
+### Checklist anti-superposición
+
+- [ ] Cada bloque visual está en un `VGroup` con nombre claro (`intro`, `formula_block`, `case_block`, etc.).
+- [ ] Antes de crear una etapa nueva, hay un `FadeOut(...)`, `ReplacementTransform(...)` o limpieza equivalente.
+- [ ] No se crean nuevos títulos encima de títulos antiguos: se transforma o se reutiliza el título existente.
+- [ ] Si hay ejes o gráficas, se limpian etiquetas y curvas antiguas antes de dibujar las nuevas.
+- [ ] No se usa `self.clear()` como atajo salvo en cortes muy claros: normalmente es mejor animar la salida para que el estudiante entienda la transición.
+
+---
+
+## Carpetas oficiales y ciclo de vida de assets
+
+Usa SIEMPRE estas rutas. No improvises carpetas nuevas.
+
+| Tipo | Ruta | ¿Se commitea? | Uso |
+|---|---|---:|---|
+| Fuente Manim | `manim_videos/YYYY-MM-DD_nombre/scene.py` | Sí | Código reproducible de la animación |
+| Assets fuente de la escena | `manim_videos/YYYY-MM-DD_nombre/assets/` | Sí, si son necesarios | Imágenes, datos o audios usados por `scene.py` |
+| Salida temporal de Manim | `media/` o `.manim_media/` | No | Carpeta generada por Manim durante renders; se puede borrar |
+| Vídeo final para el libro | `book/_static/videos/nombre_estable.mp4` | Sí | Archivo que se referencia desde las páginas del libro |
+
+Reglas importantes:
+
+- La carpeta `media/` es basura de render. NO se sube.
+- La carpeta `.manim_media/` también es basura de render. NO se sube.
+- No dejes versiones de prueba como `video_v2.mp4`, `video_v3.mp4` en `book/_static/videos/`.
+- El vídeo integrado en el libro debe tener nombre estable: `ecuacion_segundo_grado.mp4`, no `ecuacion_segundo_grado_v3.mp4`.
+- Si una versión nueva reemplaza a otra, sobrescribe el `.mp4` estable y conserva el `scene.py` fuente actualizado.
+- La página del libro nunca debe apuntar a un vídeo cuyo `scene.py` fuente no exista.
+
+Render recomendado con salida temporal controlada:
+
+```bash
+manim -pql --media_dir .manim_media manim_videos/2026-04-25_onda_senoidal/scene.py SineWave
+manim -pqh --media_dir .manim_media manim_videos/2026-04-25_onda_senoidal/scene.py SineWave
+```
+
+Después del render final, copia SOLO el `.mp4` final a:
+
+```text
+book/_static/videos/onda_senoidal.mp4
+```
+
+Y borra si hace falta:
+
+```text
+media/
+.manim_media/
+```
+
+---
+
+## PDF: qué ocurre con los vídeos
+
+Los vídeos locales `.mp4` funcionan en HTML, pero NO se reproducen dentro del PDF. Por eso toda inserción de vídeo DEBE tener fallback LaTeX.
+
+El fallback PDF debe indicar claramente qué pierde el lector y, si procede, mencionar que la animación está disponible en la versión HTML:
+
+````md
+```{raw} latex
+\begin{center}
+\textbf{Vídeo:} esta animación está disponible en la versión HTML del libro.
+\end{center}
+```
+````
+
+Si el contenido del vídeo es imprescindible para entender la página, añade además una explicación textual o una imagen estática antes/después del vídeo. El PDF no puede depender únicamente del `.mp4`.
+
+---
+
 ## Estructura recomendada de una escena
 
 ```python
@@ -169,7 +280,7 @@ class MyScene(Scene):
 ### Desarrollo rápido
 
 ```bash
-manim -pql archivo.py Escena
+manim -pql --media_dir .manim_media archivo.py Escena
 ```
 
 Úsalo para iterar rápido.
@@ -177,7 +288,7 @@ manim -pql archivo.py Escena
 ### Render final recomendado
 
 ```bash
-manim -pqh archivo.py Escena
+manim -pqh --media_dir .manim_media archivo.py Escena
 ```
 
 Esto debe ser el estándar para el vídeo que termina en el libro.
@@ -216,10 +327,12 @@ Reglas:
 
 1. Planear la idea visual: qué se quiere enseñar
 2. Crear el script en `manim_videos/YYYY-MM-DD_nombre/scene.py`
-3. Renderizar primero en baja calidad para iterar
-4. Renderizar el resultado final en alta calidad
-5. Copiar o mover el `.mp4` a `book/_static/videos/`
-6. Insertarlo en la página con el patrón HTML5 + fallback LaTeX
+3. Renderizar primero en baja calidad con `--media_dir .manim_media` para iterar
+4. Corregir superposiciones: cada etapa anterior debe transformarse o salir de pantalla
+5. Renderizar el resultado final en alta calidad
+6. Copiar o mover SOLO el `.mp4` final a `book/_static/videos/` con nombre estable
+7. Insertarlo en la página con el patrón HTML5 + fallback LaTeX
+8. Borrar `media/` o `.manim_media/` antes de dejar el repo listo para subir
 
 ---
 
@@ -228,6 +341,8 @@ Reglas:
 El vídeo final debe quedar en una ruta estable, por ejemplo:
 
 - `book/_static/videos/mi_animacion.mp4`
+
+No uses sufijos de prueba (`_v2`, `_final`, `_nuevo`) en el archivo referenciado por el libro. Esos nombres son típicos de borradores y hacen que el repositorio se ensucie.
 
 Inserción recomendada:
 
@@ -330,8 +445,10 @@ ffmpeg -version
 | Framework | SOLO **Manim Community Edition** |
 | Import | `from manim import *` |
 | Fuente | Guardar scripts en `manim_videos/YYYY-MM-DD_nombre/` |
-| Salida final | Guardar `.mp4` en `book/_static/videos/` |
+| Salida temporal | Usar `media/` o `.manim_media/`; nunca commitear |
+| Salida final | Guardar `.mp4` estable en `book/_static/videos/` |
 | Inserción | Usar siempre patrón dual HTML + LaTeX fallback |
+| PDF | El vídeo no se reproduce: añadir fallback textual y explicación si el vídeo es esencial |
 | Calidad | El render final debe priorizar legibilidad y claridad |
 | Multi-idioma | Si se documenta una animación en una página nueva, replicarla en todos los idiomas |
 | ManimGL | Prohibido en este proyecto |
@@ -342,13 +459,13 @@ ffmpeg -version
 
 ```bash
 # Desarrollo rápido
-manim -pql archivo.py NombreDeLaEscena
+manim -pql --media_dir .manim_media archivo.py NombreDeLaEscena
 
 # Calidad media para revisión
-manim -pqm archivo.py NombreDeLaEscena
+manim -pqm --media_dir .manim_media archivo.py NombreDeLaEscena
 
 # Calidad alta para integrar en el libro
-manim -pqh archivo.py NombreDeLaEscena
+manim -pqh --media_dir .manim_media archivo.py NombreDeLaEscena
 ```
 
 ---
@@ -363,3 +480,5 @@ manim -pqh archivo.py NombreDeLaEscena
 - [ ] ¿El `.mp4` quedó en `book/_static/videos/`?
 - [ ] ¿La fuente quedó ordenada en `manim_videos/YYYY-MM-DD_nombre/`?
 - [ ] ¿La página del libro tiene fallback para PDF?
+- [ ] ¿No quedan carpetas `media/` o `.manim_media/` para subir?
+- [ ] ¿No quedan vídeos de prueba `_v2`, `_v3`, `_final`, etc. en `book/_static/videos/`?
