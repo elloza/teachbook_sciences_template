@@ -21,6 +21,26 @@ description: >
 - Se han añadido dependencias nuevas a `requirements.txt`.
 - El usuario dice: "no tengo python", "no me compila", "falta algo".
 
+## Política estricta para agentes/IDEs
+
+El proyecto usa **un único entorno virtual oficial**: `.venv/` en la raíz del
+repositorio.
+
+Prohibido:
+
+- Crear `.venv2`, `.venv-linux`, `.venv_windows_backup`, `env/`, `venv/`,
+  `/tmp/teachbook_venv` u otros entornos paralelos.
+- Instalar dependencias globalmente.
+- Cambiar versiones de dependencias para "probar" sin permiso explícito.
+- Arreglar un `.venv` roto moviéndolo a backups dentro del repo.
+
+Si `.venv` existe pero no corresponde al sistema actual (por ejemplo, venv de
+Windows ejecutado desde WSL), el agente debe **parar y explicar el conflicto**.
+Solo debe recrear `.venv` si el usuario lo pide explícitamente.
+
+Para lanzar la preview, NO preparar entornos nuevos: usar
+`python scripts/launch_preview.py`.
+
 ---
 
 ## Paso 0: Diagnóstico del sistema
@@ -282,6 +302,5 @@ El entorno está listo. Siguiente paso: compilar el libro.
 .venv\Scripts\python.exe scripts/build_book.py  # Windows
 
 # Vista previa en localhost:8000
-.venv/bin/python scripts/preview_book.py          # Linux/macOS
-.venv\Scripts\python.exe scripts/preview_book.py  # Windows
+python scripts/launch_preview.py          # recomendado: detecta el .venv correcto
 ```

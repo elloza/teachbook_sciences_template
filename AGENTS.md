@@ -14,6 +14,7 @@ Tu trabajo es que TODO funcione con fricción CERO.
 4. **Responde en español** siempre (salvo que te pidan lo contrario).
 5. **No añadas frameworks JS** (React, Vue, etc.). El sistema de build es Jupyter Book, punto.
 6. **No rompas la estructura multi-idioma**. Si añades contenido en un idioma, DEBE existir en TODOS los idiomas configurados.
+7. **No crees entornos alternativos** (`.venv_linux`, `.venv2`, `/tmp/venv`, etc.). Si `.venv` no corresponde al sistema actual, para y muestra diagnóstico.
 
 ## Arquitectura del Proyecto
 
@@ -41,7 +42,8 @@ teachbook_sciences_template/
 ├── scripts/                       # Scripts de automatización
 │   ├── setup_env.py               # Configuración del entorno
 │   ├── build_book.py              # Compilación HTML
-│   ├── preview_book.py            # Vista previa con hot-reload
+│   ├── launch_preview.py          # Lanzador seguro de vista previa para personas/agentes
+│   ├── preview_book.py            # Vista previa usando el MISMO build que producción
 │   ├── export_pdf.py              # Exportación a PDF
 │   ├── setup_latex.py             # Instalación de LaTeX (Tectonic)
 │   └── git_helper.py              # Guardar y publicar
@@ -320,7 +322,7 @@ Todos los comandos se ejecutan desde la raíz del proyecto usando el Python del 
 | Configurar + dev | `python scripts/setup_env.py --dev` | Lo anterior + herramientas de testing |
 | Solo sincronizar skills | `python scripts/setup_env.py --sync-only` | Copia skills a .claude/, .agents/, .agent/ sin tocar deps |
 | Compilar libro | `python scripts/build_book.py` | Genera HTML multi-idioma en `book/_build/html/` |
-| Vista previa | `python scripts/preview_book.py` | Servidor local con hot-reload en `localhost:8000` |
+| Vista previa | `python scripts/launch_preview.py` | Lanza la preview segura en `localhost:8000` usando el mismo build que producción |
 | Exportar PDF | `python scripts/export_pdf.py` | Genera PDF para cada idioma en `book/_static/` |
 | Instalar LaTeX | `python scripts/setup_latex.py` | Instala Tectonic (motor LaTeX ligero) |
 | Renderizar CircuitikZ | `python scripts/render_circuitikz.py <entrada.tex> [salida.png]` | Compila CircuitikZ y genera una imagen PNG |
@@ -328,6 +330,29 @@ Todos los comandos se ejecutan desde la raíz del proyecto usando el Python del 
 | Guardar y publicar | `python scripts/git_helper.py` | git add + commit + push |
 
 **IMPORTANTE**: En Windows, si `python` no funciona, probar con `py`. Los scripts manejan ambas opciones.
+
+### Vista previa para agentes de código
+
+Los agentes/IDEs deben lanzar la preview en segundo plano para no quedarse bloqueados:
+
+```bash
+python scripts/launch_preview.py --background
+python scripts/launch_preview.py --status
+python scripts/launch_preview.py --log
+```
+
+Para detenerla:
+
+```bash
+python scripts/launch_preview.py --stop
+```
+
+Reglas estrictas:
+
+- NO usar `sphinx-autobuild` directamente.
+- NO crear entornos alternativos (`.venv_linux`, `.venv2`, `/tmp/venv`, etc.).
+- NO abrir una web antigua si el build falla.
+- Esperar a que el log muestre `✅ Build correcto` y `🌐 Preview listo`.
 
 ## Publicación en GitHub Pages
 

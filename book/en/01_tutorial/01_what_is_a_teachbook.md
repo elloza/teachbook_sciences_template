@@ -1,20 +1,109 @@
-# What is a TeachBook?
+# 1. What is a TeachBook?
 
-A **TeachBook** is an interactive open educational resource designed to facilitate learning.
+A **TeachBook** is a digital teaching book built from text files, code, and multimedia resources, which are then compiled into a **navigable website** and, in many cases, also a **PDF version**.
 
-## Key Features
+In simple terms:
 
-- **Web Format**: Accessible from any device (computer, tablet, mobile).
-- **Interactive**: Allows execution of code (Python) directly in the browser.
-- **Downloadable**: Can be exported to PDF for offline reading.
+- you edit the **source content**
+- the system **builds** it
+- you get a **clean, functional, publishable** book
 
-## Why use this template?
+```{figure} ../../_static/images/1_Que_es_un_teachbook.png
+---
+name: fig-what-is-a-teachbook
+alt: Visual overview of what a TeachBook is
+width: 85%
+align: center
+---
+A TeachBook starts from editable content and produces a publishable teaching website.
+```
 
-This template is pre-configured with:
-1. **USAL Design**: Colors and typography aligned with the corporate identity.
-2. **Tools**: Includes `matplotlib`, `numpy`, `pandas` ready to use.
-3. **AI Integration**: Designed to be edited with the help of AI assistants.
-from the source code.
+## Attribution and origin
 
-## Underlying Technology
-This project uses [Jupyter Book](https://jupyterbook.org/), a standard tool in the scientific community.
+This template is built on the original ecosystem of:
+
+- [TeachBooks](https://teachbooks.io/)
+- [Jupyter Book](https://jupyterbook.org/)
+
+This specific adaptation has been prepared for the **Faculty of Sciences at the University of Salamanca (USAL)**.
+
+This matters: **we are not starting from scratch**. We are starting from existing, tested, maintained tools, and building a teaching-focused template on top of them.
+
+## What goes in and what comes out
+
+The core idea is this:
+
+| You start with... | And you get... |
+|---|---|
+| `.md` and `.ipynb` files | book web pages |
+| images, bibliography, and static assets | enriched content |
+| book configuration (`_config_*.yml`) | navigation, theme, language, extensions |
+| table of contents (`_toc_*.yml`) | visible book structure |
+
+## Why this is useful for teaching
+
+1. **Accessibility**: the book can be read on the web from any device.
+2. **Reproducibility**: the content comes from source files that can be versioned.
+3. **Maintainability**: updating a page is easier than rebuilding a whole set of notes.
+4. **Scalability**: you can start with one page and grow gradually.
+5. **Compatibility**: the same project can produce both web and PDF outputs.
+
+## What this template adds on top of the original base
+
+On top of TeachBooks / Jupyter Book, this project adds several practical improvements for teachers and students:
+
+### 1. Multilingual structure
+
+The book is prepared to work in:
+
+- Spanish
+- English
+
+with synchronized content and table of contents structure.
+
+### 2. PDF export
+
+Besides the website, this template also supports a PDF output for printing or offline distribution.
+
+### 3. Simple automation scripts
+
+You do not need a complicated workflow on day one. The project includes scripts to:
+
+- prepare the environment
+- build the website
+- open live preview
+- export PDF
+- convert PDF to Markdown
+
+### 4. AI agent integration
+
+The template is prepared so an agent can help you:
+
+- create content
+- reorganize chapters
+- add multimedia
+- maintain the structure of the book
+
+## What a TeachBook is NOT
+
+It is not:
+
+- a PowerPoint presentation
+- a React-style web app with heavy JS frameworks
+- a static PDF pretending to be a website
+
+The main idea is that the content remains **editable, structured, and reusable**.
+
+## Practical advice to start
+
+Do not try to build a huge book on the first day.
+
+Start small:
+
+- a cover page
+- one short chapter
+- one image
+- one equation
+- one section with two or three pages
+
+Once that works well, expand.

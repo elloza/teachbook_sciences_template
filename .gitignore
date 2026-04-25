@@ -8,9 +8,13 @@ __pycache__/
 *.py[cod]
 *.pyc
 .venv/
+.venv
+.venv_*/
 env/
 venv/
 .python-version
+.preview.pid
+.preview.log
 
 # --- Jupyter ---
 .ipynb_checkpoints

@@ -185,6 +185,31 @@ def get_venv_python():
     return os.path.join(VENV_DIR, "bin", "python")
 
 
+def explain_wrong_os_venv():
+    venv_path = os.path.join(PROJECT_ROOT, VENV_DIR)
+    has_windows_python = os.path.isfile(
+        os.path.join(venv_path, "Scripts", "python.exe")
+    )
+    has_posix_python = os.path.isfile(os.path.join(venv_path, "bin", "python"))
+
+    print(f"❌ '{VENV_DIR}' existe, pero no corresponde a este sistema.")
+    print("   No se crearán entornos paralelos ni backups automáticos.")
+    print()
+
+    if os.name != "nt" and has_windows_python and not has_posix_python:
+        print("   Detectado: .venv de Windows en un terminal Linux/macOS/WSL.")
+        print("   Opciones:")
+        print("   - Ejecutar desde Windows: .venv\\Scripts\\python.exe scripts\\launch_preview.py")
+        print("   - O borrar .venv y ejecutar de nuevo setup_env.py desde este sistema.")
+    elif os.name == "nt" and has_posix_python and not has_windows_python:
+        print("   Detectado: .venv de Linux/macOS en Windows.")
+        print("   Opciones:")
+        print("   - Ejecutar desde Linux/macOS/WSL.")
+        print("   - O borrar .venv y ejecutar de nuevo setup_env.py desde Windows.")
+    else:
+        print("   Borra .venv y ejecuta de nuevo: python scripts/setup_env.py")
+
+
 def get_venv_pip():
     if os.name == "nt":
         return os.path.join(VENV_DIR, "Scripts", "pip.exe")
@@ -198,6 +223,9 @@ def get_uv_python_args():
 
 def create_venv(use_uv=False):
     if os.path.exists(VENV_DIR):
+        if not os.path.isfile(get_venv_python()):
+            explain_wrong_os_venv()
+            sys.exit(1)
         print(f"✅ Entorno virtual '{VENV_DIR}' ya existe.")
         return
 
