@@ -18,6 +18,7 @@ import signal
 import subprocess
 import sys
 import time
+import io
 from pathlib import Path
 
 
@@ -26,6 +27,16 @@ VENV = ROOT / ".venv"
 PREVIEW = ROOT / "scripts" / "preview_book.py"
 PID_FILE = ROOT / ".preview.pid"
 LOG_FILE = ROOT / ".preview.log"
+
+
+# ---------------------------------------------------------------------------
+# UTF-8 output, important on Windows consoles and CI
+# ---------------------------------------------------------------------------
+
+if sys.stdout.encoding and sys.stdout.encoding.lower() not in ("utf-8", "utf8"):
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
+if sys.stderr.encoding and sys.stderr.encoding.lower() not in ("utf-8", "utf8"):
+    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8", errors="replace")
 
 
 def is_wsl() -> bool:
