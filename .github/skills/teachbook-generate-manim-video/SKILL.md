@@ -8,7 +8,7 @@ description: >
   "3b1b style", "explicación visual", "animación educativa".
 license: Apache-2.0
 metadata:
-  author: gentleman-programming
+  author: Loza
   version: "2.1"
 ---
 
