@@ -12,6 +12,13 @@ In this book you will find:
 - [Examples by Degree](02_degrees/physics_degree/intro.md) to see real cases
 - Information on [how to cite](92_how_to_cite.md) and [licenses](91_licenses.md)
 
+## PDF version
+
+You can also download the printable version of the book:
+
+- [Download PDF in English](../_static/teachbook_en.pdf)
+- [Descargar PDF en español](../_static/teachbook_es.pdf)
+
 ```{note}
 This project is designed to be used with **VS Code** and **AI** assistants.
 ```

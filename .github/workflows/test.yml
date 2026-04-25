@@ -75,7 +75,7 @@ jobs:
 
       - name: Test setup_latex (non-interactive)
         run: |
-          echo "s" | .venv/bin/python scripts/setup_latex.py
+          .venv/bin/python scripts/setup_latex.py --yes
 
       - name: Test pdf_to_markdown
         run: |
@@ -205,7 +205,16 @@ jobs:
       - name: Test setup_latex (non-interactive)
         shell: pwsh
         run: |
-          echo "s" | .venv\Scripts\python.exe scripts/setup_latex.py
+          .venv\Scripts\python.exe scripts/setup_latex.py --yes
+
+      - name: Test PDF export with Tectonic on Windows
+        shell: pwsh
+        timeout-minutes: 15
+        run: |
+          .venv\Scripts\python.exe scripts\export_pdf.py
+          if (-Not (Test-Path "book\_static\teachbook_es.pdf")) { Write-Error "No Spanish PDF generated"; exit 1 }
+          if (-Not (Test-Path "book\_static\teachbook_en.pdf")) { Write-Error "No English PDF generated"; exit 1 }
+          Write-Output "✅ PDF export OK on Windows"
 
       - name: Test pdf_to_markdown
         shell: pwsh

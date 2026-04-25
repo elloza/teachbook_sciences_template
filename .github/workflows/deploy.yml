@@ -40,14 +40,11 @@ jobs:
         run: |
           pip install -r requirements.txt
 
-      - name: Install LaTeX (for PDF export)
-        if: ${{ github.event.inputs.build_pdf == 'true' || contains(github.event.head_commit.message, '[pdf]') }}
+      - name: Install Tectonic (for PDF export)
         run: |
-          sudo apt-get update
-          sudo apt-get install -y texlive-latex-recommended texlive-latex-extra texlive-fonts-recommended texlive-fonts-extra texlive-xetex latexmk texlive-lang-spanish
+          python scripts/setup_latex.py --yes
 
       - name: Generate PDF
-        if: ${{ github.event.inputs.build_pdf == 'true' || contains(github.event.head_commit.message, '[pdf]') }}
         run: |
           python scripts/export_pdf.py
 

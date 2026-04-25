@@ -34,23 +34,61 @@ def get_effective_python():
     return sys.executable
 
 
+def get_venv_bin_dir():
+    if os.name == "nt":
+        return os.path.join(VENV_DIR, "Scripts")
+    return os.path.join(VENV_DIR, "bin")
+
+
+def local_tectonic_candidates():
+    executable_name = "tectonic.exe" if os.name == "nt" else "tectonic"
+    candidates = []
+
+    venv_bin = get_venv_bin_dir()
+    if os.path.isdir(venv_bin):
+        candidates.append(os.path.join(venv_bin, executable_name))
+
+    if os.name == "nt":
+        appdata = os.environ.get("APPDATA", os.path.expanduser("~"))
+        candidates.append(os.path.join(appdata, "teachbook", executable_name))
+    else:
+        candidates.append(os.path.expanduser(os.path.join("~", ".local", "bin", executable_name)))
+
+    candidates.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), executable_name))
+    return candidates
+
+
+def get_tectonic_command():
+    found = shutil.which("tectonic")
+    if found:
+        return found
+    for candidate in local_tectonic_candidates():
+        if os.path.isfile(candidate):
+            return candidate
+    return None
+
+
 def is_tectonic_installed():
-    return shutil.which("tectonic") is not None
+    return get_tectonic_command() is not None
 
 
 def verify_tectonic():
-    if not is_tectonic_installed():
+    tectonic = get_tectonic_command()
+    if not tectonic:
         return False
     try:
         result = subprocess.run(
-            ["tectonic", "--version"],
+            [tectonic, "--version"],
             capture_output=True,
             text=True,
+            encoding="utf-8",
+            errors="replace",
             timeout=15,
         )
         if result.returncode == 0:
             version = result.stdout.strip().split("\n")[0]
             print(f"✅ Tectonic {version} funcionando correctamente.")
+            print(f"   Ejecutable: {tectonic}")
             return True
     except (subprocess.TimeoutExpired, OSError):
         pass
@@ -67,14 +105,22 @@ def install_tectonic_pip():
     else:
         print("   Usando Python del sistema.")
     try:
-        subprocess.run(
+        result = subprocess.run(
             [python, "-m", "pip", "install", "tectonic"],
-            check=True,
+            check=False,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
         )
+        if result.returncode != 0:
+            print("❌ Tectonic no está disponible como paquete pip para esta plataforma.")
+            print("   Esto es normal en muchos equipos; se usará descarga directa del binario oficial.")
+            return False
         print("✅ Tectonic instalado correctamente con pip.")
         return True
-    except subprocess.CalledProcessError:
-        print("❌ Error instalando con pip.")
+    except Exception as exc:
+        print(f"❌ Error ejecutando pip: {exc}")
         return False
 
 
@@ -129,6 +175,12 @@ def find_asset_url(assets, rust_target, ext):
 
 
 def get_binary_install_dir():
+    venv_bin = get_venv_bin_dir()
+    if os.path.isdir(venv_bin):
+        # Prefer installing inside the project venv. This is the most robust
+        # option for Windows agents because it avoids global PATH edits.
+        return venv_bin
+
     if os.name == "nt":
         base = os.environ.get("APPDATA", os.path.expanduser("~"))
         dest = os.path.join(base, "teachbook")
@@ -208,6 +260,10 @@ def install_tectonic_binary():
 
     print(f"✅ Tectonic instalado en: {dest_path}")
 
+    if os.path.abspath(install_dir) == os.path.abspath(get_venv_bin_dir()):
+        print("   Instalado dentro de .venv: no hace falta tocar el PATH global.")
+        return True
+
     if not shutil.which("tectonic"):
         print()
         print(
@@ -218,6 +274,7 @@ def install_tectonic_binary():
             print(
                 "   (O añade la carpeta en Configuración → Sistema → Variables de entorno)"
             )
+            print("   Los scripts del proyecto también buscarán Tectonic en %APPDATA%\\teachbook.")
         else:
             print(f'   export PATH="{install_dir}:$PATH"')
             shell_rc = os.path.expanduser("~/.bashrc")
@@ -233,10 +290,26 @@ def install_tectonic_binary():
 def main():
     print("🔍 Verificando entorno LaTeX...")
 
+    if "--help" in sys.argv or "-h" in sys.argv:
+        print("""
+Uso:
+  python scripts/setup_latex.py          # pregunta antes de instalar
+  python scripts/setup_latex.py --yes    # instala sin preguntar
+  python scripts/setup_latex.py --check  # solo verifica
+
+En Windows usa siempre el Python del proyecto:
+  .venv\\Scripts\\python.exe scripts\\setup_latex.py --yes
+""")
+        return
+
     if is_tectonic_installed():
         if verify_tectonic():
             return
         print("⚠️  Tectonic encontrado pero no funciona. Se reinstalará.")
+
+    if "--check" in sys.argv:
+        print("❌ Tectonic no está instalado o no funciona.")
+        sys.exit(1)
 
     auto_confirm = "--yes" in sys.argv or "-y" in sys.argv
     print("ℹ️  No se encontró Tectonic (motor LaTeX ligero para generar PDFs).")

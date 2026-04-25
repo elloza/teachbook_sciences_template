@@ -31,9 +31,6 @@ _temp_pdf_*
 # --- LaTeX (build artifacts) ---
 latex_templates/_sphinx_design_static/
 
-# --- Generated PDFs (se regeneran con export_pdf.py) ---
-book/_static/teachbook*.pdf
-
 # --- Skills sincronizados (la fuente está en .github/skills/) ---
 .claude/skills/
 .agents/skills/

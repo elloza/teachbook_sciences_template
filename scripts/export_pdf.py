@@ -21,7 +21,7 @@ def get_jupyter_book():
         venv_jb = os.path.join(".venv", "bin", "jupyter-book")
     if os.path.isfile(venv_jb):
         return venv_jb
-    return "jupyter-book"
+    return shutil.which("jupyter-book")
 
 
 # Configuration
@@ -51,16 +51,42 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 def check_latex_installed():
     """Checks if tectonic, latexmk or pdflatex is available."""
-    local_tectonic = os.path.join(
-        SCRIPT_DIR, "tectonic.exe" if os.name == "nt" else "tectonic"
-    )
+    executable_name = "tectonic.exe" if os.name == "nt" else "tectonic"
 
-    if os.path.exists(local_tectonic):
-        return local_tectonic
+    candidates = []
+    if os.name == "nt":
+        candidates.extend(
+            [
+                os.path.join(".venv", "Scripts", executable_name),
+                os.path.join(os.environ.get("APPDATA", os.path.expanduser("~")), "teachbook", executable_name),
+            ]
+        )
+    else:
+        candidates.extend(
+            [
+                os.path.join(".venv", "bin", executable_name),
+                os.path.expanduser(os.path.join("~", ".local", "bin", executable_name)),
+            ]
+        )
+
+    candidates.append(os.path.join(SCRIPT_DIR, executable_name))
+
+    for candidate in candidates:
+        if os.path.exists(candidate):
+            return os.path.abspath(candidate)
 
     return (
         shutil.which("tectonic") or shutil.which("latexmk") or shutil.which("pdflatex")
     )
+
+
+def latex_env(tex_engine_path):
+    """Return an environment that can find a project-local LaTeX engine."""
+    env = os.environ.copy()
+    env.setdefault("PYTHONUTF8", "1")
+    engine_dir = os.path.dirname(os.path.abspath(tex_engine_path))
+    env["PATH"] = engine_dir + os.pathsep + env.get("PATH", "")
+    return env
 
 
 def ensure_static_dir():
@@ -182,11 +208,29 @@ def build_pdf_for_lang(lang):
 
     print("📝 Generando archivos LaTeX con Jupyter Book...", flush=True)
     try:
-        cmd = [get_jupyter_book(), "build", "--builder", "latex", src_dir, "--all"]
+        jupyter_book = get_jupyter_book()
+        if not jupyter_book:
+            print("❌ No se encontró jupyter-book.")
+            print("   Ejecuta primero el setup oficial del proyecto y usa el Python de .venv:")
+            if os.name == "nt":
+                print(r"   py scripts\setup_env.py")
+                print(r"   .venv\Scripts\python.exe scripts\export_pdf.py")
+            else:
+                print("   python scripts/setup_env.py")
+                print("   .venv/bin/python scripts/export_pdf.py")
+            return False
+
+        cmd = [jupyter_book, "build", "--builder", "latex", src_dir, "--all"]
         subprocess.run(cmd, shell=(os.name == "nt"), check=True)
     except subprocess.CalledProcessError as e:
         print(f"❌ Error en jupyter-book build ({lang}): {e}")
         return False
+    except OSError as e:
+        print(f"❌ No se pudo ejecutar jupyter-book ({lang}): {e}")
+        return False
+    finally:
+        if temp_mode and not os.path.exists(latex_build_dir) and os.path.exists(src_dir):
+            shutil.rmtree(src_dir)
 
     print("🎨 Aplicando plantillas LaTeX personalizadas...", flush=True)
     templates_root = os.path.abspath("latex_templates")
@@ -236,6 +280,7 @@ def build_pdf_for_lang(lang):
             return False
 
         print(f"🔧 Usando motor: {tex_engine_path}")
+        env = latex_env(tex_engine_path)
 
         # Determine commands based on engine
         engine_name = os.path.basename(tex_engine_path).lower()
@@ -260,7 +305,7 @@ def build_pdf_for_lang(lang):
             ]
 
         print(f"🚀 Ejecutando: {' '.join(cmd)}")
-        subprocess.run(cmd, check=True)
+        subprocess.run(cmd, check=True, env=env)
 
         found_pdf = glob_pdf(".")
         if found_pdf:
@@ -319,7 +364,10 @@ def main():
     if not check_latex_installed():
         print("⚠️  No se detectó un motor LaTeX.")
         print("   Puedes instalarlo automáticamente ejecutando:")
-        print("   python scripts/setup_latex.py")
+        if os.name == "nt":
+            print(r"   .venv\Scripts\python.exe scripts\setup_latex.py --yes")
+        else:
+            print("   .venv/bin/python scripts/setup_latex.py --yes")
         sys.exit(1)
 
     languages = get_languages()
