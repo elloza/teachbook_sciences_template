@@ -25,6 +25,7 @@ parts:
     - file: es/02_grados/grado_matematicas/intro
       sections:
       - file: es/02_grados/grado_matematicas/ejemplo_matematicas
+      - file: es/02_grados/grado_matematicas/ecuacion_segundo_grado
       - file: es/02_grados/grado_matematicas/metodo_newton
       - file: es/02_grados/grado_matematicas/transformaciones_lineales
     - file: es/02_grados/grado_estadistica/intro

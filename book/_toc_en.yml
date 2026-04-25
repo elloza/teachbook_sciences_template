@@ -25,6 +25,7 @@ parts:
     - file: en/02_degrees/math_degree/intro
       sections:
       - file: en/02_degrees/math_degree/math_example
+      - file: en/02_degrees/math_degree/quadratic_equation
       - file: en/02_degrees/math_degree/newtons_method
       - file: en/02_degrees/math_degree/linear_transformations
     - file: en/02_degrees/stats_degree/intro

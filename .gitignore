@@ -57,6 +57,9 @@ desktop.ini
 
 # --- Test artifacts ---
 sidebar_verification.png
+build.log
+build_utf8.log
+media/
 
 # --- Env ---
 .env
