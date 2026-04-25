@@ -12,8 +12,8 @@ In simple terms:
 ```{raw} html
 <figure class="align-center">
   <picture>
-    <source srcset="../../_static/images/1_Que_es_un_teachbook.webp" type="image/webp">
-    <img src="../../_static/images/1_Que_es_un_teachbook.png" alt="Visual overview of what a TeachBook is" style="width: 85%;">
+    <source srcset="../../_static/images/1_Que_es_un_teachbook_en.webp" type="image/webp">
+    <img src="../../_static/images/1_Que_es_un_teachbook_en.png" alt="Visual overview of what a TeachBook is" style="width: 85%;">
   </picture>
   <figcaption>A TeachBook starts from editable content and produces a publishable teaching website.</figcaption>
 </figure>
@@ -21,7 +21,7 @@ In simple terms:
 ````
 
 ````{only} latex
-```{figure} ../../_static/images/1_Que_es_un_teachbook.png
+```{figure} ../../_static/images/1_Que_es_un_teachbook_en.png
 ---
 name: fig-what-is-a-teachbook
 alt: Visual overview of what a TeachBook is
