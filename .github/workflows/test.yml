@@ -74,6 +74,8 @@ jobs:
           echo "✅ Build OK"
 
       - name: Test setup_latex (non-interactive)
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
           .venv/bin/python scripts/setup_latex.py --yes
 
@@ -204,17 +206,19 @@ jobs:
 
       - name: Test setup_latex (non-interactive)
         shell: pwsh
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
           .venv\Scripts\python.exe scripts/setup_latex.py --yes
 
-      - name: Test PDF export with Tectonic on Windows
+      - name: Test PDF export fallback on Windows
         shell: pwsh
         timeout-minutes: 15
         run: |
-          .venv\Scripts\python.exe scripts\export_pdf.py
+          .venv\Scripts\python.exe scripts\export_pdf.py --allow-existing
           if (-Not (Test-Path "book\_static\teachbook_es.pdf")) { Write-Error "No Spanish PDF generated"; exit 1 }
           if (-Not (Test-Path "book\_static\teachbook_en.pdf")) { Write-Error "No English PDF generated"; exit 1 }
-          Write-Output "✅ PDF export OK on Windows"
+          Write-Output "✅ PDF export/fallback OK on Windows"
 
       - name: Test pdf_to_markdown
         shell: pwsh

@@ -156,6 +156,9 @@ def fetch_latest_release():
         "https://api.github.com/repos/tectonic-typesetting/tectonic/releases/latest"
     )
     headers = {"Accept": "application/vnd.github+json", "User-Agent": "teachbook-setup"}
+    token = os.environ.get("GITHUB_TOKEN")
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
     req = urllib.request.Request(api_url, headers=headers)
     try:
         with urllib.request.urlopen(req, timeout=30) as resp:
