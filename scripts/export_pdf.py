@@ -391,6 +391,22 @@ def sanitize_config(config_path):
 
 def main():
     print("📚 Iniciando exportación de PDF multi-idioma...")
+    allow_existing = "--allow-existing" in sys.argv
+
+    if "--help" in sys.argv or "-h" in sys.argv:
+        print(
+            """
+Uso:
+  python scripts/export_pdf.py                  # genera PDFs y falla si no puede
+  python scripts/export_pdf.py --allow-existing # en CI, permite continuar si ya existen PDFs publicados
+
+La opción --allow-existing es un salvavidas para despliegue: NO oculta el fallo
+de generación, pero permite publicar la web si `book/_static/teachbook_<lang>.pdf`
+ya existe y tiene contenido.
+"""
+        )
+        return
+
     if not check_latex_installed():
         print("⚠️  No se detectó un motor LaTeX.")
         print("   Puedes instalarlo automáticamente ejecutando:")
@@ -413,6 +429,24 @@ def main():
         sys.exit(0)
     else:
         print(f"\n⚠️ Se generaron {success_count} de {len(languages)} PDFs.")
+        if allow_existing:
+            missing_or_empty = []
+            for lang in languages:
+                pdf_path = os.path.join(STATIC_DIR, f"teachbook_{lang}.pdf")
+                if not os.path.isfile(pdf_path) or os.path.getsize(pdf_path) == 0:
+                    missing_or_empty.append(pdf_path)
+
+            if not missing_or_empty:
+                print(
+                    "✅ Modo --allow-existing: la generación falló, pero existen "
+                    "PDFs publicados para todos los idiomas. El deploy puede continuar."
+                )
+                sys.exit(0)
+
+            print("❌ Modo --allow-existing: faltan PDFs existentes válidos:")
+            for pdf_path in missing_or_empty:
+                print(f"   - {pdf_path}")
+
         sys.exit(1)
 
 

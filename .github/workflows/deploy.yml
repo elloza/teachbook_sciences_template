@@ -46,7 +46,7 @@ jobs:
 
       - name: Generate PDF
         run: |
-          python scripts/export_pdf.py
+          python scripts/export_pdf.py --allow-existing
 
       - name: Build HTML book
         run: |

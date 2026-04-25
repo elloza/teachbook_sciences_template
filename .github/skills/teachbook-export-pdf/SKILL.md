@@ -107,11 +107,12 @@ El workflow de despliegue ejecuta siempre:
 
 ```bash
 python scripts/setup_latex.py --yes
-python scripts/export_pdf.py
+python scripts/export_pdf.py --allow-existing
 python scripts/build_book.py
 ```
 
 Así los PDFs quedan dentro de `book/_static/` antes de construir el HTML y se incluyen en el artefacto publicado.
+Si Tectonic falla en CI pero ya existen PDFs válidos versionados en `book/_static/`, `--allow-existing` permite publicar la web sin romper el despliegue. Para uso docente normal y tests, usa `python scripts/export_pdf.py` sin esa opción para detectar fallos reales.
 
 ## Personalización de plantillas LaTeX
 
