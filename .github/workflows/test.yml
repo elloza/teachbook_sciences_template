@@ -37,6 +37,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+
       # GitHub runners have Python pre-installed, but we test the script
       # still works correctly as if it were a fresh Mac
       - name: Remove pre-existing venv if any
@@ -94,6 +97,9 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
 
       - name: Remove pre-existing venv if any
         shell: pwsh
