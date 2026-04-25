@@ -96,6 +96,34 @@ El agente hará `git add` + `commit` + `push` automáticamente con un mensaje de
 
 > La URL de tu libro será: `https://<tu-usuario>.github.io/<nombre-del-repo>/`
 
+### 7️⃣ Empezar con un libro mínimo sin borrar los ejemplos
+
+Si al principio quieres que el libro muestre **solo una parte** (por ejemplo, un único capítulo que te interese), no hace falta borrar todo el contenido de ejemplo.
+
+La opción recomendada es decirle al agente algo como:
+
+> **"Quiero dejar visible solo este capítulo y ocultar el resto como referencia"**
+
+o:
+
+> **"Oculta temporalmente los capítulos de ejemplo que no voy a usar todavía"**
+
+El agente puede:
+
+- quitar esos capítulos del menú
+- comentarlos en los `_toc_es.yml` y `_toc_en.yml`
+- dejar los archivos intactos en el repositorio
+
+Así tienes una plantilla limpia para empezar, pero conservas material reutilizable para más adelante.
+
+### ¿Por qué es mejor ocultar que borrar?
+
+- puedes volver a activar ejemplos en cualquier momento
+- sigues teniendo páginas de referencia para copiar estructura, estilo y recursos
+- reduces el riesgo de borrar cosas útiles demasiado pronto
+
+**Recomendación**: al principio, **oculta primero**. Borra solo cuando ya tengas claro que no vas a necesitar ese contenido.
+
 ---
 
 ## 📂 Estructura del proyecto (no hace falta tocarla)

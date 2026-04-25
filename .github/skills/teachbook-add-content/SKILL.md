@@ -15,6 +15,67 @@ description: >
 
 > Todo contenido debe existir en **TODOS los idiomas** configurados. Si se añade un archivo en español, DEBE existir el equivalente en inglés (y viceversa). Los cambios de contenido + TOC deben ir en el mismo commit.
 
+## Recomendación clave para primeros usos
+
+Cuando un docente o estudiante quiera "dejar el libro solo con un capítulo" para empezar, **NO recomendar borrar contenido de ejemplo a la primera**.
+
+La estrategia recomendada es:
+
+1. **ocultar** temporalmente capítulos o secciones en los `_toc_<lang>.yml`
+2. **mantener los archivos `.md` / `.ipynb` en el repo** como referencia reutilizable
+3. documentar con un comentario YAML qué se ha ocultado y por qué
+
+Esto permite:
+
+- empezar con un libro pequeño y limpio
+- conservar ejemplos listos para copiar/adaptar
+- volver a activarlos más adelante sin reconstruir nada
+
+## Patrón recomendado: ocultar sin borrar
+
+### Opción preferida
+
+Comentar en el TOC las entradas que no se quieren mostrar todavía.
+
+Ejemplo en `_toc_es.yml`:
+
+```yaml
+  - caption: Ejemplos por Grado
+    chapters:
+    - file: es/02_grados/grado_fisica/intro
+      sections:
+      - file: es/02_grados/grado_fisica/ejemplo_fisica
+    # Contenido oculto temporalmente para primer arranque del curso:
+    # - file: es/02_grados/grado_matematicas/intro
+    #   sections:
+    #   - file: es/02_grados/grado_matematicas/ejemplo_matematicas
+    # - file: es/02_grados/grado_estadistica/intro
+    #   sections:
+    #   - file: es/02_grados/grado_estadistica/ejemplo_estadistica
+```
+
+Y el mismo patrón en `_toc_en.yml`.
+
+### Regla
+
+- **Ocultar en TODOS los idiomas** al mismo tiempo
+- **NO borrar** archivos de contenido de referencia salvo que el usuario lo pida explícitamente
+- añadir comentario tipo:
+  - `# Contenido oculto temporalmente para usar esta plantilla como base mínima`
+
+## Cuándo sugerir ocultar en vez de borrar
+
+Sugerir esta opción si el usuario dice cosas como:
+
+- "quiero empezar solo con una página"
+- "quiero quitar todo lo demás por ahora"
+- "solo quiero quedarme con un capítulo"
+- "me abruma el contenido de ejemplo"
+
+En esos casos, el agente debe proponer algo así:
+
+> "Puedo quitarlo del menú y dejarlo oculto en el TOC para que no se vea, pero mantenerlo en el repo como referencia por si luego quieres reutilizarlo. Es más seguro que borrarlo del todo."
+
 ## Proceso paso a paso
 
 ### Paso 1: Identificar qué se va a añadir
@@ -23,6 +84,7 @@ Determinar ANTES de escribir nada:
 - ¿Es un **capítulo nuevo** (entrada directa en `chapters:`) o una **sección** dentro de un capítulo existente (entrada en `sections:`)?
 - ¿En qué **parte** del TOC va? (Tutorial, Ejemplos por Grado, Información...)
 - ¿Cuál es el **nombre del archivo** y la **ruta** en cada idioma?
+- ¿El usuario quiere **añadir**, **reordenar**, **ocultar temporalmente** o **eliminar definitivamente**?
 
 ### Paso 2: Crear los archivos de contenido en TODOS los idiomas
 
@@ -50,6 +112,8 @@ book/en/02_degrees/biology_degree/biology_example.md
 ### Paso 3: Actualizar TODOS los `_toc_<lang>.yml`
 
 **Los cambios deben ser IDÉNTICOS en estructura** en todos los idiomas (mismo orden, mismas secciones).
+
+Si el objetivo es **ocultar** contenido existente, comentar las entradas en ambos TOCs en vez de borrarlas, salvo instrucción explícita del usuario para eliminación definitiva.
 
 #### `_toc_es.yml` — Añadir dentro de la parte "Ejemplos por Grado":
 
@@ -108,6 +172,8 @@ El agente DEBE ejecutar estas verificaciones ANTES de commit:
 3. **Comparar la estructura** de ambos TOC: deben tener el mismo número de partes, capítulos y secciones.
 4. **Reportar** cualquier archivo huérfano (existe pero no está en el TOC) o entrada rota (en el TOC pero no existe el archivo).
 
+**Importante**: un archivo ocultado deliberadamente al comentar su entrada en el TOC **NO cuenta como error** si el usuario pidió conservarlo como referencia.
+
 ### Paso 5: Compilar para verificar
 
 El agente DEBE usar el Python del entorno virtual (`.venv`):
@@ -132,3 +198,12 @@ Si se necesita un idioma completamente nuevo (ej: portugués `pt`):
 3. Crear `book/pt/` con TODO el contenido traducido (misma estructura de carpetas).
 4. Crear `latex_templates/pt/language_support.tex` si se quiere PDF.
 5. Añadir `"pt": "Português"` al mapa `LANG_DISPLAY_NAMES` en `scripts/build_book.py`.
+
+## Resumen práctico para el agente
+
+| Caso | Acción recomendada |
+|---|---|
+| Añadir capítulo nuevo | Crear archivos en todos los idiomas + actualizar TOCs |
+| Reordenar capítulos | Cambiar el orden en todos los TOCs |
+| Ocultar temporalmente contenido de ejemplo | **Comentar entradas en todos los TOCs** y conservar archivos |
+| Borrar contenido definitivamente | Solo si el usuario lo pide explícitamente |
