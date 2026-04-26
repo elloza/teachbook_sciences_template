@@ -300,6 +300,7 @@ def install_full_latex_ci():
                     "collection-fontsrecommended",
                     "collection-langspanish",
                     "collection-langenglish",
+                    "bbm",
                     "xindy",
                 ]
             )
@@ -309,10 +310,11 @@ def install_full_latex_ci():
         if not command_exists("choco"):
             print("❌ Chocolatey no está disponible; no puedo instalar MiKTeX automáticamente.")
             return False
-        packages = ["librsvg", "gtk-runtime"]
+        packages = [] if verify_svg_converter() else ["gtk-runtime"]
         if not full_latex_ready:
             packages = ["miktex", "strawberryperl"] + packages
-        run(["choco", "install", *packages, "-y", "--no-progress"])
+        if packages:
+            run(["choco", "install", *packages, "-y", "--no-progress"])
         miktex_bin = r"C:\Program Files\MiKTeX\miktex\bin\x64"
         perl_bin = r"C:\Strawberry\perl\bin"
         gtk_candidates = [
@@ -333,6 +335,7 @@ def install_full_latex_ci():
         mpm = shutil.which("mpm")
         if mpm and not full_latex_ready:
             subprocess.run([mpm, "--update-db"], check=False)
+            subprocess.run([mpm, "--install=bbm"], check=False)
         return verify_full_latex() and verify_svg_converter()
 
     print(f"❌ Sistema no soportado para instalación CI: {platform.system()}")
