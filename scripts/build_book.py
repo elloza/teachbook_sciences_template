@@ -6,6 +6,7 @@ import glob
 import shutil
 import json
 import yaml
+import time
 
 # Fix: Windows cp1252 can't encode emojis — force UTF-8
 if sys.stdout.encoding and sys.stdout.encoding.lower() not in ("utf-8", "utf8"):
@@ -24,6 +25,32 @@ def get_jupyter_book():
         return venv_jb
     # Fallback: system-wide jupyter-book (e.g. CI environments)
     return "jupyter-book"
+
+
+def run_jupyter_book_build(cmd, label, attempts=3):
+    """Run a Jupyter Book build with retries for transient network-backed extensions.
+
+    Kroki diagrams are rendered through a remote service during the build. In CI or
+    first-use setups, a temporary network timeout should not make the whole setup
+    look broken, so retry the exact same build before failing for real.
+    """
+    last_error = None
+    for attempt in range(1, attempts + 1):
+        try:
+            print(f"🚀 Ejecutando build {label} ({attempt}/{attempts}): {' '.join(cmd)}")
+            subprocess.check_call(cmd, shell=(os.name == "nt"))
+            return
+        except subprocess.CalledProcessError as exc:
+            last_error = exc
+            if attempt == attempts:
+                break
+            wait_seconds = 10 * attempt
+            print(
+                f"⚠️  Build {label} falló en el intento {attempt}. "
+                f"Reintentando en {wait_seconds}s..."
+            )
+            time.sleep(wait_seconds)
+    raise last_error
 
 
 # Mapping of language codes to display names (ISO 639-1)
@@ -293,8 +320,7 @@ def build_language(lang):
             "--all",
         ]
         try:
-            print(f"🚀 Ejecutando build DEFAULT: {' '.join(cmd)}")
-            subprocess.check_call(cmd, shell=(os.name == "nt"))
+            run_jupyter_book_build(cmd, "DEFAULT")
             print(f"✅ Versión default lista en: {final_dest}")
         except subprocess.CalledProcessError:
             print(f"❌ Error compilando idioma: {lang}")
@@ -354,8 +380,7 @@ def build_language(lang):
     ]
 
     try:
-        print(f"🚀 Ejecutando build STANDALONE ({lang}): {' '.join(cmd)}")
-        subprocess.check_call(cmd, shell=(os.name == "nt"))
+        run_jupyter_book_build(cmd, f"STANDALONE ({lang})")
 
         # DEBUG: See what was created
         debug_directory(temp_build_root)
