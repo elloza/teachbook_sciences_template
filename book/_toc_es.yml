@@ -45,7 +45,7 @@ parts:
       - file: es/02_grados/grado_geologia/perfil_topografico
       - file: es/02_grados/grado_geologia/columna_estratigrafica
       - file: es/02_grados/grado_geologia/ciclo_rocas_mermaid
-  - caption: Ejemplos Transferibles
+  - caption: Ejemplos transversales
     chapters:
     - file: es/03_ejemplos_transferibles/intro
       sections:

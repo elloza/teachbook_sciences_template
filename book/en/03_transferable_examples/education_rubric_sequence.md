@@ -1,4 +1,4 @@
-# Assessment Rubric and Learning Objective Sequence
+# Rubrics and Learning Sequences
 
 ## Rubric: Research project
 
@@ -26,13 +26,15 @@ Minimum passing score: **10 / 20** (50 %). The total score is obtained by adding
 | 5. Analysis | Interpret the results | Findings report |
 | 6. Communication | Present the final work | Written document + oral defense |
 
-## Applications
+## Cross-disciplinary applications
 
-- **Education**: formative and summative assessment of projects
-- **Psychology**: designing criteria for case studies
-- **Biology**: evaluation of lab practices
+- **Humanities**: assessment of essays, text commentaries, and presentations
+- **Social sciences**: assessment of case studies, reports, and debates
+- **Experimental sciences**: assessment of lab work and field notebooks
+- **Engineering**: assessment of projects, prototypes, and technical documentation
+- **Health**: assessment of simulated clinical cases and diagnostic reasoning
 
 ```{admonition} Adapt the rubric
 :class: tip
-Replace the criteria in the first column with those from your course and adjust the descriptors. The 1-4 scale is standard and easy to calibrate across evaluators.
+Replace the criteria in the first column with those from your course and adjust the descriptors. The structure works for almost any assessable product: essay, lab activity, report, project, poster, presentation, or portfolio.
 ```

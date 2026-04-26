@@ -1,4 +1,4 @@
-# Rúbrica de Evaluación y Secuencia de Objetivos
+# Rúbricas y secuencias de aprendizaje
 
 ## Rúbrica: Trabajo de investigación
 
@@ -26,13 +26,15 @@ Puntuación mínima para aprobar: **10 / 20** (50 %). La puntuación se obtiene 
 | 5. Análisis | Interpretar los resultados | Informe de hallazgos |
 | 6. Comunicación | Presentar el trabajo final | Documento escrito + defensa oral |
 
-## Aplicaciones
+## Aplicaciones transversales
 
-- **Educación**: evaluación formativa y sumativa de trabajos
-- **Psicología**: diseño de criterios para estudios de caso
-- **Biología**: evaluación de prácticas de laboratorio
+- **Humanidades**: evaluación de ensayos, comentarios de texto y exposiciones
+- **Ciencias sociales**: evaluación de estudios de caso, informes y debates
+- **Ciencias experimentales**: evaluación de prácticas de laboratorio y cuadernos de campo
+- **Ingeniería**: evaluación de proyectos, prototipos y documentación técnica
+- **Salud**: evaluación de casos clínicos simulados y razonamiento diagnóstico
 
 ```{admonition} Adapta la rúbrica
 :class: tip
-Cambia los criterios de la primera columna por los de tu asignatura y ajusta los descriptores. La escala 1-4 es estándar y fácil de calibrar entre evaluadores.
+Cambia los criterios de la primera columna por los de tu asignatura y ajusta los descriptores. La estructura sirve para casi cualquier producto evaluable: ensayo, práctica, informe, proyecto, póster, presentación o portfolio.
 ```

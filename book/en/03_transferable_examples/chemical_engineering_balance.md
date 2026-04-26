@@ -1,4 +1,4 @@
-# Mass Balance in a Reactor
+# Balances and Conservation
 
 ## Problem statement
 
@@ -45,9 +45,11 @@ $$X = 1 - \frac{C_A}{C_{A0}} = 1 - \frac{0.333}{2.0} = 0.833 \; (83.3\%)$$
 Residence time: $\tau = V / Q = 100 / 10 = 10 \; \text{min}$. For a first-order CSTR: $X = k\tau / (1 + k\tau) = 5 / 6 = 0.833$. The results match.
 ```
 
-## Applications
+## Cross-disciplinary applications
 
 - **Chemical Engineering**: reactor design, stoichiometric calculations
-- **Biology**: bioreactor models (fermentation)
-- **Medicine**: pharmacokinetics (single-compartment model)
-- **Environmental**: wastewater treatment modeling
+- **Biology and environment**: bioreactor, ecosystem, and wastewater treatment models
+- **Medicine**: pharmacokinetics and compartment models
+- **Economics**: income, expenses, debt, and accumulation flows
+- **Logistics**: inputs, outputs, and material storage
+- **Energy**: power balances, consumption, and losses

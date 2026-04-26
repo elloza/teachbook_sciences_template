@@ -1,4 +1,4 @@
-# Balance de Masa en un Reactor
+# Balances y conservación
 
 ## Planteamiento del problema
 
@@ -45,9 +45,11 @@ $$X = 1 - \frac{C_A}{C_{A0}} = 1 - \frac{0.333}{2.0} = 0.833 \; (83.3\%)$$
 Tiempo de residencia: $\tau = V / Q = 100 / 10 = 10 \; \text{min}$. Para un reactor CSTR de primer orden: $X = k\tau / (1 + k\tau) = 5 / 6 = 0.833$. Los resultados coinciden.
 ```
 
-## Aplicaciones
+## Aplicaciones transversales
 
 - **Ingeniería Química**: diseño de reactores, cálculos estequiométricos
-- **Biología**: modelos de biorreactores (fermentación)
-- **Medicina**: farmacocinética (modelo de compartimento único)
-- **Medioambiental**: modelado de depuradoras
+- **Biología y medioambiente**: modelos de biorreactores, ecosistemas y depuradoras
+- **Medicina**: farmacocinética y modelos de compartimentos
+- **Economía**: flujos de ingresos, gastos, deuda y acumulación
+- **Logística**: entradas, salidas y almacenamiento de materiales
+- **Energía**: balances de potencia, consumo y pérdidas

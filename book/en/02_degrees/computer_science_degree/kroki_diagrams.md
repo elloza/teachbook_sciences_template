@@ -67,9 +67,27 @@ workspace {
       include *
       autoLayout lr
     }
-    theme default
+    styles {
+      element "Software System" {
+        background #1168BD
+        color #FFFFFF
+      }
+      element "Container" {
+        background #438DD5
+        color #FFFFFF
+      }
+      element "Person" {
+        background #08427B
+        color #FFFFFF
+      }
+    }
   }
 }
+```
+
+```{admonition} PDF note
+:class: tip
+For C4 diagrams, define colors explicitly. Some default themes may produce white text on a white background when SVG is converted to PDF.
 ```
 
 ## 5. Wavedrom: digital protocol timing

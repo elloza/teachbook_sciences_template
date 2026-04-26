@@ -45,7 +45,7 @@ parts:
       - file: en/02_degrees/geology_degree/topographic_profile
       - file: en/02_degrees/geology_degree/stratigraphic_column
       - file: en/02_degrees/geology_degree/rock_cycle_mermaid
-  - caption: Transferable Examples
+  - caption: Cross-disciplinary Examples
     chapters:
     - file: en/03_transferable_examples/intro
       sections:

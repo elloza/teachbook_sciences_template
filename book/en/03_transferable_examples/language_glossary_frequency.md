@@ -1,10 +1,10 @@
-# Lexical Frequency Glossary
+# Text Corpus Frequencies
 
-In text analysis, **lexical frequency** indicates how many times each word appears in a corpus. It is a fundamental tool for vocabulary teaching.
+In any discipline that works with documents, **term frequency** indicates how many times each word or concept appears in a corpus. It helps detect dominant topics, key vocabulary, and shifts in focus across texts.
 
 ```{admonition} Why does frequency matter?
 :class: tip
-The 1,000 most frequent words in a language cover approximately 80 % of any text. Teaching the most frequent words first maximizes reading comprehension.
+The most frequent words or concepts often reveal the structure of a discourse. The same technique can be applied to novels, legal decisions, interviews, scientific articles, historical newspapers, or open-ended survey responses.
 ```
 
 ## Frequency table: sample corpus
@@ -24,12 +24,13 @@ The 1,000 most frequent words in a language cover approximately 80 % of any text
 
 ## Teaching applications
 
-- **Language and Literature**: vocabulary selection for different levels
-- **Education**: design of graded materials by difficulty
-- **Psychology**: language processing studies
-- **Engineering**: foundations of text mining and NLP
+- **Humanities**: topic analysis in literary, historical, or philosophical texts
+- **Social sciences**: study of interviews, open-ended surveys, or public discourse
+- **Health sciences**: review of frequent terms in reports or simulated anamnesis
+- **Engineering and computer science**: foundations of text mining and NLP
+- **Education**: design of materials graded by lexical or conceptual difficulty
 
 ```{admonition} How to adapt this table
 :class: tip
-Replace the frequencies with those from your own corpus. Tools like AntConc or Voyant Tools calculate frequencies automatically from any text.
+Replace the frequencies with those from your own corpus. Tools such as AntConc, Voyant Tools, or Python compute frequencies automatically from almost any collection of texts.
 ```

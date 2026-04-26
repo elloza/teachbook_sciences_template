@@ -40,7 +40,7 @@ python scripts/render_circuitikz.py rc_circuit.tex book/_static/generated/rc_cir
 ## Insert it in a MyST page
 
 ```md
-```{figure} _static/generated/rc_circuit.png
+```{figure} ../../../_static/generated/rc_circuit.png
 :alt: RC circuit generated with CircuitikZ
 :width: 70%
 :align: center
@@ -48,6 +48,18 @@ python scripts/render_circuitikz.py rc_circuit.tex book/_static/generated/rc_cir
 RC circuit generated with CircuitikZ.
 ```
 ```
+
+## Rendered result
+
+```{figure} ../../../_static/generated/rc_circuit_circuitikz.png
+:alt: RC circuit generated with CircuitikZ
+:width: 70%
+:align: center
+
+RC circuit generated from a `.tex` file with CircuitikZ and converted to a PNG image.
+```
+
+The advantage of this workflow is that the final circuit behaves like a normal image: it appears on the website, is included in the PDF, and does not require the reader to have LaTeX installed.
 
 ## When to use CircuitikZ
 
@@ -66,5 +78,5 @@ RC circuit generated with CircuitikZ.
 If you do not have Tectonic installed yet:
 
 ```bash
-python scripts/setup_latex.py
+python scripts/setup_latex.py --yes
 ```

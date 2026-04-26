@@ -67,9 +67,27 @@ workspace {
       include *
       autoLayout lr
     }
-    theme default
+    styles {
+      element "Software System" {
+        background #1168BD
+        color #FFFFFF
+      }
+      element "Container" {
+        background #438DD5
+        color #FFFFFF
+      }
+      element "Person" {
+        background #08427B
+        color #FFFFFF
+      }
+    }
   }
 }
+```
+
+```{admonition} Nota sobre PDF
+:class: tip
+En diagramas C4 conviene definir colores explícitos. Algunos temas por defecto pueden producir texto blanco sobre fondo blanco al convertir SVG a PDF.
 ```
 
 ## 5. Wavedrom: protocolo digital

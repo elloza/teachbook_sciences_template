@@ -1,11 +1,13 @@
 ---
 name: teachbook-generate-diagram
 description: >
-  Genera diagramas para el libro usando Kroki: Mermaid, PlantUML, GraphViz, Excalidraw, etc.
+  Genera imágenes de diagramas para el libro usando Kroki: Mermaid, PlantUML, GraphViz,
+  TikZ, WaveDrom, Excalidraw, etc.
   Los diagramas se renderizan como imágenes SVG que funcionan tanto en HTML como en PDF.
   Trigger phrases: "diagrama", "diagrama de flujo", "ER", "UML", "mermaid",
   "flowchart", "diagrama de clases", "diagrama entidad relación", "diagrama de secuencia",
   "diagrama de estados", "diagrama de gantt", "plantuml", "graphviz", "excalidraw",
+  "tikz", "wavedrom", "cronograma digital", "señal digital",
   "kroki", "generar diagrama", "crear diagrama".
 ---
 
@@ -13,18 +15,45 @@ description: >
 
 ## Qué es Kroki
 
-Kroki convierte texto en diagramas. El profesor escribe la sintaxis del diagrama (Mermaid, PlantUML, etc.) y Kroki la convierte en una imagen SVG durante la compilación del libro. La imagen se incrusta directamente, funcionando **tanto en HTML como en PDF**.
+Kroki convierte texto en **imágenes de diagramas**. El profesor escribe la sintaxis del diagrama (Mermaid, PlantUML, GraphViz, TikZ, WaveDrom, etc.) y Kroki la convierte en una imagen SVG durante la compilación del libro. La imagen se incrusta directamente, funcionando **tanto en HTML como en PDF**.
+
+El agente NO debe pensar en Kroki como “solo Mermaid”. Kroki es una capa para generar artefactos visuales desde lenguajes intermedios. La elección correcta depende del tipo de diagrama.
 
 ## Ventajas
 
 - ✅ Funciona en **HTML y PDF** (se renderiza como imagen SVG)
-- ✅ Soporta **20+ tipos** de diagramas (Mermaid, PlantUML, GraphViz, Excalidraw, etc.)
+- ✅ Soporta **20+ tipos** de diagramas (Mermaid, PlantUML, GraphViz, TikZ, WaveDrom, Excalidraw, etc.)
 - ✅ No requiere JavaScript ni herramientas externas instaladas
 - ✅ No necesita fallbacks manuales
 
 ## Requisito
 
 Necesita conexión a internet **durante la compilación** (no al leer el libro). GitHub Actions siempre tiene internet, así que el despliegue funciona siempre.
+
+## Decisión rápida: qué lenguaje usar
+
+| Necesidad docente | Opción recomendada | Por qué |
+|---|---|---|
+| Diagrama de flujo, mapa conceptual, proceso simple | **Mermaid** (`:type: mermaid`) | Sintaxis simple, ideal para contenido general. |
+| Informática: ER, clases, secuencia, estados, Gantt | **Mermaid** o **PlantUML** | Mermaid para casos sencillos; PlantUML si el UML es más formal/complejo. |
+| Arquitectura software/C4 | **Structurizr** o **PlantUML C4** | Mejor semántica arquitectónica que un flowchart genérico. |
+| Grafos matemáticos o redes | **GraphViz** (`:type: graphviz`) | Control claro de nodos/aristas y layout. |
+| Electrónica/Física: circuitos docentes bonitos | **CircuitikZ local renderizado a imagen** | CircuitikZ es LaTeX/TikZ especializado, pero el servicio público de Kroki/TikZ no garantiza tener `circuitikz` disponible. Usar la skill `teachbook-generate-circuitikz`. |
+| Señales digitales, buses, cronogramas, protocolos | **WaveDrom** (`:type: wavedrom`) | Diseñado específicamente para timing diagrams. |
+| Diagramas de bloques electrónicos | **Mermaid**, **D2** o **GraphViz** | Mejor para arquitectura de sistema que para esquemas de componentes. |
+| Campos de bits / paquetes / protocolos | **Bytefield** o **PacketDiag** | Más preciso que dibujarlo como cajas genéricas. |
+| Visualización de datos declarativa | **Vega/Vega-Lite** | Gráficos desde JSON declarativo. |
+
+```{admonition} Regla para circuitos
+:class: important
+Para circuitos eléctricos/electrónicos docentes, NO usar Mermaid como primera opción. Usar **CircuitikZ renderizado localmente a imagen** mediante `teachbook-generate-circuitikz`. Mermaid sirve para bloques, no para esquemas eléctricos con símbolos normalizados.
+```
+
+### Cuándo NO usar esta skill
+
+- **Circuitos docentes con símbolos normalizados**: usar la skill `teachbook-generate-circuitikz`, que renderiza CircuitikZ localmente a PNG mediante el pipeline LaTeX del proyecto.
+- **Circuitos electrónicos reales / netlists / KiCad**: usar un flujo avanzado tipo **SKiDL → netlist KiCad → KiCad CLI/export → SVG/PNG/PDF**. Esto es diseño electrónico real, no solo diagrama docente.
+- **Animaciones**: usar `teachbook-generate-manim-video`, no Kroki.
 
 ## Sintaxis MyST
 
@@ -69,6 +98,46 @@ graph TD
 Alice -> Bob: Hello
 Bob --> Alice: Hi!
 @enduml
+```
+````
+
+### Circuitos docentes: CircuitikZ NO va por Kroki público
+
+Kroki soporta `:type: tikz`, pero eso no implica que el servicio público tenga cargado el paquete LaTeX `circuitikz`. En pruebas directas, `\begin{circuitikz}` puede fallar con `Environment circuitikz undefined`.
+
+Para circuitos, usar el flujo local de la skill `teachbook-generate-circuitikz`:
+
+````markdown
+```{figure} _static/generated/circuito_rc_circuitikz.png
+:alt: Circuito RC generado con CircuitikZ
+:width: 70%
+:align: center
+
+Circuito RC generado desde código CircuitikZ y renderizado como imagen.
+```
+````
+
+Notas para el agente:
+
+- Mantener los circuitos CircuitikZ **pequeños y docentes**.
+- Etiquetar magnitudes con unidades LaTeX legibles: `$5\,\mathrm{V}$`, `$20\,\mu\mathrm{F}$`.
+- No prometer CircuitikZ vía Kroki público salvo que se haya verificado en ese entorno concreto.
+
+### Señales digitales con WaveDrom
+
+Usar WaveDrom para cronogramas, buses, señales digitales y protocolos.
+
+````markdown
+```{kroki-figure}
+:type: wavedrom
+:align: center
+:caption: Cronograma digital de una señal de reloj y datos
+
+{ signal: [
+  { name: "clk",  wave: "p.....|..." },
+  { name: "data", wave: "x.345x|=.x", data: ["A", "B", "C", "D"] },
+  { name: "valid", wave: "0.1..0|1.0" }
+]}
 ```
 ````
 
@@ -216,6 +285,7 @@ gantt
 | PlantUML | `plantuml` | Diagramas UML completos. Sintaxis `@startuml` / `@enduml`. |
 | GraphViz | `graphviz` | Diagramas de nodos y aristas. Usa sintaxis DOT. |
 | Excalidraw | `excalidraw` | Diagramas dibujados a mano (estilo pizarra). JSON. |
+| TikZ | `tikz` | Diagramas LaTeX/TikZ simples. Para CircuitikZ, preferir render local con `teachbook-generate-circuitikz`. |
 | Bytefield | `bytefield` | Diagramas de campos de bits (electrónica/protocolos). |
 | BlockDiag | `blockdiag` | Diagramas de bloques simples. |
 | SeqDiaq | `seqdiag` | Diagramas de secuencia (alternativa simple). |
@@ -229,7 +299,7 @@ gantt
 | Nomnoml | `nomnoml` | Diagramas de clases UML minimalistas. |
 | SvgBob | `svgbob` | Diagramas ASCII convertidos a SVG. |
 | Umlet | `umlet` | Diagramas UML. |
-| WaveDrom | `wavedrom` | Diagramas de formas de onda digitales. |
+| WaveDrom | `wavedrom` | Diagramas de formas de onda digitales, buses, timing y protocolos. |
 | Pikchr | `pikchr` | Diagramas técnicos (tipo PIC). |
 | Structurizr | `structurizr` | Diagramas C4 (arquitectura software). |
 
@@ -238,6 +308,9 @@ gantt
 | Regla | Detalle |
 |---|---|
 | Tipo por defecto | Usar **Mermaid** (`:type: mermaid`) salvo que el usuario pida otro. |
+| Circuitos docentes | Usar **CircuitikZ local renderizado a imagen** para circuitos de Física/Electrónica. No asumir que Kroki público carga `circuitikz`. |
+| Señales digitales | Usar **WaveDrom** (`:type: wavedrom`) para cronogramas, buses y timing. |
+| Circuitos reales | No usar Kroki como diseño electrónico real. Recomendar SKiDL/KiCad para netlists y KiCad CLI/export para render final. |
 | Simplicidad | Máximo **10-15 nodos**. Si necesitas más, divide en varios diagramas. |
 | Etiquetas | Usar **español** para los textos (salvo que el contenido sea en inglés). |
 | Caption | Siempre añadir `:caption:` descriptivo usando `{kroki-figure}`. |
@@ -249,7 +322,7 @@ gantt
 ## Flujo de trabajo
 
 1. Preguntar qué tipo de diagrama necesita el usuario y qué concepto quiere representar.
-2. Elegir el tipo adecuado (Mermaid por defecto, PlantUML para UML complejo, etc.).
+2. Elegir el tipo adecuado: Mermaid por defecto; PlantUML para UML complejo; GraphViz para grafos; CircuitikZ local para circuitos docentes; WaveDrom para señales digitales.
 3. Generar el código del diagrama usando la plantilla correspondiente.
 4. Insertar en el archivo `.md` usando `{kroki}` con `:type: <tipo>`.
 5. Si el usuario quiere título/caption, usar `{kroki-figure}` en lugar de `{kroki}`.

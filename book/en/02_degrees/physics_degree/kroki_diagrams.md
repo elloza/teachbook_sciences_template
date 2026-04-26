@@ -1,11 +1,13 @@
 # Technical Diagrams with Kroki for Physics
 
-Kroki is useful for **block diagrams, signal flow, timing diagrams, and conceptual schematics**. For **precise electrical circuits**, the recommended tool is still **SchemDraw**.
+Kroki is useful for **block diagrams, signal flow, timing diagrams, and conceptual schematics**. For **electrical circuits with standard symbols**, the recommended tool is **CircuitikZ rendered as an image**.
 
-## When to use Kroki and when to use SchemDraw
+## When to use each tool
 
 - **Use Kroki** for conceptual explanations, functional blocks, timing, instrumentation, and signal flow.
-- **Use SchemDraw** for resistors, capacitors, sources, switches, and formal electrical schematics.
+- **Use WaveDrom through Kroki** for digital signals, buses, clocks, and timing protocols.
+- **Use CircuitikZ** for resistors, capacitors, sources, switches, and formal electrical schematics.
+- **Use SchemDraw** when you want to build simple circuits from Python inside a notebook.
 
 ## 1. Mermaid: instrumentation chain
 
@@ -37,7 +39,34 @@ digraph G {
 }
 ```
 
-## 3. Wavedrom: input and output signals
+## 3. CircuitikZ: teaching circuit as an image
+
+The following circuit is not drawn by hand: it comes from a `.tex` file with CircuitikZ code, rendered beforehand as an image so it works the same way in HTML and PDF.
+
+```{figure} ../../../_static/generated/rc_circuit_circuitikz.png
+:alt: RC circuit generated with CircuitikZ
+:width: 70%
+:align: center
+
+RC circuit generated from CircuitikZ code.
+```
+
+```tex
+\begin{circuitikz}
+\draw
+  (0,0) to[V, l=$5\,\mathrm{V}$] (0,3)
+  to[R, l=$R_1$] (3,3)
+  to[C, l=$20\,\mu\mathrm{F}$] (3,0)
+  -- (0,0);
+\end{circuitikz}
+```
+
+```{admonition} Important
+:class: warning
+Kroki supports TikZ, but the public Kroki service does not guarantee that the `circuitikz` package is available. For robust teaching circuits, this project renders CircuitikZ locally as an image.
+```
+
+## 4. Wavedrom: input and output signals
 
 ```{kroki}
 :type: wavedrom
@@ -50,7 +79,7 @@ digraph G {
 ]}
 ```
 
-## 4. Ditaa: quick experimental bench sketch
+## 5. Ditaa: quick experimental bench sketch
 
 ```{kroki}
 :type: ditaa
@@ -63,7 +92,8 @@ digraph G {
 
 ## Key idea
 
-Kroki **complements** SchemDraw. They do not compete:
+Kroki, CircuitikZ, and SchemDraw **complement** each other. They do not compete:
 
-- **SchemDraw** = exact circuit
-- **Kroki** = system-level visual explanation
+- **Kroki** = system-level visual explanation, blocks, flows, and timing diagrams.
+- **CircuitikZ** = formal circuit with standard symbols and LaTeX-quality output.
+- **SchemDraw** = programmable circuit from Python, ideal for teaching notebooks.

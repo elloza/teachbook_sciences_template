@@ -1,10 +1,10 @@
-# Glosario de Frecuencia Léxica
+# Frecuencias en corpus de texto
 
-En el análisis de textos, la **frecuencia léxica** indica cuántas veces aparece cada palabra en un corpus. Es una herramienta fundamental para la enseñanza de vocabulario.
+En cualquier disciplina que trabaje con documentos, la **frecuencia de términos** indica cuántas veces aparece cada palabra o concepto en un corpus. Sirve para detectar temas dominantes, vocabulario clave y cambios de enfoque entre textos.
 
 ```{admonition} ¿Por qué importa la frecuencia?
 :class: tip
-Las 1.000 palabras más frecuentes de un idioma cubren aproximadamente el 80 % de cualquier texto. Enseñar primero las palabras más frecuentes maximiza la comprensión lectora.
+Las palabras o conceptos más frecuentes suelen revelar la estructura de un discurso. La misma técnica puede aplicarse a novelas, sentencias judiciales, entrevistas, artículos científicos, prensa histórica o respuestas abiertas de encuestas.
 ```
 
 ## Tabla de frecuencia: corpus de ejemplo
@@ -24,12 +24,13 @@ Las 1.000 palabras más frecuentes de un idioma cubren aproximadamente el 80 % d
 
 ## Aplicaciones didácticas
 
-- **Lengua y Literatura**: selección de vocabulario para distintos niveles
-- **Educación**: diseño de materiales graduados por dificultad
-- **Psicología**: estudios sobre procesamiento del lenguaje
-- **Ingeniería**: fundamentos de minería de textos y PLN
+- **Humanidades**: análisis de temas en textos literarios, históricos o filosóficos
+- **Ciencias sociales**: estudio de entrevistas, encuestas abiertas o discursos públicos
+- **Ciencias de la salud**: revisión de términos frecuentes en informes o anamnesis simuladas
+- **Ingeniería e informática**: fundamentos de minería de textos y PLN
+- **Educación**: diseño de materiales graduados por dificultad léxica o conceptual
 
 ```{admonition} Cómo adaptar esta tabla
 :class: tip
-Sustituye las frecuencias por las de tu propio corpus. Herramientas como AntConc o Voyant Tools calculan frecuencias automáticamente a partir de cualquier texto.
+Sustituye las frecuencias por las de tu propio corpus. Herramientas como AntConc, Voyant Tools o Python permiten calcular frecuencias automáticamente a partir de casi cualquier colección de textos.
 ```

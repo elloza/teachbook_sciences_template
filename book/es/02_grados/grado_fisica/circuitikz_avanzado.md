@@ -40,7 +40,7 @@ python scripts/render_circuitikz.py rc_circuit.tex book/_static/generated/rc_cir
 ## Inserción en la página MyST
 
 ```md
-```{figure} _static/generated/rc_circuit.png
+```{figure} ../../../_static/generated/rc_circuit.png
 :alt: Circuito RC generado con CircuitikZ
 :width: 70%
 :align: center
@@ -48,6 +48,18 @@ python scripts/render_circuitikz.py rc_circuit.tex book/_static/generated/rc_cir
 Circuito RC generado con CircuitikZ.
 ```
 ```
+
+## Resultado renderizado
+
+```{figure} ../../../_static/generated/circuito_rc_circuitikz.png
+:alt: Circuito RC generado con CircuitikZ
+:width: 70%
+:align: center
+
+Circuito RC generado desde un archivo `.tex` con CircuitikZ y convertido a imagen PNG.
+```
+
+La ventaja de este flujo es que el circuito final se comporta como una imagen normal: se ve en la web, se incluye en el PDF y no depende de que el lector tenga instalado LaTeX.
 
 ## Cuándo usar CircuitikZ
 
@@ -66,5 +78,5 @@ Circuito RC generado con CircuitikZ.
 Si aún no tienes Tectonic instalado:
 
 ```bash
-python scripts/setup_latex.py
+python scripts/setup_latex.py --yes
 ```
