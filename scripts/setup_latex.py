@@ -300,6 +300,7 @@ def install_full_latex_ci():
                     "collection-fontsrecommended",
                     "collection-langspanish",
                     "collection-langenglish",
+                    "gnu-freefont",
                     "bbm",
                     "bbm-macros",
                     "xindy",
@@ -338,6 +339,7 @@ def install_full_latex_ci():
             subprocess.run([mpm, "--update-db"], check=False)
             subprocess.run([mpm, "--install=bbm"], check=False)
             subprocess.run([mpm, "--install=bbm-macros"], check=False)
+            subprocess.run([mpm, "--install=gnu-freefont"], check=False)
         return verify_full_latex() and verify_svg_converter()
 
     print(f"❌ Sistema no soportado para instalación CI: {platform.system()}")
