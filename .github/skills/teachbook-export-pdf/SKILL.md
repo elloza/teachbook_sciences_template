@@ -107,7 +107,7 @@ python scripts/setup_latex.py --yes
 python scripts/export_pdf.py
 ```
 
-Si se quiere validar el fallback completo, debe ser un paso explícito aparte, NO el flujo normal del usuario.
+Si Tectonic falla en CI con un problema del motor, el workflow puede instalar el fallback avanzado y repetir con `--engine latexmk`. Eso mantiene Tectonic como flujo principal del usuario, pero evita que la publicación quede bloqueada por un fallo interno del binario de Tectonic en un runner concreto.
 
 ## Solución de problemas
 

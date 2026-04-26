@@ -48,7 +48,11 @@ jobs:
 
       - name: Generate PDF with Tectonic
         run: |
-          python scripts/export_pdf.py
+          if ! python scripts/export_pdf.py; then
+            echo "⚠️ Tectonic falló en CI. Instalando fallback avanzado latexmk/XeLaTeX..."
+            python scripts/setup_latex.py --ci-full
+            python scripts/export_pdf.py --engine latexmk
+          fi
 
       - name: Build HTML book
         run: |
