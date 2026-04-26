@@ -71,7 +71,17 @@ def install_full_latex_ci():
     print("🔧 Instalando toolchain LaTeX completa para CI...")
     system = platform.system().lower()
 
-    if verify_full_latex():
+    full_latex_ready = verify_full_latex()
+
+    def verify_svg_converter():
+        converter = shutil.which("rsvg-convert")
+        if converter:
+            print(f"✅ Conversor SVG detectado: {converter}")
+            return True
+        print("❌ Falta conversor SVG robusto (rsvg-convert).")
+        return False
+
+    if full_latex_ready and verify_svg_converter():
         return True
 
     if system == "linux":
@@ -93,44 +103,50 @@ def install_full_latex_ci():
                 "texlive-fonts-extra",
                 "texlive-lang-spanish",
                 "texlive-lang-english",
+                "librsvg2-bin",
                 "xindy",
             ]
         )
-        return verify_full_latex()
+        return verify_full_latex() and verify_svg_converter()
 
     if system == "darwin":
         if not command_exists("brew"):
             print("❌ Homebrew no está disponible; no puedo instalar BasicTeX automáticamente.")
             return False
-        run(["brew", "install", "cairo", "pkg-config"])
-        run(["brew", "install", "--cask", "basictex"])
+        run(["brew", "install", "librsvg", "cairo", "pkg-config"])
+        if not full_latex_ready:
+            run(["brew", "install", "--cask", "basictex"])
         texbin = "/Library/TeX/texbin"
         os.environ["PATH"] = texbin + os.pathsep + os.environ.get("PATH", "")
         add_github_path(texbin)
-        tlmgr = os.path.join(texbin, "tlmgr")
-        run(["sudo", tlmgr, "update", "--self"])
-        run(
-            [
-                "sudo",
-                tlmgr,
-                "install",
-                "latexmk",
-                "collection-xetex",
-                "collection-latexrecommended",
-                "collection-latexextra",
-                "collection-fontsrecommended",
-                "collection-langspanish",
-                "collection-langenglish",
-                "xindy",
-            ]
-        )
-        return verify_full_latex()
+        if not full_latex_ready:
+            tlmgr = os.path.join(texbin, "tlmgr")
+            run(["sudo", tlmgr, "update", "--self"])
+            run(
+                [
+                    "sudo",
+                    tlmgr,
+                    "install",
+                    "latexmk",
+                    "collection-xetex",
+                    "collection-latexrecommended",
+                    "collection-latexextra",
+                    "collection-fontsrecommended",
+                    "collection-langspanish",
+                    "collection-langenglish",
+                    "xindy",
+                ]
+            )
+        return verify_full_latex() and verify_svg_converter()
 
     if system == "windows":
         if not command_exists("choco"):
             print("❌ Chocolatey no está disponible; no puedo instalar MiKTeX automáticamente.")
             return False
-        run(["choco", "install", "miktex", "strawberryperl", "gtk-runtime", "-y", "--no-progress"])
+        packages = ["librsvg", "gtk-runtime"]
+        if not full_latex_ready:
+            packages = ["miktex", "strawberryperl"] + packages
+        run(["choco", "install", *packages, "-y", "--no-progress"])
         miktex_bin = r"C:\Program Files\MiKTeX\miktex\bin\x64"
         perl_bin = r"C:\Strawberry\perl\bin"
         gtk_candidates = [
@@ -145,13 +161,13 @@ def install_full_latex_ci():
         for gtk_bin in gtk_candidates:
             add_github_path(gtk_bin)
         initexmf = shutil.which("initexmf")
-        if initexmf:
+        if initexmf and not full_latex_ready:
             subprocess.run([initexmf, "--set-config-value", "[MPM]AutoInstall=1"], check=False)
             subprocess.run([initexmf, "--update-fndb"], check=False)
         mpm = shutil.which("mpm")
-        if mpm:
+        if mpm and not full_latex_ready:
             subprocess.run([mpm, "--update-db"], check=False)
-        return verify_full_latex()
+        return verify_full_latex() and verify_svg_converter()
 
     print(f"❌ Sistema no soportado para instalación CI: {platform.system()}")
     return False

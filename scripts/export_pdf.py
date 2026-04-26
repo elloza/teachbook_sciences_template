@@ -177,20 +177,31 @@ def prepare_svg_images_for_latex(latex_build_dir):
     if not svg_paths:
         return True
 
-    try:
-        import cairosvg
-    except Exception as exc:
-        print("❌ Hay SVGs en el build LaTeX, pero CairoSVG no está instalado.")
-        print("   Ejecuta: python -m pip install cairosvg")
-        print(f"   Detalle: {exc}")
-        return False
+    rsvg_convert = shutil.which("rsvg-convert")
+    cairosvg = None
+    if not rsvg_convert:
+        try:
+            import cairosvg as cairosvg_module
+
+            cairosvg = cairosvg_module
+        except Exception as exc:
+            print("❌ Hay SVGs en el build LaTeX, pero no hay conversor SVG robusto.")
+            print("   Instala rsvg-convert (librsvg) o CairoSVG con las librerías Cairo nativas.")
+            print(f"   Detalle CairoSVG: {exc}")
+            return False
 
     print(f"🖼️  Convirtiendo {len(svg_paths)} SVG(s) a PNG para LaTeX...")
     replacements = {}
     for svg_path in svg_paths:
         png_path = os.path.splitext(svg_path)[0] + ".png"
         try:
-            cairosvg.svg2png(url=svg_path, write_to=png_path, output_width=1600)
+            if rsvg_convert:
+                subprocess.run(
+                    [rsvg_convert, "--width", "1600", "--output", png_path, svg_path],
+                    check=True,
+                )
+            else:
+                cairosvg.svg2png(url=svg_path, write_to=png_path, output_width=1600)
         except Exception as exc:
             print(f"❌ No se pudo convertir {svg_path}: {exc}")
             return False
