@@ -4,6 +4,7 @@ sphinx-design
 sphinxcontrib-bibtex
 sphinx-thebe
 sphinx-kroki
+cairosvg
 jupyterquiz
 manim
 matplotlib

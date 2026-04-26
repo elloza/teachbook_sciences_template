@@ -164,6 +164,51 @@ def generate_metadata_tex(lang, latex_build_dir):
     print(f"   📝 Metadata TeX generado: {tex_path}")
 
 
+def prepare_svg_images_for_latex(latex_build_dir):
+    """Convert SVG images in the LaTeX build to PNG and rewrite TeX refs.
+
+    Sphinx's default converter uses ImageMagick `convert`, which fails on some
+    Kroki/Mermaid SVGs (`stroke-dasharray`).  XeLaTeX also cannot infer SVG
+    bounding boxes directly.  CairoSVG handles these diagrams reliably enough
+    for static PDF output and keeps the workflow cross-platform.
+    """
+    svg_paths = glob.glob(os.path.join(latex_build_dir, "*.svg"))
+    if not svg_paths:
+        return True
+
+    try:
+        import cairosvg
+    except Exception as exc:
+        print("❌ Hay SVGs en el build LaTeX, pero CairoSVG no está instalado.")
+        print("   Ejecuta: python -m pip install cairosvg")
+        print(f"   Detalle: {exc}")
+        return False
+
+    print(f"🖼️  Convirtiendo {len(svg_paths)} SVG(s) a PNG para LaTeX...")
+    replacements = {}
+    for svg_path in svg_paths:
+        png_path = os.path.splitext(svg_path)[0] + ".png"
+        try:
+            cairosvg.svg2png(url=svg_path, write_to=png_path, output_width=1600)
+        except Exception as exc:
+            print(f"❌ No se pudo convertir {svg_path}: {exc}")
+            return False
+        replacements[os.path.basename(svg_path)] = os.path.basename(png_path)
+
+    for tex_path in glob.glob(os.path.join(latex_build_dir, "*.tex")):
+        with open(tex_path, "r", encoding="utf-8") as f:
+            text = f.read()
+        original = text
+        for svg_name, png_name in replacements.items():
+            text = text.replace(svg_name, png_name)
+        if text != original:
+            with open(tex_path, "w", encoding="utf-8") as f:
+                f.write(text)
+            print(f"   🔁 Referencias SVG actualizadas en {os.path.basename(tex_path)}")
+
+    return True
+
+
 def build_pdf_for_lang(lang):
     """Builds the PDF for a specific language using a standalone temporary project."""
     print(f"\n🚀 Iniciando generación de PDF STANDALONE para: {lang.upper()}...")
@@ -266,6 +311,9 @@ def build_pdf_for_lang(lang):
             d = os.path.join(latex_build_dir, item)
             if os.path.isfile(s):
                 shutil.copy2(s, d)
+
+    if not prepare_svg_images_for_latex(latex_build_dir):
+        return False
 
     print(f"📂 Compilando PDF en {latex_build_dir}...")
     current_dir = os.getcwd()

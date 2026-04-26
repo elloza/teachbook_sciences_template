@@ -144,8 +144,8 @@ latex_templates/
 | PowerShell bloquea scripts | No actives el venv con `.ps1`; usa la ruta completa `.venv\Scripts\python.exe ...` |
 | `UnicodeEncodeError` / caracteres raros en Windows | Usa los scripts actualizados; fuerzan salida UTF-8 segura |
 | Error con videos de YouTube | Usar el patrón dual `{raw} html` + `{raw} latex` (ver skill `teachbook-multimedia`) |
-| Error con imágenes SVG | Convertir a PNG; LaTeX no soporta SVG nativamente |
-| Error `convert` / ImageMagick con SVG de Kroki | No instales ImageMagick solo para esto en CI: puede fallar con SVG complejos. Si necesitas conversión real, pre-renderiza esos diagramas a PNG |
+| Error con imágenes SVG | Los scripts convierten SVG a PNG con CairoSVG antes de compilar; no referencies SVG directamente desde LaTeX |
+| Error `convert` / ImageMagick con SVG de Kroki | No uses ImageMagick para esto en CI: puede fallar con SVG complejos. El flujo oficial usa CairoSVG |
 | Tectonic termina con `SIGSEGV` en CI | No usar Tectonic como motor principal: instalar toolchain completa con `setup_latex.py --ci-full` |
 | GitHub API devuelve `rate limit exceeded` instalando Tectonic en Actions | Pasar `GITHUB_TOKEN: ${{ github.token }}` al paso `setup_latex.py --yes` |
 | Fórmulas mal renderizadas | Verificar que `dollarmath` está en `myst_enable_extensions` del config |
