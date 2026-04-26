@@ -41,6 +41,8 @@ jobs:
           pip install -r requirements.txt
 
       - name: Install Tectonic (default PDF flow)
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
           python scripts/setup_latex.py --yes
 

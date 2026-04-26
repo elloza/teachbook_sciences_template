@@ -10,6 +10,7 @@ import urllib.request
 import zipfile
 import tarfile
 import tempfile
+import time
 
 # Fix: Windows cp1252 can't encode emojis — force UTF-8
 if sys.stdout.encoding and sys.stdout.encoding.lower() not in ("utf-8", "utf8"):
@@ -504,6 +505,36 @@ def fetch_latest_release_for_repo(repo_slug):
         return None, []
 
 
+def download_file_with_retries(url, destination, label, attempts=4):
+    """Download a release asset with retries and CI-friendly headers."""
+    headers = {"User-Agent": "teachbook-setup"}
+    token = os.environ.get("GITHUB_TOKEN")
+    if token and "github.com" in url:
+        headers["Authorization"] = f"Bearer {token}"
+
+    last_error = None
+    for attempt in range(1, attempts + 1):
+        try:
+            print(f"   Descargando {label} (intento {attempt}/{attempts})...")
+            req = urllib.request.Request(url, headers=headers)
+            with urllib.request.urlopen(req, timeout=120) as resp:
+                with open(destination, "wb") as f:
+                    shutil.copyfileobj(resp, f)
+            if os.path.getsize(destination) > 0:
+                return True
+            last_error = "archivo descargado vacío"
+        except Exception as exc:
+            last_error = exc
+
+        if attempt < attempts:
+            wait_seconds = min(2 * attempt, 8)
+            print(f"   ⚠️  Descarga fallida ({last_error}). Reintentando en {wait_seconds}s...")
+            time.sleep(wait_seconds)
+
+    print(f"❌ Error descargando {label}: {last_error}")
+    return False
+
+
 def find_asset_url(assets, rust_target, ext):
     for asset in assets:
         name = asset.get("name", "")
@@ -590,10 +621,7 @@ def install_resvg_binary():
         extract_dir = os.path.join(tmp, "extracted")
         os.makedirs(extract_dir, exist_ok=True)
 
-        try:
-            urllib.request.urlretrieve(download_url, archive_path)
-        except Exception as e:
-            print(f"❌ Error descargando resvg: {e}")
+        if not download_file_with_retries(download_url, archive_path, asset_name):
             return False
 
         try:
@@ -655,16 +683,11 @@ def install_tectonic_binary():
         print("   Revisa https://github.com/tectonic-typesetting/tectonic/releases")
         return False
 
-    print(f"   Descargando {asset_name}...")
-
     install_dir = get_binary_install_dir()
     with tempfile.TemporaryDirectory(prefix="tectonic_") as tmp:
         archive_path = os.path.join(tmp, asset_name)
 
-        try:
-            urllib.request.urlretrieve(download_url, archive_path)
-        except Exception as e:
-            print(f"❌ Error descargando: {e}")
+        if not download_file_with_retries(download_url, archive_path, asset_name):
             return False
 
         print("📦 Extrayendo...")
