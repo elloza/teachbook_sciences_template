@@ -5,6 +5,7 @@ import shutil
 import sys
 import glob
 import yaml
+import re
 
 
 # Determine script/project directories once, before any chdir.
@@ -213,6 +214,39 @@ def prepare_svg_images_for_latex(latex_build_dir):
     return True
 
 
+def prepare_static_paths_for_latex(latex_build_dir):
+    """Mirror root `_static` into nested paths referenced by Sphinx LaTeX.
+
+    In standalone per-language builds, MyST/Sphinx may serialize an image
+    reference such as `_static/logo.png` from a nested source page as
+    `es/05_contenidos_basicos/_static/logo.png`.  The real files live in the
+    LaTeX build root `_static/`.  Mirroring that directory into the referenced
+    nested locations avoids OS-specific path hacks and works on all runners.
+    """
+    root_static = os.path.join(latex_build_dir, "_static")
+    if not os.path.isdir(root_static):
+        return
+
+    needed_dirs = set()
+    for tex_path in glob.glob(os.path.join(latex_build_dir, "*.tex")):
+        with open(tex_path, "r", encoding="utf-8") as f:
+            text = f.read()
+        for match in re.finditer(r"([A-Za-z0-9_./-]+/_static/)", text):
+            prefix = match.group(1).strip("./")
+            if prefix and prefix != "_static/":
+                needed_dirs.add(os.path.join(latex_build_dir, prefix))
+
+    for dest_static in sorted(needed_dirs):
+        if os.path.abspath(dest_static) == os.path.abspath(root_static):
+            continue
+        parent = os.path.dirname(dest_static)
+        os.makedirs(parent, exist_ok=True)
+        if os.path.exists(dest_static):
+            continue
+        shutil.copytree(root_static, dest_static)
+        print(f"   📁 _static replicado para LaTeX: {os.path.relpath(dest_static, latex_build_dir)}")
+
+
 def build_pdf_for_lang(lang):
     """Builds the PDF for a specific language using a standalone temporary project."""
     print(f"\n🚀 Iniciando generación de PDF STANDALONE para: {lang.upper()}...")
@@ -318,6 +352,7 @@ def build_pdf_for_lang(lang):
 
     if not prepare_svg_images_for_latex(latex_build_dir):
         return False
+    prepare_static_paths_for_latex(latex_build_dir)
 
     print(f"📂 Compilando PDF en {latex_build_dir}...")
     current_dir = os.getcwd()
