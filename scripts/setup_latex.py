@@ -102,6 +102,7 @@ def install_full_latex_ci():
         if not command_exists("brew"):
             print("❌ Homebrew no está disponible; no puedo instalar BasicTeX automáticamente.")
             return False
+        run(["brew", "install", "cairo", "pkg-config"])
         run(["brew", "install", "--cask", "basictex"])
         texbin = "/Library/TeX/texbin"
         os.environ["PATH"] = texbin + os.pathsep + os.environ.get("PATH", "")
@@ -129,12 +130,20 @@ def install_full_latex_ci():
         if not command_exists("choco"):
             print("❌ Chocolatey no está disponible; no puedo instalar MiKTeX automáticamente.")
             return False
-        run(["choco", "install", "miktex", "strawberryperl", "-y", "--no-progress"])
+        run(["choco", "install", "miktex", "strawberryperl", "gtk-runtime", "-y", "--no-progress"])
         miktex_bin = r"C:\Program Files\MiKTeX\miktex\bin\x64"
         perl_bin = r"C:\Strawberry\perl\bin"
-        os.environ["PATH"] = miktex_bin + os.pathsep + perl_bin + os.pathsep + os.environ.get("PATH", "")
+        gtk_candidates = [
+            r"C:\Program Files\GTK3-Runtime Win64\bin",
+            r"C:\Program Files\GTK2-Runtime\bin",
+            r"C:\tools\gtk-runtime\bin",
+        ]
+        extra_paths = [miktex_bin, perl_bin] + [p for p in gtk_candidates if os.path.isdir(p)]
+        os.environ["PATH"] = os.pathsep.join(extra_paths) + os.pathsep + os.environ.get("PATH", "")
         add_github_path(miktex_bin)
         add_github_path(perl_bin)
+        for gtk_bin in gtk_candidates:
+            add_github_path(gtk_bin)
         initexmf = shutil.which("initexmf")
         if initexmf:
             subprocess.run([initexmf, "--set-config-value", "[MPM]AutoInstall=1"], check=False)
