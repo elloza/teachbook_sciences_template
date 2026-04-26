@@ -36,27 +36,23 @@ jobs:
             pango1.0-tools \
             ffmpeg
 
-      - name: Install dependencies
+      - name: Set up TeachBook environment
         run: |
-          pip install -r requirements.txt
+          echo "n" | python scripts/setup_env.py
 
-      - name: Install Tectonic (default PDF flow)
+      - name: Install PDF toolchain (same as local full setup)
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
-          python scripts/setup_latex.py --yes
+          .venv/bin/python scripts/setup_latex.py --yes --full
 
-      - name: Generate PDF with Tectonic
+      - name: Generate PDF with CI/CD engine policy
         run: |
-          if ! python scripts/export_pdf.py; then
-            echo "⚠️ Tectonic falló en CI. Instalando fallback avanzado latexmk/XeLaTeX..."
-            python scripts/setup_latex.py --ci-full
-            python scripts/export_pdf.py --engine latexmk
-          fi
+          .venv/bin/python scripts/export_pdf.py --engine auto
 
       - name: Build HTML book
         run: |
-          python scripts/build_book.py
+          .venv/bin/python scripts/build_book.py
           # FAILSAFE: Ensure .nojekyll exists even if script skipped it
           touch book/_build/html/.nojekyll
 

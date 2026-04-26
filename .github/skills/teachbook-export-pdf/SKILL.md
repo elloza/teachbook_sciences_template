@@ -2,7 +2,7 @@
 name: teachbook-export-pdf
 description: >
   Exporta el libro completo a formato PDF para cada idioma configurado.
-  Genera LaTeX intermedio, preprocesa SVG/rutas problemáticas y compila con Tectonic como flujo principal.
+  Genera LaTeX intermedio, preprocesa SVG/rutas problemáticas y compila con la misma política local/CI.
   Trigger phrases: "exportar PDF", "genera PDF", "PDF", "imprimible", "versión impresa",
   "quiero imprimir", "descargar PDF", "export pdf", "generate PDF".
 ---
@@ -17,14 +17,14 @@ description: >
 
 ## Flujo principal del proyecto
 
-El flujo normal para usuario y agentes es:
+El flujo recomendado para que el alumno vea localmente lo mismo que publicará CI/CD es:
 
 ```bash
-python scripts/setup_latex.py --yes
-python scripts/export_pdf.py
+python scripts/setup_latex.py --yes --full
+python scripts/export_pdf.py --engine auto
 ```
 
-Eso instala **Tectonic** y lo usa como motor por defecto.
+Eso instala **Tectonic** y también prepara el fallback avanzado (`latexmk` + XeLaTeX) cuando el sistema lo permite. La exportación con `--engine auto` prueba Tectonic primero y, si el motor falla, usa el fallback. Es la misma política que deben usar deploy y tests.
 
 ## Qué hace `export_pdf.py`
 
@@ -45,7 +45,7 @@ book/_static/teachbook_en.pdf
 
 ## Motores soportados
 
-### Opción principal: Tectonic
+### Opción principal ligera: Tectonic
 
 - Es el default.
 - Es la opción simple/portable.
@@ -58,13 +58,13 @@ python scripts/setup_latex.py --yes
 python scripts/setup_latex.py --check
 ```
 
-### Fallback avanzado explícito: latexmk + xelatex
+### Toolchain completa local/CI: Tectonic + latexmk/xelatex
 
-Se mantiene solo para casos avanzados, diagnóstico o entornos concretos:
+Usar cuando se quiera paridad con CI/CD o generación robusta de PDFs:
 
 ```bash
-python scripts/setup_latex.py --ci-full
-python scripts/export_pdf.py --engine latexmk
+python scripts/setup_latex.py --yes --full
+python scripts/export_pdf.py --engine auto
 ```
 
 Verificación:
@@ -79,15 +79,15 @@ python scripts/setup_latex.py --check-full
 
 | Sistema | Comando |
 |---|---|
-| Linux / macOS | `.venv/bin/python scripts/setup_latex.py --yes` |
-| Windows PowerShell | `.venv\Scripts\python.exe scripts/setup_latex.py --yes` |
+| Linux / macOS | `.venv/bin/python scripts/setup_latex.py --yes --full` |
+| Windows PowerShell | `.venv\Scripts\python.exe scripts/setup_latex.py --yes --full` |
 
 ### Paso 2: exportar PDF
 
 | Sistema | Comando |
 |---|---|
-| Linux / macOS | `.venv/bin/python scripts/export_pdf.py` |
-| Windows PowerShell | `.venv\Scripts\python.exe scripts/export_pdf.py` |
+| Linux / macOS | `.venv/bin/python scripts/export_pdf.py --engine auto` |
+| Windows PowerShell | `.venv\Scripts\python.exe scripts/export_pdf.py --engine auto` |
 
 ### Paso 3: comprobar salida
 
@@ -100,20 +100,20 @@ book/_static/teachbook_en.pdf
 
 ## Workflows CI/CD
 
-El deploy y los tests deben probar **Tectonic primero**:
+El deploy y los tests deben usar la misma política que el alumno:
 
 ```bash
-python scripts/setup_latex.py --yes
-python scripts/export_pdf.py
+.venv/bin/python scripts/setup_latex.py --yes --full
+.venv/bin/python scripts/export_pdf.py --engine auto
 ```
 
-Si Tectonic falla en CI con un problema del motor, el workflow puede instalar el fallback avanzado y repetir con `--engine latexmk`. Eso mantiene Tectonic como flujo principal del usuario, pero evita que la publicación quede bloqueada por un fallo interno del binario de Tectonic en un runner concreto.
+Si Tectonic falla en CI con un problema del motor, `--engine auto` debe caer al fallback ya instalado. Así no se publica con un camino distinto al que puede reproducir el alumno localmente.
 
 ## Solución de problemas
 
 | Problema | Solución |
 |---|---|
-| "No se detectó un motor LaTeX" | Ejecutar `scripts/setup_latex.py --yes` usando el Python de `.venv` |
+| "No se detectó un motor LaTeX" | Ejecutar `scripts/setup_latex.py --yes --full` usando el Python de `.venv` |
 | Error con SVG/Kroki | Convertir SVG a PNG antes de compilar; no dejar SVG crudo llegando a LaTeX |
 | Error de rutas `_static` o `_images` | Replicar esas carpetas en rutas anidadas dentro del build LaTeX si Sphinx las serializa así |
 | PowerShell bloquea scripts | No actives `.ps1`; usa `.venv\Scripts\python.exe ...` |
@@ -124,6 +124,6 @@ Si Tectonic falla en CI con un problema del motor, el workflow puede instalar el
 
 - [ ] `book/_static/teachbook_es.pdf` existe.
 - [ ] `book/_static/teachbook_en.pdf` existe.
-- [ ] El flujo normal funciona con Tectonic.
+- [ ] El flujo local/CI usa `setup_latex.py --yes --full` + `export_pdf.py --engine auto`.
 - [ ] SVG/Kroki no llegan crudos a LaTeX.
 - [ ] El fallback avanzado sigue siendo explícito, no default.

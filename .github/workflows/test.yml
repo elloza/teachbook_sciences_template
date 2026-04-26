@@ -73,21 +73,17 @@ jobs:
           test -d book/_build/html/en || { echo "❌ No en/"; exit 1; }
           echo "✅ Build OK"
 
-      - name: Test setup_latex default flow (Tectonic)
-        timeout-minutes: 30
+      - name: Test PDF toolchain setup (same as CI/CD)
+        timeout-minutes: 60
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
-          .venv/bin/python scripts/setup_latex.py --yes
+          .venv/bin/python scripts/setup_latex.py --yes --full
 
-      - name: Test PDF export on macOS with Tectonic
+      - name: Test PDF export on macOS with CI/CD engine policy
         timeout-minutes: 45
         run: |
-          if ! .venv/bin/python scripts/export_pdf.py; then
-            echo "⚠️ Tectonic falló en CI. Instalando fallback avanzado latexmk/XeLaTeX..."
-            .venv/bin/python scripts/setup_latex.py --ci-full
-            .venv/bin/python scripts/export_pdf.py --engine latexmk
-          fi
+          .venv/bin/python scripts/export_pdf.py --engine auto
           test -f book/_static/teachbook_es.pdf || { echo "❌ No Spanish PDF generated"; exit 1; }
           test -f book/_static/teachbook_en.pdf || { echo "❌ No English PDF generated"; exit 1; }
           echo "✅ PDF export OK on macOS"
@@ -217,26 +213,20 @@ jobs:
             .venv\Scripts\python.exe scripts\launch_preview.py --stop
           }
 
-      - name: Test setup_latex default flow (Tectonic)
+      - name: Test PDF toolchain setup (same as CI/CD)
         shell: pwsh
-        timeout-minutes: 30
+        timeout-minutes: 60
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
-          .venv\Scripts\python.exe scripts/setup_latex.py --yes
+          .venv\Scripts\python.exe scripts/setup_latex.py --yes --full
 
-      - name: Test PDF export on Windows with Tectonic
+      - name: Test PDF export on Windows with CI/CD engine policy
         shell: pwsh
         timeout-minutes: 45
         run: |
-          .venv\Scripts\python.exe scripts\export_pdf.py
-          if ($LASTEXITCODE -ne 0) {
-            Write-Output "⚠️ Tectonic falló en CI. Instalando fallback avanzado latexmk/XeLaTeX..."
-            .venv\Scripts\python.exe scripts\setup_latex.py --ci-full
-            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-            .venv\Scripts\python.exe scripts\export_pdf.py --engine latexmk
-            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          }
+          .venv\Scripts\python.exe scripts\export_pdf.py --engine auto
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           if (-Not (Test-Path "book\_static\teachbook_es.pdf")) { Write-Error "No Spanish PDF generated"; exit 1 }
           if (-Not (Test-Path "book\_static\teachbook_en.pdf")) { Write-Error "No English PDF generated"; exit 1 }
           Write-Output "✅ PDF export OK on Windows"

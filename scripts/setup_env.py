@@ -393,7 +393,7 @@ def verify_runtime_tools():
         (
             "tectonic",
             "PDF y CircuitikZ",
-            "Ejecuta: python scripts/setup_latex.py",
+            "Ejecuta: python scripts/setup_latex.py --yes --full",
         ),
     ]
 
@@ -482,6 +482,9 @@ def print_summary(dev_mode=False, use_uv=False):
     print("║                                                  ║")
     print("║  Siguiente paso: compilar el libro               ║")
     print("║  → python scripts/build_book.py                  ║")
+    print("║  Para PDFs como CI/CD:                           ║")
+    print("║  → python scripts/setup_latex.py --yes --full    ║")
+    print("║  → python scripts/export_pdf.py --engine auto    ║")
     print("╚══════════════════════════════════════════════════╝")
 
 

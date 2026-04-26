@@ -765,6 +765,7 @@ def main():
 Uso:
   python scripts/setup_latex.py            # pregunta antes de instalar Tectonic
   python scripts/setup_latex.py --yes      # instala Tectonic sin preguntar
+  python scripts/setup_latex.py --yes --full # instala el toolchain PDF completo usado por CI/CD
   python scripts/setup_latex.py --check    # solo verifica Tectonic
   python scripts/setup_latex.py --ci-full  # instala latexmk + XeLaTeX como fallback avanzado
   python scripts/setup_latex.py --check-full # verifica el fallback avanzado
@@ -785,14 +786,28 @@ En Windows usa siempre el Python del proyecto:
             return
         sys.exit(1)
 
+    full_mode = "--full" in sys.argv
+
+    def finish_after_tectonic_ready():
+        if not full_mode:
+            return True
+        print("ℹ️  Modo completo: preparando también el fallback latexmk + XeLaTeX usado por CI/CD.")
+        return install_full_latex_ci()
+
     if is_tectonic_installed():
         if verify_tectonic():
             if verify_svg_converter():
+                if finish_after_tectonic_ready():
+                    return
+                sys.exit(1)
                 return
             print("⚠️  Tectonic está bien, pero falta el conversor SVG necesario para PDF.")
             if "--check" in sys.argv:
                 sys.exit(1)
             if install_svg_converter():
+                if finish_after_tectonic_ready():
+                    return
+                sys.exit(1)
                 return
             sys.exit(1)
         print("⚠️  Tectonic encontrado pero no funciona. Se reinstalará.")
@@ -815,11 +830,17 @@ En Windows usa siempre el Python del proyecto:
 
     if install_tectonic_pip():
         if verify_tectonic() and install_svg_converter():
+            if finish_after_tectonic_ready():
+                return
+            sys.exit(1)
             return
 
     print("⚠️  Pip falló. Intentando descarga directa del binario...")
     if install_tectonic_binary():
         if verify_tectonic() and install_svg_converter():
+            if finish_after_tectonic_ready():
+                return
+            sys.exit(1)
             return
         sys.exit(1)
     else:

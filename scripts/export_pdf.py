@@ -143,6 +143,30 @@ def resolve_latex_engine(engine_name):
     return None
 
 
+def resolve_latex_engine_candidates(engine_name):
+    """Return ordered engine candidates.
+
+    `auto` is the CI/CD and full local mode: try Tectonic first because it is the
+    lightweight project default, then fall back to latexmk/XeLaTeX if Tectonic
+    crashes or cannot compile the generated LaTeX on a platform.
+    """
+    if engine_name == "auto":
+        candidates = []
+        for name, path in (
+            ("tectonic", find_tectonic_command()),
+            ("latexmk", find_latexmk_command()),
+            ("pdflatex", shutil.which("pdflatex")),
+        ):
+            if path:
+                candidates.append((name, path))
+        return candidates
+
+    resolved = resolve_latex_engine(engine_name)
+    if not resolved:
+        return []
+    return [(engine_name, resolved)]
+
+
 def latex_env(tex_engine_path):
     """Return an environment that can find a project-local LaTeX engine."""
     env = os.environ.copy()
@@ -150,6 +174,57 @@ def latex_env(tex_engine_path):
     engine_dir = os.path.dirname(os.path.abspath(tex_engine_path))
     env["PATH"] = engine_dir + os.pathsep + env.get("PATH", "")
     return env
+
+
+def compile_latex_with_engine(tex_engine_path, main_tex):
+    """Compile a LaTeX file with one concrete engine path."""
+    print(f"🔧 Usando motor: {tex_engine_path}")
+    env = latex_env(tex_engine_path)
+
+    engine_basename = os.path.basename(tex_engine_path).lower()
+    if "tectonic" in engine_basename:
+        commands = [
+            [tex_engine_path, "--keep-logs", "--keep-intermediates", main_tex],
+            [tex_engine_path, "-X", "compile", main_tex],
+        ]
+    elif "latexmk" in engine_basename:
+        commands = [
+            [
+                tex_engine_path,
+                "-xelatex",
+                "-interaction=nonstopmode",
+                "-halt-on-error",
+                main_tex,
+            ]
+        ]
+    else:
+        commands = [
+            [
+                tex_engine_path,
+                "-interaction=nonstopmode",
+                "-halt-on-error",
+                main_tex,
+            ]
+        ]
+
+    last_error = None
+    for attempt, cmd in enumerate(commands, start=1):
+        try:
+            print(f"🚀 Ejecutando ({attempt}/{len(commands)}): {' '.join(cmd)}")
+            subprocess.run(cmd, check=True, env=env)
+            return True
+        except subprocess.CalledProcessError as exc:
+            last_error = exc
+            print(f"⚠️  Falló el intento {attempt}: {exc}")
+            if exc.returncode < 0:
+                print(
+                    "   El motor LaTeX terminó por señal del sistema "
+                    f"({-exc.returncode}). Se probará el siguiente modo si existe."
+                )
+
+    if last_error is not None:
+        raise last_error
+    return False
 
 
 def ensure_static_dir():
@@ -483,64 +558,27 @@ def build_pdf_for_lang(lang, engine_name):
         # Prioritize python.tex or the first file available
         main_tex = "python.tex" if "python.tex" in tex_files else tex_files[0]
 
-        tex_engine_path = resolve_latex_engine(engine_name)
-        if not tex_engine_path:
+        engine_candidates = resolve_latex_engine_candidates(engine_name)
+        if not engine_candidates:
             print(f"❌ No se encontró el motor solicitado: {engine_name}.")
             return False
 
-        print(f"🔧 Usando motor: {tex_engine_path}")
-        env = latex_env(tex_engine_path)
-
-        # Determine commands based on engine.  Tectonic has two CLIs:
-        # - classic: `tectonic book.tex`
-        # - v2:      `tectonic -X compile book.tex`
-        #
-        # In GitHub Actions, the v2 CLI has been observed to segfault on some
-        # larger Jupyter Book outputs.  Prefer the classic CLI for plain .tex
-        # files and keep v2 as a fallback instead of making deploy fragile.
-        engine_name = os.path.basename(tex_engine_path).lower()
-        if "tectonic" in engine_name:
-            commands = [
-                [tex_engine_path, "--keep-logs", "--keep-intermediates", main_tex],
-                [tex_engine_path, "-X", "compile", main_tex],
-            ]
-        elif "latexmk" in engine_name:
-            # Use xelatex as per project config
-            commands = [
-                [
-                    tex_engine_path,
-                    "-xelatex",
-                    "-interaction=nonstopmode",
-                    "-halt-on-error",
-                    main_tex,
-                ]
-            ]
-        else:
-            # Fallback to pdflatex
-            commands = [
-                [
-                    tex_engine_path,
-                    "-interaction=nonstopmode",
-                    "-halt-on-error",
-                    main_tex,
-                ]
-            ]
-
         last_error = None
-        for attempt, cmd in enumerate(commands, start=1):
+        for candidate_index, (candidate_name, tex_engine_path) in enumerate(engine_candidates, start=1):
             try:
-                print(f"🚀 Ejecutando ({attempt}/{len(commands)}): {' '.join(cmd)}")
-                subprocess.run(cmd, check=True, env=env)
+                if len(engine_candidates) > 1:
+                    print(
+                        f"🔁 Motor candidato {candidate_index}/{len(engine_candidates)}: "
+                        f"{candidate_name}"
+                    )
+                compile_latex_with_engine(tex_engine_path, main_tex)
                 last_error = None
                 break
             except subprocess.CalledProcessError as exc:
                 last_error = exc
-                print(f"⚠️  Falló el intento {attempt}: {exc}")
-                if exc.returncode < 0:
-                    print(
-                        "   El motor LaTeX terminó por señal del sistema "
-                        f"({-exc.returncode}). Se probará el siguiente modo si existe."
-                    )
+                print(f"⚠️  Falló el motor {candidate_name}: {exc}")
+                if candidate_index < len(engine_candidates):
+                    print("   Probando el siguiente motor disponible...")
 
         if last_error is not None:
             raise last_error
