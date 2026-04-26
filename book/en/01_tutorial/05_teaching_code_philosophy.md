@@ -1,45 +1,88 @@
 # 5. The Teaching-as-Code Philosophy
 
-Did you know your teaching materials can be **code**? We don't mean building software applications — we mean expressing diagrams, figures, quizzes, and glossaries as structured text that a machine transforms automatically.
+The central idea is not “learning to program” in the abstract. The idea is to use programming languages and markup languages as **intermediate languages** for generating teaching artifacts: images, diagrams, animations, videos, simulations, quizzes, tables, notebooks, and PDFs.
 
-## What can be generated from code?
+In other words: working with **X as code**.
 
-| Resource | Tool | Example |
-|----------|------|---------|
-| Flow diagrams | Mermaid | `graph TD --> A --> B` |
-| Scientific plots | matplotlib | `plt.plot(x, y)` |
-| Interactive widgets | ipywidgets | Sliders, dropdowns |
-| Quizzes | MyST `{admonition}` | Questions with hidden answers |
-| Glossaries | MyST `{glossary}` | Terms and definitions |
-| Data tables | pandas | DataFrames as HTML tables |
-
-## Why is this a good idea?
+- *Diagrams as code*: diagrams written as text.
+- *Figures as code*: plots and figures generated from data or formulas.
+- *Animations as code*: educational videos rendered from a programmed scene.
+- *Quizzes as code*: questions, solutions, and exercise banks defined as structured text.
+- *Books as code*: a complete book compiled from Markdown files, notebooks, and configuration.
 
 ```{admonition} Key idea
-Code-based materials are **reproducible**: you always produce the same output from the same instructions. No more "final_v3_definitive_2.pdf".
+A teaching artifact generated from code is not edited “by hand” at the end of the process. It is described with an intermediate language, versioned, and regenerated as many times as needed.
 ```
 
-1. **Reproducible**: Anyone can regenerate the materials with identical results.
-2. **Versionable**: Git tracks every change with its date, author, and reason.
-3. **AI-modifiable**: An AI assistant can update your materials when they live in structured text, not a locked PDF.
-4. **Collaborative**: Multiple professors can contribute without overwriting each other's work.
+## Code as a bridge to the final result
 
-```{admonition} Tip
+When you draw a diagram directly in a visual tool, the result is locked inside that interface. If you want to change ten arrows, translate labels, or adapt the style, you have to edit it manually again.
+
+When you describe that same diagram with code, an intermediate layer appears:
+
+```{kroki}
+:type: mermaid
+:align: center
+
+flowchart LR
+    A[Teaching idea] --> B[Intermediate language]
+    B --> C[Final artifact]
+    C --> D[HTML]
+    C --> E[PDF]
+    C --> F[Video or image]
+```
+
+That intermediate layer is where AI works especially well. An assistant can read, modify, translate, refactor, and compare structured text much better than it can directly manipulate a PDF, a final image, or a closed presentation.
+
+## What artifacts can be generated from code?
+
+| Final artifact | Intermediate language | Teaching use case |
+|---|---|---|
+| Diagram | Mermaid/Kroki, GraphViz, PlantUML | Concept map, experiment flow, process schema |
+| Scientific plot | Python + matplotlib | Represent real or simulated data |
+| Electrical circuit | Schemdraw or CircuitikZ | Generate consistent schematics for Physics problems |
+| Animation or video | Manim Community | Explain a transformation, a wave, or a proof step by step |
+| Table or dataset | Python + pandas | Create clean tables from raw data |
+| Quiz | MyST, JupyterQuiz, structured Markdown | Review questions with collapsible solutions |
+| Executable notebook | Jupyter Notebook | Simulation, reproducible calculation, guided practice |
+| Web book and PDF | Jupyter Book/TeachBooks | Publish the same material as a website, download, and printable version |
+
+## Why this fits so well with AI
+
+AI does not “understand” a final image the way it understands a code-based description. If you give it a screenshot of a diagram, it can suggest changes; if you give it the Mermaid or Kroki code that generates it, it can **make** those changes.
+
+```{admonition} The practical advantage
 :class: tip
-You don't need to write all the code yourself. AI assistants can generate Mermaid diagrams, matplotlib plots, and tables from your natural-language description.
+We do not ask AI to edit pixels. We ask it to edit instructions. Then the system recompiles those instructions and produces the final artifact.
 ```
 
-## Quick example: a Mermaid diagram
+This makes it possible to ask for things like:
 
-```mermaid
-graph LR
-    A[Markdown notes] --> B[Build engine]
-    B --> C[Interactive web book]
-    B --> D[Printable PDF]
-```
+- “Turn this flowchart into a state diagram.”
+- “Generate an English version while keeping the same structure.”
+- “Adapt the example so it uses Biology data instead of Physics data.”
+- “Create a 20-second animation showing this function growing.”
+- “Create three versions of the quiz with different difficulty levels.”
 
-That diagram is written in three lines of text. No PowerPoint. No dragging boxes around.
+The key is that the final result is not handcrafted every time. It is produced from an editable recipe.
+
+## Reproducibility, not just automation
+
+Working “as code” does not mean making things more complicated. It means every artifact has a clear recipe:
+
+1. **Input**: data, formulas, text, or a teaching idea.
+2. **Intermediate language**: Markdown, Python, Mermaid, LaTeX, Manim, etc.
+3. **Compilation**: the system transforms that description.
+4. **Output**: image, video, website, PDF, notebook, or quiz.
+
+If you change the recipe, you regenerate the artifact. If something fails, you fix the recipe. If another teacher wants to adapt it, they do not start from scratch: they modify the recipe.
 
 ## The mindset shift
 
-The goal is not to turn you into a programmer. The goal is for your materials to stop being closed files and become **living documents** that evolve with your course, that can be improved with AI help, and that any colleague can reuse.
+The question stops being: “Which program should I use to draw this?”
+
+The question becomes: “Which intermediate language best describes this artifact?”
+
+Not every material needs code. But when a resource will be revised, translated, versioned, reused, or generated with AI support, it is worth asking whether it can be expressed as **X as code**.
+
+That is the teaching-as-code philosophy: using code not as an end in itself, but as a **generative medium** between the teaching intention and the final artifact.

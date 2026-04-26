@@ -1,45 +1,88 @@
 # 5. La Filosofía del Código Docente
 
-¿Sabías que tus materiales didácticos pueden ser **código**? No hablamos de programar aplicaciones, sino de expresar diagramas, figuras, cuestionarios y glosarios como texto estructurado que una máquina puede transformar automáticamente.
+La idea central no es “aprender a programar” en abstracto. La idea es usar lenguajes de programación y lenguajes de marcado como **lenguajes intermedios** para generar artefactos docentes: imágenes, diagramas, animaciones, vídeos, simulaciones, cuestionarios, tablas, notebooks y PDFs.
 
-## ¿Qué puede generarse desde código?
+Dicho de otra forma: trabajar con **X as code**.
 
-| Recurso | Herramienta | Ejemplo |
-|---------|------------|---------|
-| Diagramas de flujo | Mermaid | `graph TD --> A --> B` |
-| Gráficas científicas | matplotlib | `plt.plot(x, y)` |
-| Widgets interactivos | ipywidgets | Deslizadores, menús |
-| Cuestionarios | MyST `{admonition}` | Preguntas con respuesta oculta |
-| Glosarios | MyST `{glossary}` | Términos y definiciones |
-| Tablas de datos | pandas | DataFrames como tablas HTML |
-
-## ¿Por qué es una buena idea?
+- *Diagrams as code*: diagramas escritos como texto.
+- *Figures as code*: gráficas y figuras generadas desde datos o fórmulas.
+- *Animations as code*: vídeos educativos renderizados desde una escena programada.
+- *Quizzes as code*: preguntas, soluciones y bancos de ejercicios definidos en texto estructurado.
+- *Books as code*: un libro completo compilado desde archivos Markdown, notebooks y configuración.
 
 ```{admonition} Idea clave
-Un material en código es **reproducible**: siempre produces el mismo resultado desde las mismas instrucciones. No hay "versión final_v3_definitiva_2.pdf".
+Un artefacto docente generado desde código no se edita “a mano” al final del proceso. Se describe con un lenguaje intermedio, se versiona y se vuelve a generar tantas veces como haga falta.
 ```
 
-1. **Reproducible**: Cualquiera puede regenerar los materiales con los mismos resultados.
-2. **Versionable**: Git guarda cada cambio con su fecha, autor y motivo.
-3. **Modificable por IA**: Un asistente de IA puede actualizar tus materiales si están en texto estructurado, no en un PDF cerrado.
-4. **Colaborativo**: Varios profesores pueden contribuir sin sobreescribir el trabajo ajeno.
+## El código como puente hacia el resultado final
 
-```{admonition} Consejo
+Cuando dibujas un diagrama directamente en una herramienta visual, el resultado queda encerrado en esa interfaz. Si quieres cambiar diez flechas, traducir etiquetas o adaptar el estilo, tienes que volver a editar manualmente.
+
+Cuando describes ese mismo diagrama con código, aparece una capa intermedia:
+
+```{kroki}
+:type: mermaid
+:align: center
+
+flowchart LR
+    A[Idea docente] --> B[Lenguaje intermedio]
+    B --> C[Artefacto final]
+    C --> D[HTML]
+    C --> E[PDF]
+    C --> F[Vídeo o imagen]
+```
+
+Esa capa intermedia es donde la IA trabaja especialmente bien. Un asistente puede leer, modificar, traducir, refactorizar y comparar texto estructurado mucho mejor que manipular directamente un PDF, una imagen final o una presentación cerrada.
+
+## ¿Qué artefactos pueden generarse desde código?
+
+| Artefacto final | Lenguaje intermedio | Ejemplo de uso docente |
+|---|---|---|
+| Diagrama | Mermaid/Kroki, GraphViz, PlantUML | Mapa conceptual, flujo de un experimento, esquema de un proceso |
+| Gráfica científica | Python + matplotlib | Representar datos reales o simulados |
+| Circuito eléctrico | Schemdraw o CircuitikZ | Generar esquemas consistentes para problemas de Física |
+| Animación o vídeo | Manim Community | Explicar una transformación, una onda o una demostración paso a paso |
+| Tabla o dataset | Python + pandas | Crear tablas limpias desde datos brutos |
+| Cuestionario | MyST, JupyterQuiz, Markdown estructurado | Preguntas de repaso con soluciones desplegables |
+| Notebook ejecutable | Jupyter Notebook | Simulación, cálculo reproducible, práctica guiada |
+| Libro web y PDF | Jupyter Book/TeachBooks | Publicar el mismo material en web, descarga y versión imprimible |
+
+## Por qué esto encaja tan bien con IA
+
+La IA no “entiende” una imagen final como entiende una descripción en código. Si le das una captura de un diagrama, puede sugerir cambios; si le das el código Mermaid o Kroki que lo genera, puede **hacer** esos cambios.
+
+```{admonition} La ventaja práctica
 :class: tip
-No necesitas escribir todo el código tú mismo. Los asistentes de IA pueden generar diagramas Mermaid, gráficas matplotlib y tablas a partir de tu descripción en lenguaje natural.
+No le pedimos a la IA que edite píxeles. Le pedimos que edite instrucciones. Después, el sistema recompila esas instrucciones y produce el artefacto final.
 ```
 
-## Ejemplo rápido: un diagrama con Mermaid
+Esto permite pedir cosas como:
 
-```mermaid
-graph LR
-    A[Apuntes en Markdown] --> B[Motor de compilación]
-    B --> C[Libro web interactivo]
-    B --> D[PDF imprimible]
-```
+- “Convierte este diagrama de flujo en un diagrama de estados”.
+- “Genera una versión en inglés manteniendo la misma estructura”.
+- “Cambia el ejemplo para que use datos de Biología en vez de Física”.
+- “Haz una animación de 20 segundos que muestre esta función creciendo”.
+- “Crea tres variantes del cuestionario con distinta dificultad”.
 
-Ese diagrama se escribe en tres líneas de texto. Sin abrir PowerPoint. Sin arrastrar cajas.
+La clave es que el resultado final no se fabrica de forma artesanal cada vez. Se fabrica desde una receta editable.
+
+## Reproducibilidad, no solo automatización
+
+Trabajar “as code” no significa hacer las cosas más complicadas. Significa que cada artefacto tiene una receta clara:
+
+1. **Entrada**: datos, fórmulas, texto o una idea docente.
+2. **Lenguaje intermedio**: Markdown, Python, Mermaid, LaTeX, Manim, etc.
+3. **Compilación**: el sistema transforma esa descripción.
+4. **Salida**: imagen, vídeo, web, PDF, notebook o cuestionario.
+
+Si cambias la receta, regeneras el artefacto. Si algo falla, corriges la receta. Si otro profesor quiere adaptarlo, no empieza desde cero: modifica la receta.
 
 ## El cambio de mentalidad
 
-La idea no es que te conviertas en programadora o programador. La idea es que tus materiales dejen de ser archivos cerrados y pasen a ser **documentos vivos** que evolucionan con tu asignatura, que pueden mejorarse con ayuda de IA y que cualquier colega puede reutilizar.
+La pregunta deja de ser: “¿con qué programa dibujo esto?”
+
+La pregunta pasa a ser: “¿qué lenguaje intermedio describe mejor este artefacto?”
+
+No todos los materiales necesitan código. Pero cuando un recurso se va a revisar, traducir, versionar, reutilizar o generar con ayuda de IA, conviene preguntarse si puede expresarse como **X as code**.
+
+Esa es la filosofía del código docente: usar el código no como fin, sino como **medio generativo** entre la intención didáctica y el artefacto final.
