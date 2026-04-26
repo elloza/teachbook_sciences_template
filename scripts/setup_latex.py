@@ -21,6 +21,133 @@ if sys.stderr.encoding and sys.stderr.encoding.lower() not in ("utf-8", "utf8"):
 VENV_DIR = ".venv"
 
 
+def run(cmd, **kwargs):
+    """Run a command, showing it for transparent CI logs."""
+    printable = " ".join(cmd) if isinstance(cmd, list) else str(cmd)
+    print(f"$ {printable}")
+    return subprocess.run(cmd, check=True, **kwargs)
+
+
+def add_github_path(path):
+    """Persist a PATH entry for later GitHub Actions steps."""
+    github_path = os.environ.get("GITHUB_PATH")
+    if github_path and os.path.isdir(path):
+        with open(github_path, "a", encoding="utf-8") as f:
+            f.write(path + "\n")
+        print(f"✅ Añadido a GITHUB_PATH: {path}")
+
+
+def command_exists(command):
+    return shutil.which(command) is not None
+
+
+def verify_full_latex():
+    """Verify the robust PDF toolchain used by Jupyter Book."""
+    latexmk = shutil.which("latexmk")
+    xelatex = shutil.which("xelatex")
+    if latexmk and xelatex:
+        print("✅ Toolchain LaTeX completa detectada.")
+        print(f"   latexmk: {latexmk}")
+        print(f"   xelatex: {xelatex}")
+        try:
+            subprocess.run([xelatex, "--version"], check=False, timeout=15)
+        except Exception:
+            pass
+        return True
+
+    print("❌ Falta toolchain LaTeX completa.")
+    print(f"   latexmk: {latexmk or 'NO encontrado'}")
+    print(f"   xelatex: {xelatex or 'NO encontrado'}")
+    return False
+
+
+def install_full_latex_ci():
+    """Install a real XeLaTeX + latexmk toolchain on GitHub Actions.
+
+    This is intentionally heavier than Tectonic.  The full TeachBook has shown
+    Tectonic crashes in CI, so CI must use the boring, proven distribution:
+    TeX Live on Linux/macOS and MiKTeX on Windows.
+    """
+    print("🔧 Instalando toolchain LaTeX completa para CI...")
+    system = platform.system().lower()
+
+    if verify_full_latex():
+        return True
+
+    if system == "linux":
+        if os.geteuid() == 0:
+            apt = ["apt-get"]
+        else:
+            apt = ["sudo", "apt-get"]
+        run(apt + ["update"])
+        run(
+            apt
+            + [
+                "install",
+                "-y",
+                "latexmk",
+                "texlive-xetex",
+                "texlive-latex-recommended",
+                "texlive-latex-extra",
+                "texlive-fonts-recommended",
+                "texlive-fonts-extra",
+                "texlive-lang-spanish",
+                "texlive-lang-english",
+                "xindy",
+            ]
+        )
+        return verify_full_latex()
+
+    if system == "darwin":
+        if not command_exists("brew"):
+            print("❌ Homebrew no está disponible; no puedo instalar BasicTeX automáticamente.")
+            return False
+        run(["brew", "install", "--cask", "basictex"])
+        texbin = "/Library/TeX/texbin"
+        os.environ["PATH"] = texbin + os.pathsep + os.environ.get("PATH", "")
+        add_github_path(texbin)
+        tlmgr = os.path.join(texbin, "tlmgr")
+        run(["sudo", tlmgr, "update", "--self"])
+        run(
+            [
+                "sudo",
+                tlmgr,
+                "install",
+                "latexmk",
+                "collection-xetex",
+                "collection-latexrecommended",
+                "collection-latexextra",
+                "collection-fontsrecommended",
+                "collection-langspanish",
+                "collection-langenglish",
+                "xindy",
+            ]
+        )
+        return verify_full_latex()
+
+    if system == "windows":
+        if not command_exists("choco"):
+            print("❌ Chocolatey no está disponible; no puedo instalar MiKTeX automáticamente.")
+            return False
+        run(["choco", "install", "miktex", "strawberryperl", "-y", "--no-progress"])
+        miktex_bin = r"C:\Program Files\MiKTeX\miktex\bin\x64"
+        perl_bin = r"C:\Strawberry\perl\bin"
+        os.environ["PATH"] = miktex_bin + os.pathsep + perl_bin + os.pathsep + os.environ.get("PATH", "")
+        add_github_path(miktex_bin)
+        add_github_path(perl_bin)
+        initexmf = shutil.which("initexmf")
+        if initexmf:
+            subprocess.run([initexmf, "--set-config-value", "[MPM]AutoInstall=1"], check=False)
+            subprocess.run([initexmf, "--update-fndb"], check=False)
+        mpm = shutil.which("mpm")
+        if mpm:
+            subprocess.run([mpm, "--update-db"], check=False)
+        return verify_full_latex()
+
+    print(f"❌ Sistema no soportado para instalación CI: {platform.system()}")
+    return False
+
+
 def get_venv_python():
     if os.name == "nt":
         return os.path.join(VENV_DIR, "Scripts", "python.exe")
@@ -299,11 +426,22 @@ Uso:
   python scripts/setup_latex.py          # pregunta antes de instalar
   python scripts/setup_latex.py --yes    # instala sin preguntar
   python scripts/setup_latex.py --check  # solo verifica
+  python scripts/setup_latex.py --ci-full # instala TeX Live/MiKTeX para CI real
 
 En Windows usa siempre el Python del proyecto:
   .venv\\Scripts\\python.exe scripts\\setup_latex.py --yes
 """)
         return
+
+    if "--ci-full" in sys.argv:
+        if install_full_latex_ci():
+            return
+        sys.exit(1)
+
+    if "--check-full" in sys.argv:
+        if verify_full_latex():
+            return
+        sys.exit(1)
 
     if is_tectonic_installed():
         if verify_tectonic():

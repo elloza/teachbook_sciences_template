@@ -40,13 +40,13 @@ jobs:
         run: |
           pip install -r requirements.txt
 
-      - name: Install Tectonic (for PDF export)
+      - name: Install full LaTeX toolchain (for PDF export)
         run: |
-          python scripts/setup_latex.py --yes
+          python scripts/setup_latex.py --ci-full
 
       - name: Generate PDF
         run: |
-          python scripts/export_pdf.py --allow-existing
+          python scripts/export_pdf.py
 
       - name: Build HTML book
         run: |

@@ -51,7 +51,17 @@ def get_languages():
 
 
 def check_latex_installed():
-    """Checks if tectonic, latexmk or pdflatex is available."""
+    """Checks if a usable LaTeX engine is available.
+
+    Prefer a real TeX Live/MiKTeX toolchain (`latexmk` + XeLaTeX) over
+    Tectonic.  Tectonic is convenient for small documents, but this TeachBook
+    has repeatedly crashed in CI on the full multi-language LaTeX output.
+    """
+    latexmk = shutil.which("latexmk")
+    xelatex = shutil.which("xelatex")
+    if latexmk and xelatex:
+        return latexmk
+
     executable_name = "tectonic.exe" if os.name == "nt" else "tectonic"
 
     candidates = []
@@ -76,9 +86,7 @@ def check_latex_installed():
         if os.path.exists(candidate):
             return os.path.abspath(candidate)
 
-    return (
-        shutil.which("tectonic") or shutil.which("latexmk") or shutil.which("pdflatex")
-    )
+    return shutil.which("tectonic") or latexmk or shutil.which("pdflatex")
 
 
 def latex_env(tex_engine_path):
@@ -259,7 +267,7 @@ def build_pdf_for_lang(lang):
             if os.path.isfile(s):
                 shutil.copy2(s, d)
 
-    print(f"📂 Compilando con Tectonic en {latex_build_dir}...")
+    print(f"📂 Compilando PDF en {latex_build_dir}...")
     current_dir = os.getcwd()
     try:
         os.chdir(latex_build_dir)

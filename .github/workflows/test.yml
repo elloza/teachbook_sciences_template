@@ -74,10 +74,19 @@ jobs:
           echo "✅ Build OK"
 
       - name: Test setup_latex (non-interactive)
+        timeout-minutes: 30
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
-          .venv/bin/python scripts/setup_latex.py --yes
+          .venv/bin/python scripts/setup_latex.py --ci-full
+
+      - name: Test PDF export on macOS
+        timeout-minutes: 30
+        run: |
+          .venv/bin/python scripts/export_pdf.py
+          test -f book/_static/teachbook_es.pdf || { echo "❌ No Spanish PDF generated"; exit 1; }
+          test -f book/_static/teachbook_en.pdf || { echo "❌ No English PDF generated"; exit 1; }
+          echo "✅ PDF export OK on macOS"
 
       - name: Test pdf_to_markdown
         run: |
@@ -206,19 +215,20 @@ jobs:
 
       - name: Test setup_latex (non-interactive)
         shell: pwsh
+        timeout-minutes: 30
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
-          .venv\Scripts\python.exe scripts/setup_latex.py --yes
+          .venv\Scripts\python.exe scripts/setup_latex.py --ci-full
 
-      - name: Test PDF export fallback on Windows
+      - name: Test PDF export on Windows
         shell: pwsh
-        timeout-minutes: 15
+        timeout-minutes: 30
         run: |
-          .venv\Scripts\python.exe scripts\export_pdf.py --allow-existing
+          .venv\Scripts\python.exe scripts\export_pdf.py
           if (-Not (Test-Path "book\_static\teachbook_es.pdf")) { Write-Error "No Spanish PDF generated"; exit 1 }
           if (-Not (Test-Path "book\_static\teachbook_en.pdf")) { Write-Error "No English PDF generated"; exit 1 }
-          Write-Output "✅ PDF export/fallback OK on Windows"
+          Write-Output "✅ PDF export OK on Windows"
 
       - name: Test pdf_to_markdown
         shell: pwsh
