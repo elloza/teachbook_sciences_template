@@ -33,6 +33,7 @@ def get_jupyter_book():
 # Configuration
 BOOK_DIR = "book"
 STATIC_DIR = os.path.join(BOOK_DIR, "_static")
+SUPPORTED_ENGINES = ("tectonic", "latexmk", "auto")
 
 
 def get_languages():
@@ -51,18 +52,8 @@ def get_languages():
     return sorted(languages)
 
 
-def check_latex_installed():
-    """Checks if a usable LaTeX engine is available.
-
-    Prefer a real TeX Live/MiKTeX toolchain (`latexmk` + XeLaTeX) over
-    Tectonic.  Tectonic is convenient for small documents, but this TeachBook
-    has repeatedly crashed in CI on the full multi-language LaTeX output.
-    """
-    latexmk = shutil.which("latexmk")
-    xelatex = shutil.which("xelatex")
-    if latexmk and xelatex:
-        return latexmk
-
+def find_tectonic_command():
+    """Return a usable Tectonic executable if available."""
     executable_name = "tectonic.exe" if os.name == "nt" else "tectonic"
 
     candidates = []
@@ -87,7 +78,35 @@ def check_latex_installed():
         if os.path.exists(candidate):
             return os.path.abspath(candidate)
 
-    return shutil.which("tectonic") or latexmk or shutil.which("pdflatex")
+    return shutil.which("tectonic")
+
+
+def find_latexmk_command():
+    """Return latexmk only when its XeLaTeX dependency is available."""
+    latexmk = shutil.which("latexmk")
+    xelatex = shutil.which("xelatex")
+    if latexmk and xelatex:
+        return latexmk
+    return None
+
+
+def resolve_latex_engine(engine_name):
+    """Resolve the requested LaTeX engine path.
+
+    Default user flow is Tectonic. `latexmk` remains available as explicit
+    advanced fallback. `auto` preserves a diagnostics-oriented fallback mode.
+    """
+    if engine_name == "tectonic":
+        return find_tectonic_command()
+    if engine_name == "latexmk":
+        return find_latexmk_command()
+    if engine_name == "auto":
+        return (
+            find_tectonic_command()
+            or find_latexmk_command()
+            or shutil.which("pdflatex")
+        )
+    return None
 
 
 def latex_env(tex_engine_path):
@@ -173,20 +192,35 @@ def prepare_svg_images_for_latex(latex_build_dir):
     bounding boxes directly.  CairoSVG handles these diagrams reliably enough
     for static PDF output and keeps the workflow cross-platform.
     """
-    svg_paths = glob.glob(os.path.join(latex_build_dir, "*.svg"))
+    svg_paths = glob.glob(os.path.join(latex_build_dir, "**", "*.svg"), recursive=True)
     if not svg_paths:
         return True
 
+    resvg = shutil.which("resvg")
+    if not resvg:
+        resvg_name = "resvg.exe" if os.name == "nt" else "resvg"
+        resvg_candidates = [
+            os.path.join(PROJECT_ROOT, ".venv", "Scripts", resvg_name),
+            os.path.join(PROJECT_ROOT, ".venv", "bin", resvg_name),
+            os.path.join(os.environ.get("APPDATA", os.path.expanduser("~")), "teachbook", resvg_name),
+            os.path.expanduser(os.path.join("~", ".local", "bin", resvg_name)),
+            os.path.join(SCRIPT_DIR, resvg_name),
+        ]
+        for candidate in resvg_candidates:
+            if os.path.isfile(candidate):
+                resvg = candidate
+                break
+
     rsvg_convert = shutil.which("rsvg-convert")
     cairosvg = None
-    if not rsvg_convert:
+    if not resvg and not rsvg_convert:
         try:
             import cairosvg as cairosvg_module
 
             cairosvg = cairosvg_module
         except Exception as exc:
             print("❌ Hay SVGs en el build LaTeX, pero no hay conversor SVG robusto.")
-            print("   Instala rsvg-convert (librsvg) o CairoSVG con las librerías Cairo nativas.")
+            print("   Instala resvg con scripts/setup_latex.py --yes, o usa rsvg-convert/CairoSVG.")
             print(f"   Detalle CairoSVG: {exc}")
             return False
 
@@ -195,7 +229,12 @@ def prepare_svg_images_for_latex(latex_build_dir):
     for svg_path in svg_paths:
         png_path = os.path.splitext(svg_path)[0] + ".png"
         try:
-            if rsvg_convert:
+            if resvg:
+                subprocess.run(
+                    [resvg, svg_path, png_path],
+                    check=True,
+                )
+            elif rsvg_convert:
                 subprocess.run(
                     [rsvg_convert, "--width", "1600", "--output", png_path, svg_path],
                     check=True,
@@ -205,6 +244,9 @@ def prepare_svg_images_for_latex(latex_build_dir):
         except Exception as exc:
             print(f"❌ No se pudo convertir {svg_path}: {exc}")
             return False
+        svg_rel = os.path.relpath(svg_path, latex_build_dir).replace(os.sep, "/")
+        png_rel = os.path.relpath(png_path, latex_build_dir).replace(os.sep, "/")
+        replacements[svg_rel] = png_rel
         replacements[os.path.basename(svg_path)] = os.path.basename(png_path)
 
     for tex_path in glob.glob(os.path.join(latex_build_dir, "*.tex")):
@@ -225,43 +267,65 @@ def prepare_svg_images_for_latex(latex_build_dir):
     return True
 
 
-def prepare_static_paths_for_latex(latex_build_dir):
-    """Mirror root `_static` into nested paths referenced by Sphinx LaTeX.
+def mirror_shared_asset_paths_for_latex(latex_build_dir):
+    """Mirror root `_static` and `_images` into nested paths referenced by Sphinx LaTeX.
 
     In standalone per-language builds, MyST/Sphinx may serialize an image
     reference such as `_static/logo.png` from a nested source page as
     `es/05_contenidos_basicos/_static/logo.png`.  The real files live in the
-    LaTeX build root `_static/`.  Mirroring that directory into the referenced
+    LaTeX build root `_static/`.  The same can happen with `_images/` assets.
+    Mirroring those directories into the referenced
     nested locations avoids OS-specific path hacks and works on all runners.
     """
-    root_static = os.path.join(latex_build_dir, "_static")
-    source_static = root_static
-    if not os.path.isdir(source_static):
-        source_static = os.path.join(PROJECT_ROOT, BOOK_DIR, "_static")
-    if not os.path.isdir(source_static):
-        return
+    asset_sources = {
+        "_static": os.path.join(latex_build_dir, "_static"),
+        "_images": os.path.join(latex_build_dir, "_images"),
+    }
+    if not os.path.isdir(asset_sources["_static"]):
+        asset_sources["_static"] = os.path.join(PROJECT_ROOT, BOOK_DIR, "_static")
 
-    needed_dirs = set()
+    needed_dirs = {"_static": set(), "_images": set()}
     for tex_path in glob.glob(os.path.join(latex_build_dir, "*.tex")):
         with open(tex_path, "r", encoding="utf-8") as f:
             text = f.read()
-        for match in re.finditer(r"([A-Za-z0-9_./-]+/_static/)", text):
-            prefix = match.group(1).strip("./")
-            if prefix and prefix != "_static/":
-                needed_dirs.add(os.path.join(latex_build_dir, prefix))
+        for asset_dir in needed_dirs:
+            pattern = rf"([A-Za-z0-9_./-]+/{re.escape(asset_dir)}/)"
+            for match in re.finditer(pattern, text):
+                prefix = match.group(1).strip("./")
+                if prefix and prefix != f"{asset_dir}/":
+                    needed_dirs[asset_dir].add(os.path.join(latex_build_dir, prefix))
 
-    for dest_static in sorted(needed_dirs):
-        if os.path.abspath(dest_static) == os.path.abspath(source_static):
+    for asset_dir, source_dir in asset_sources.items():
+        if not os.path.isdir(source_dir):
             continue
-        parent = os.path.dirname(dest_static)
-        os.makedirs(parent, exist_ok=True)
-        if os.path.exists(dest_static):
-            continue
-        shutil.copytree(source_static, dest_static)
-        print(f"   📁 _static replicado para LaTeX: {os.path.relpath(dest_static, latex_build_dir)}")
+        for dest_dir in sorted(needed_dirs[asset_dir]):
+            if os.path.abspath(dest_dir) == os.path.abspath(source_dir):
+                continue
+            parent = os.path.dirname(dest_dir)
+            os.makedirs(parent, exist_ok=True)
+            if os.path.exists(dest_dir):
+                continue
+            shutil.copytree(source_dir, dest_dir)
+            print(
+                f"   📁 {asset_dir} replicado para LaTeX: "
+                f"{os.path.relpath(dest_dir, latex_build_dir)}"
+            )
 
 
-def build_pdf_for_lang(lang):
+def copy_root_latex_support_files(latex_build_dir):
+    """Copy top-level helper files like latexmkrc into the build dir."""
+    templates_root = os.path.abspath("latex_templates")
+    if not os.path.isdir(templates_root):
+        return
+
+    for item in os.listdir(templates_root):
+        source = os.path.join(templates_root, item)
+        dest = os.path.join(latex_build_dir, item)
+        if os.path.isfile(source):
+            shutil.copy2(source, dest)
+
+
+def build_pdf_for_lang(lang, engine_name):
     """Builds the PDF for a specific language using a standalone temporary project."""
     print(f"\n🚀 Iniciando generación de PDF STANDALONE para: {lang.upper()}...")
 
@@ -343,6 +407,7 @@ def build_pdf_for_lang(lang):
 
     # 0. Generate metadata tex file from YAML config
     generate_metadata_tex(lang, latex_build_dir)
+    copy_root_latex_support_files(latex_build_dir)
 
     # 1. Apply COMMON templates (base)
     common_dir = os.path.join(templates_root, "common")
@@ -366,7 +431,7 @@ def build_pdf_for_lang(lang):
 
     if not prepare_svg_images_for_latex(latex_build_dir):
         return False
-    prepare_static_paths_for_latex(latex_build_dir)
+    mirror_shared_asset_paths_for_latex(latex_build_dir)
 
     print(f"📂 Compilando PDF en {latex_build_dir}...")
     current_dir = os.getcwd()
@@ -384,9 +449,9 @@ def build_pdf_for_lang(lang):
         # Prioritize python.tex or the first file available
         main_tex = "python.tex" if "python.tex" in tex_files else tex_files[0]
 
-        tex_engine_path = check_latex_installed()
+        tex_engine_path = resolve_latex_engine(engine_name)
         if not tex_engine_path:
-            print("❌ No hay motor LaTeX.")
+            print(f"❌ No se encontró el motor solicitado: {engine_name}.")
             return False
 
         print(f"🔧 Usando motor: {tex_engine_path}")
@@ -501,13 +566,29 @@ def sanitize_config(config_path):
 def main():
     print("📚 Iniciando exportación de PDF multi-idioma...")
     allow_existing = "--allow-existing" in sys.argv
+    engine = "tectonic"
+
+    if "--engine" in sys.argv:
+        try:
+            engine = sys.argv[sys.argv.index("--engine") + 1].strip().lower()
+        except IndexError:
+            print("❌ Falta el valor de --engine. Usa: --engine tectonic|latexmk|auto")
+            sys.exit(1)
+
+    if engine not in SUPPORTED_ENGINES:
+        print(f"❌ Motor no soportado: {engine}")
+        print(f"   Motores válidos: {', '.join(SUPPORTED_ENGINES)}")
+        sys.exit(1)
 
     if "--help" in sys.argv or "-h" in sys.argv:
         print(
             """
 Uso:
-  python scripts/export_pdf.py                  # genera PDFs y falla si no puede
-  python scripts/export_pdf.py --allow-existing # en CI, permite continuar si ya existen PDFs publicados
+  python scripts/export_pdf.py                                   # usa Tectonic por defecto
+  python scripts/export_pdf.py --engine tectonic                 # flujo normal/simple/portable
+  python scripts/export_pdf.py --engine latexmk                  # fallback avanzado explícito
+  python scripts/export_pdf.py --engine auto                     # diagnóstico: Tectonic → latexmk → pdflatex
+  python scripts/export_pdf.py --allow-existing                  # en CI, permite continuar si ya existen PDFs publicados
 
 La opción --allow-existing es un salvavidas para despliegue: NO oculta el fallo
 de generación, pero permite publicar la web si `book/_static/teachbook_<lang>.pdf`
@@ -516,21 +597,35 @@ ya existe y tiene contenido.
         )
         return
 
-    if not check_latex_installed():
-        print("⚠️  No se detectó un motor LaTeX.")
-        print("   Puedes instalarlo automáticamente ejecutando:")
-        if os.name == "nt":
-            print(r"   .venv\Scripts\python.exe scripts\setup_latex.py --yes")
+    selected_engine = resolve_latex_engine(engine)
+    if not selected_engine:
+        print(f"⚠️  No se detectó el motor solicitado: {engine}.")
+        if engine == "tectonic":
+            print("   El flujo principal del proyecto usa Tectonic.")
+            print("   Puedes instalarlo automáticamente ejecutando:")
+            if os.name == "nt":
+                print(r"   .venv\Scripts\python.exe scripts\setup_latex.py --yes")
+            else:
+                print("   .venv/bin/python scripts/setup_latex.py --yes")
+        elif engine == "latexmk":
+            print("   El fallback avanzado requiere latexmk + xelatex ya instalados.")
+            print("   Para CI o diagnóstico avanzado usa:")
+            if os.name == "nt":
+                print(r"   .venv\Scripts\python.exe scripts\setup_latex.py --ci-full")
+            else:
+                print("   .venv/bin/python scripts/setup_latex.py --ci-full")
         else:
-            print("   .venv/bin/python scripts/setup_latex.py --yes")
+            print("   Instala Tectonic con setup_latex.py --yes o usa --engine latexmk si ya tienes toolchain completa.")
         sys.exit(1)
+
+    print(f"🔧 Motor PDF solicitado: {engine} ({selected_engine})")
 
     languages = get_languages()
     print(f"🔍 Idiomas detectados para PDF: {languages}")
 
     success_count: int = 0
     for lang in languages:
-        if build_pdf_for_lang(lang):
+        if build_pdf_for_lang(lang, engine):
             success_count = success_count + 1  # type: ignore
 
     if success_count == len(languages):

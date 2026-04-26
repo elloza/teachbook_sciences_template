@@ -40,11 +40,11 @@ jobs:
         run: |
           pip install -r requirements.txt
 
-      - name: Install full LaTeX toolchain (for PDF export)
+      - name: Install Tectonic (default PDF flow)
         run: |
-          python scripts/setup_latex.py --ci-full
+          python scripts/setup_latex.py --yes
 
-      - name: Generate PDF
+      - name: Generate PDF with Tectonic
         run: |
           python scripts/export_pdf.py
 

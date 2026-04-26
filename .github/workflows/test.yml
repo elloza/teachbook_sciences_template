@@ -73,14 +73,14 @@ jobs:
           test -d book/_build/html/en || { echo "❌ No en/"; exit 1; }
           echo "✅ Build OK"
 
-      - name: Test setup_latex (non-interactive)
+      - name: Test setup_latex default flow (Tectonic)
         timeout-minutes: 30
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
-          .venv/bin/python scripts/setup_latex.py --ci-full
+          .venv/bin/python scripts/setup_latex.py --yes
 
-      - name: Test PDF export on macOS
+      - name: Test PDF export on macOS with Tectonic
         timeout-minutes: 30
         run: |
           .venv/bin/python scripts/export_pdf.py
@@ -213,15 +213,15 @@ jobs:
             .venv\Scripts\python.exe scripts\launch_preview.py --stop
           }
 
-      - name: Test setup_latex (non-interactive)
+      - name: Test setup_latex default flow (Tectonic)
         shell: pwsh
         timeout-minutes: 30
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
-          .venv\Scripts\python.exe scripts/setup_latex.py --ci-full
+          .venv\Scripts\python.exe scripts/setup_latex.py --yes
 
-      - name: Test PDF export on Windows
+      - name: Test PDF export on Windows with Tectonic
         shell: pwsh
         timeout-minutes: 30
         run: |

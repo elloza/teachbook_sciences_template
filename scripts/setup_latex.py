@@ -41,8 +41,181 @@ def command_exists(command):
     return shutil.which(command) is not None
 
 
+def local_binary_candidates(binary_name):
+    candidates = []
+    venv_bin = get_venv_bin_dir()
+    if os.path.isdir(venv_bin):
+        candidates.append(os.path.join(venv_bin, binary_name))
+
+    if os.name == "nt":
+        appdata = os.environ.get("APPDATA", os.path.expanduser("~"))
+        candidates.append(os.path.join(appdata, "teachbook", binary_name))
+    else:
+        candidates.append(os.path.expanduser(os.path.join("~", ".local", "bin", binary_name)))
+
+    candidates.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), binary_name))
+    return candidates
+
+
+def get_python_launcher():
+    return get_effective_python()
+
+
+def python_module_available(module_name):
+    python = get_python_launcher()
+    try:
+        result = subprocess.run(
+            [python, "-c", f"import {module_name}"],
+            check=False,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            timeout=20,
+        )
+        return result.returncode == 0
+    except Exception:
+        return False
+
+
+def pip_available():
+    python = get_python_launcher()
+    try:
+        result = subprocess.run(
+            [python, "-m", "pip", "--version"],
+            check=False,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            timeout=20,
+        )
+        return result.returncode == 0
+    except Exception:
+        return False
+
+
+def ensure_pip_available():
+    if pip_available():
+        return True
+    python = get_python_launcher()
+    print("🧰 Pip no está disponible en el Python del proyecto. Intentando activarlo...")
+    try:
+        result = subprocess.run(
+            [python, "-m", "ensurepip", "--upgrade"],
+            check=False,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            timeout=180,
+        )
+        if result.stdout:
+            print(result.stdout.strip())
+        if result.stderr:
+            print(result.stderr.strip())
+    except Exception as exc:
+        print(f"⚠️  No se pudo activar pip automáticamente: {exc}")
+        return False
+    return pip_available()
+
+
+def verify_svg_converter():
+    resvg = get_resvg_command()
+    if resvg:
+        print(f"✅ Conversor SVG detectado: {resvg}")
+        return True
+
+    converter = shutil.which("rsvg-convert")
+    if converter:
+        print(f"✅ Conversor SVG detectado: {converter}")
+        return True
+
+    if python_module_available("cairosvg"):
+        print("✅ CairoSVG disponible en el Python del proyecto.")
+        return True
+
+    print("❌ Falta conversor SVG robusto (rsvg-convert o CairoSVG).")
+    return False
+
+
+def install_cairosvg_with_pip():
+    if not ensure_pip_available():
+        return False
+
+    python = get_python_launcher()
+    print("📦 Intentando instalar CairoSVG en el entorno del proyecto...")
+    try:
+        result = subprocess.run(
+            [python, "-m", "pip", "install", "cairosvg"],
+            check=False,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            timeout=900,
+        )
+        if result.stdout:
+            print(result.stdout.strip())
+        if result.stderr:
+            print(result.stderr.strip())
+        return result.returncode == 0
+    except Exception as exc:
+        print(f"⚠️  Falló la instalación de CairoSVG con pip: {exc}")
+        return False
+
+
+def install_svg_converter():
+    if verify_svg_converter():
+        return True
+
+    print("🖼️  Instalando soporte SVG para PDF con Tectonic...")
+    if install_resvg_binary() and verify_svg_converter():
+        return True
+    if install_cairosvg_with_pip() and verify_svg_converter():
+        return True
+
+    system = platform.system().lower()
+
+    if system == "windows" and command_exists("choco"):
+        try:
+            run(["choco", "install", "librsvg", "gtk-runtime", "-y", "--no-progress"])
+            gtk_candidates = [
+                r"C:\Program Files\GTK3-Runtime Win64\bin",
+                r"C:\Program Files\GTK2-Runtime\bin",
+                r"C:\tools\gtk-runtime\bin",
+            ]
+            for gtk_bin in gtk_candidates:
+                if os.path.isdir(gtk_bin):
+                    os.environ["PATH"] = gtk_bin + os.pathsep + os.environ.get("PATH", "")
+                    add_github_path(gtk_bin)
+            return verify_svg_converter()
+        except Exception as exc:
+            print(f"⚠️  No se pudo instalar librsvg con Chocolatey: {exc}")
+
+    if system == "darwin" and command_exists("brew"):
+        try:
+            run(["brew", "install", "librsvg", "cairo", "pkg-config"])
+            return verify_svg_converter()
+        except Exception as exc:
+            print(f"⚠️  No se pudo instalar librsvg con Homebrew: {exc}")
+
+    if system == "linux" and (os.environ.get("CI") or os.environ.get("GITHUB_ACTIONS")):
+        try:
+            apt = ["apt-get"] if os.geteuid() == 0 else ["sudo", "apt-get"]
+            run(apt + ["update"])
+            run(apt + ["install", "-y", "librsvg2-bin"])
+            return verify_svg_converter()
+        except Exception as exc:
+            print(f"⚠️  No se pudo instalar librsvg en Linux: {exc}")
+
+    print("⚠️  No se pudo dejar listo el conversor SVG automáticamente.")
+    print("   El flujo PDF con Tectonic necesita rsvg-convert o CairoSVG para los SVG/Kroki.")
+    return False
+
+
 def verify_full_latex():
-    """Verify the robust PDF toolchain used by Jupyter Book."""
+    """Verify the advanced fallback PDF toolchain (latexmk + XeLaTeX)."""
     latexmk = shutil.which("latexmk")
     xelatex = shutil.which("xelatex")
     if latexmk and xelatex:
@@ -62,24 +235,16 @@ def verify_full_latex():
 
 
 def install_full_latex_ci():
-    """Install a real XeLaTeX + latexmk toolchain on GitHub Actions.
+    """Install the advanced XeLaTeX + latexmk fallback toolchain on CI.
 
-    This is intentionally heavier than Tectonic.  The full TeachBook has shown
-    Tectonic crashes in CI, so CI must use the boring, proven distribution:
-    TeX Live on Linux/macOS and MiKTeX on Windows.
+    Tectonic remains the default user-facing flow because it is simpler and
+    more portable. This installer is kept for explicit fallback scenarios,
+    deeper diagnostics, or environments that require a full LaTeX distro.
     """
-    print("🔧 Instalando toolchain LaTeX completa para CI...")
+    print("🔧 Instalando toolchain LaTeX completa AVANZADA para CI/fallback...")
     system = platform.system().lower()
 
     full_latex_ready = verify_full_latex()
-
-    def verify_svg_converter():
-        converter = shutil.which("rsvg-convert")
-        if converter:
-            print(f"✅ Conversor SVG detectado: {converter}")
-            return True
-        print("❌ Falta conversor SVG robusto (rsvg-convert).")
-        return False
 
     if full_latex_ready and verify_svg_converter():
         return True
@@ -194,20 +359,12 @@ def get_venv_bin_dir():
 
 def local_tectonic_candidates():
     executable_name = "tectonic.exe" if os.name == "nt" else "tectonic"
-    candidates = []
+    return local_binary_candidates(executable_name)
 
-    venv_bin = get_venv_bin_dir()
-    if os.path.isdir(venv_bin):
-        candidates.append(os.path.join(venv_bin, executable_name))
 
-    if os.name == "nt":
-        appdata = os.environ.get("APPDATA", os.path.expanduser("~"))
-        candidates.append(os.path.join(appdata, "teachbook", executable_name))
-    else:
-        candidates.append(os.path.expanduser(os.path.join("~", ".local", "bin", executable_name)))
-
-    candidates.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), executable_name))
-    return candidates
+def local_resvg_candidates():
+    executable_name = "resvg.exe" if os.name == "nt" else "resvg"
+    return local_binary_candidates(executable_name)
 
 
 def get_tectonic_command():
@@ -215,6 +372,16 @@ def get_tectonic_command():
     if found:
         return found
     for candidate in local_tectonic_candidates():
+        if os.path.isfile(candidate):
+            return candidate
+    return None
+
+
+def get_resvg_command():
+    found = shutil.which("resvg")
+    if found:
+        return found
+    for candidate in local_resvg_candidates():
         if os.path.isfile(candidate):
             return candidate
     return None
@@ -250,7 +417,7 @@ def verify_tectonic():
 
 def install_tectonic_pip():
     print("📦 Intentando instalar Tectonic con pip...")
-    python = get_effective_python()
+    python = get_python_launcher()
     is_venv = python != sys.executable
     if is_venv:
         print(f"   Usando entorno virtual: {python}")
@@ -321,6 +488,22 @@ def fetch_latest_release():
         return None, []
 
 
+def fetch_latest_release_for_repo(repo_slug):
+    api_url = f"https://api.github.com/repos/{repo_slug}/releases/latest"
+    headers = {"Accept": "application/vnd.github+json", "User-Agent": "teachbook-setup"}
+    token = os.environ.get("GITHUB_TOKEN")
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
+    req = urllib.request.Request(api_url, headers=headers)
+    try:
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+        return data.get("tag_name"), data.get("assets", [])
+    except Exception as e:
+        print(f"❌ Error consultando GitHub API ({repo_slug}): {e}")
+        return None, []
+
+
 def find_asset_url(assets, rust_target, ext):
     for asset in assets:
         name = asset.get("name", "")
@@ -343,6 +526,108 @@ def get_binary_install_dir():
         dest = os.path.expanduser("~/.local/bin")
     os.makedirs(dest, exist_ok=True)
     return dest
+
+
+def verify_resvg():
+    resvg = get_resvg_command()
+    if not resvg:
+        return False
+    try:
+        result = subprocess.run(
+            [resvg, "--version"],
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            timeout=15,
+        )
+        if result.returncode == 0:
+            version = (result.stdout or result.stderr).strip().split("\n")[0]
+            print(f"✅ resvg {version} funcionando correctamente.")
+            print(f"   Ejecutable: {resvg}")
+            return True
+    except (subprocess.TimeoutExpired, OSError):
+        pass
+    print("❌ resvg se instaló pero no se pudo ejecutar.")
+    return False
+
+
+def get_resvg_asset_name(system, arch):
+    mapping = {
+        ("windows", "amd64"): ("resvg-win64.zip", ".zip"),
+        ("darwin", "amd64"): ("resvg-macos-x86_64.zip", ".zip"),
+        ("darwin", "arm64"): ("resvg-macos-aarch64.zip", ".zip"),
+        ("linux", "amd64"): ("resvg-linux-x86_64.tar.gz", ".tar.gz"),
+    }
+    return mapping.get((system, arch), (None, None))
+
+
+def install_resvg_binary():
+    print("⬇️  Intentando instalar resvg (conversor SVG portable)...")
+    system = platform.system().lower()
+    arch = get_arch_tag()
+    asset_name, ext = get_resvg_asset_name(system, arch)
+    if not asset_name or not ext:
+        print(f"⚠️  No hay binario resvg predefinido para {platform.system()} {platform.machine()}.")
+        return False
+
+    tag_name, assets = fetch_latest_release_for_repo("linebender/resvg")
+    if not tag_name or not assets:
+        print("❌ No se pudo obtener la última release de resvg.")
+        return False
+
+    asset = next((item for item in assets if item.get("name") == asset_name), None)
+    if not asset:
+        print(f"❌ No se encontró el asset {asset_name} en la release {tag_name}.")
+        return False
+
+    download_url = asset.get("browser_download_url")
+    install_dir = get_binary_install_dir()
+    executable_name = "resvg.exe" if system == "windows" else "resvg"
+
+    with tempfile.TemporaryDirectory(prefix="resvg_") as tmp:
+        archive_path = os.path.join(tmp, asset_name)
+        extract_dir = os.path.join(tmp, "extracted")
+        os.makedirs(extract_dir, exist_ok=True)
+
+        try:
+            urllib.request.urlretrieve(download_url, archive_path)
+        except Exception as e:
+            print(f"❌ Error descargando resvg: {e}")
+            return False
+
+        try:
+            if ext == ".zip":
+                with zipfile.ZipFile(archive_path, "r") as zf:
+                    zf.extractall(extract_dir)
+            else:
+                with tarfile.open(archive_path, "r:gz") as tf:
+                    tf.extractall(extract_dir)
+        except Exception as e:
+            print(f"❌ Error extrayendo resvg: {e}")
+            return False
+
+        extracted_bin = os.path.join(extract_dir, executable_name)
+        if not os.path.isfile(extracted_bin):
+            for root, dirs, files in os.walk(extract_dir):
+                if executable_name in files:
+                    extracted_bin = os.path.join(root, executable_name)
+                    break
+
+        if not os.path.isfile(extracted_bin):
+            print("❌ No se encontró el ejecutable de resvg dentro del archivo descargado.")
+            return False
+
+        dest_path = os.path.join(install_dir, executable_name)
+        shutil.copy2(extracted_bin, dest_path)
+        if system != "windows":
+            st = os.stat(dest_path)
+            os.chmod(dest_path, st.st_mode | stat.S_IEXEC)
+
+    print(f"✅ resvg instalado en: {dest_path}")
+    if os.path.abspath(install_dir) == os.path.abspath(get_venv_bin_dir()):
+        print("   Instalado dentro de .venv: no hace falta tocar el PATH global.")
+    return verify_resvg()
 
 
 def install_tectonic_binary():
@@ -448,10 +733,11 @@ def main():
     if "--help" in sys.argv or "-h" in sys.argv:
         print("""
 Uso:
-  python scripts/setup_latex.py          # pregunta antes de instalar
-  python scripts/setup_latex.py --yes    # instala sin preguntar
-  python scripts/setup_latex.py --check  # solo verifica
-  python scripts/setup_latex.py --ci-full # instala TeX Live/MiKTeX para CI real
+  python scripts/setup_latex.py            # pregunta antes de instalar Tectonic
+  python scripts/setup_latex.py --yes      # instala Tectonic sin preguntar
+  python scripts/setup_latex.py --check    # solo verifica Tectonic
+  python scripts/setup_latex.py --ci-full  # instala latexmk + XeLaTeX como fallback avanzado
+  python scripts/setup_latex.py --check-full # verifica el fallback avanzado
 
 En Windows usa siempre el Python del proyecto:
   .venv\\Scripts\\python.exe scripts\\setup_latex.py --yes
@@ -459,6 +745,7 @@ En Windows usa siempre el Python del proyecto:
         return
 
     if "--ci-full" in sys.argv:
+        print("ℹ️  Modo avanzado: instalando fallback completo latexmk + XeLaTeX.")
         if install_full_latex_ci():
             return
         sys.exit(1)
@@ -470,11 +757,18 @@ En Windows usa siempre el Python del proyecto:
 
     if is_tectonic_installed():
         if verify_tectonic():
-            return
+            if verify_svg_converter():
+                return
+            print("⚠️  Tectonic está bien, pero falta el conversor SVG necesario para PDF.")
+            if "--check" in sys.argv:
+                sys.exit(1)
+            if install_svg_converter():
+                return
+            sys.exit(1)
         print("⚠️  Tectonic encontrado pero no funciona. Se reinstalará.")
 
     if "--check" in sys.argv:
-        print("❌ Tectonic no está instalado o no funciona.")
+        print("❌ Tectonic no está instalado/no funciona, o falta el conversor SVG.")
         sys.exit(1)
 
     auto_confirm = "--yes" in sys.argv or "-y" in sys.argv
@@ -490,12 +784,14 @@ En Windows usa siempre el Python del proyecto:
         return
 
     if install_tectonic_pip():
-        verify_tectonic()
-        return
+        if verify_tectonic() and install_svg_converter():
+            return
 
     print("⚠️  Pip falló. Intentando descarga directa del binario...")
     if install_tectonic_binary():
-        verify_tectonic()
+        if verify_tectonic() and install_svg_converter():
+            return
+        sys.exit(1)
     else:
         print()
         print("❌ No se pudo instalar Tectonic automáticamente.")
