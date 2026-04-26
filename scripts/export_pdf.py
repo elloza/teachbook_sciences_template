@@ -201,6 +201,10 @@ def prepare_svg_images_for_latex(latex_build_dir):
         original = text
         for svg_name, png_name in replacements.items():
             text = text.replace(svg_name, png_name)
+        # Sphinx may emit SVG paths as `{{name}.svg}` rather than `name.svg`.
+        # At this point every SVG in the LaTeX build directory has a PNG pair,
+        # so rewriting the remaining `.svg` extensions in TeX files is safe.
+        text = text.replace(".svg", ".png")
         if text != original:
             with open(tex_path, "w", encoding="utf-8") as f:
                 f.write(text)
