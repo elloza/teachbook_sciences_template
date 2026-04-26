@@ -83,10 +83,44 @@ def find_tectonic_command():
 
 def find_latexmk_command():
     """Return latexmk only when its XeLaTeX dependency is available."""
-    latexmk = shutil.which("latexmk")
-    xelatex = shutil.which("xelatex")
+    latexmk = find_command_with_common_latex_paths("latexmk")
+    xelatex = find_command_with_common_latex_paths("xelatex")
     if latexmk and xelatex:
         return latexmk
+    return None
+
+
+def find_command_with_common_latex_paths(command_name):
+    """Find LaTeX tools even before CI PATH updates take effect."""
+    found = shutil.which(command_name)
+    if found:
+        return found
+
+    executable = f"{command_name}.exe" if os.name == "nt" else command_name
+    candidates = []
+    if os.name == "nt":
+        candidates.extend(
+            [
+                os.path.join("C:\\Program Files\\MiKTeX\\miktex\\bin\\x64", executable),
+                os.path.join("C:\\Program Files\\MiKTeX\\miktex\\bin", executable),
+                os.path.join(os.environ.get("LOCALAPPDATA", ""), "Programs", "MiKTeX", "miktex", "bin", "x64", executable),
+            ]
+        )
+    else:
+        candidates.extend(
+            [
+                os.path.join("/Library/TeX/texbin", executable),
+                os.path.join("/usr/local/texlive/2026basic/bin/universal-darwin", executable),
+                os.path.join("/usr/local/texlive/2025basic/bin/universal-darwin", executable),
+                os.path.join("/usr/local/texlive/2024basic/bin/universal-darwin", executable),
+                os.path.join("/usr/bin", executable),
+                os.path.join("/usr/local/bin", executable),
+            ]
+        )
+
+    for candidate in candidates:
+        if candidate and os.path.isfile(candidate):
+            return candidate
     return None
 
 
