@@ -301,6 +301,7 @@ def install_full_latex_ci():
                     "collection-langspanish",
                     "collection-langenglish",
                     "bbm",
+                    "bbm-macros",
                     "xindy",
                 ]
             )
@@ -336,6 +337,7 @@ def install_full_latex_ci():
         if mpm and not full_latex_ready:
             subprocess.run([mpm, "--update-db"], check=False)
             subprocess.run([mpm, "--install=bbm"], check=False)
+            subprocess.run([mpm, "--install=bbm-macros"], check=False)
         return verify_full_latex() and verify_svg_converter()
 
     print(f"❌ Sistema no soportado para instalación CI: {platform.system()}")
