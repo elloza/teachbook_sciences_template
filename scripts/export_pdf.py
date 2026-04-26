@@ -224,7 +224,10 @@ def prepare_static_paths_for_latex(latex_build_dir):
     nested locations avoids OS-specific path hacks and works on all runners.
     """
     root_static = os.path.join(latex_build_dir, "_static")
-    if not os.path.isdir(root_static):
+    source_static = root_static
+    if not os.path.isdir(source_static):
+        source_static = os.path.join(PROJECT_ROOT, BOOK_DIR, "_static")
+    if not os.path.isdir(source_static):
         return
 
     needed_dirs = set()
@@ -237,13 +240,13 @@ def prepare_static_paths_for_latex(latex_build_dir):
                 needed_dirs.add(os.path.join(latex_build_dir, prefix))
 
     for dest_static in sorted(needed_dirs):
-        if os.path.abspath(dest_static) == os.path.abspath(root_static):
+        if os.path.abspath(dest_static) == os.path.abspath(source_static):
             continue
         parent = os.path.dirname(dest_static)
         os.makedirs(parent, exist_ok=True)
         if os.path.exists(dest_static):
             continue
-        shutil.copytree(root_static, dest_static)
+        shutil.copytree(source_static, dest_static)
         print(f"   📁 _static replicado para LaTeX: {os.path.relpath(dest_static, latex_build_dir)}")
 
 
