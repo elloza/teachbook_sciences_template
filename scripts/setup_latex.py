@@ -635,6 +635,10 @@ def verify_tectonic():
 
 def verify_tectonic_minimal_compile(tectonic, env):
     """Compile a tiny document so --check catches broken Tectonic installs."""
+    # `tectonic` may be a project-relative path such as `.venv/bin/tectonic`.
+    # The compile probe runs with `cwd=tmp`, so a relative executable path would
+    # be resolved from the temporary directory and fail immediately in CI.
+    tectonic = os.path.abspath(tectonic)
     with tempfile.TemporaryDirectory(prefix="tectonic_check_") as tmp:
         tex_path = os.path.join(tmp, "check.tex")
         with open(tex_path, "w", encoding="utf-8") as f:
