@@ -159,14 +159,14 @@ erDiagram
     ASIGNATURA ||--o{ PRACTICA : incluye
 ```
 
-## Diagrama de estados (`stateDiagram-v2`)
+## Diagrama de estados (`stateDiagram`)
 
 ````md
 ```{kroki}
 :type: mermaid
 :align: center
 
-stateDiagram-v2
+stateDiagram
     [*] --> Pendiente
     Pendiente --> EnProgreso : iniciar
     EnProgreso --> Completado : finalizar
@@ -181,13 +181,13 @@ Resultado:
 
 El diagrama siguiente resume visualmente esta parte de la explicación.
 
-**Diagrama: Diagrama de estados (`stateDiagram-v2`).**
+**Diagrama: Diagrama de estados (`stateDiagram`).**
 
 ```{kroki}
 :type: mermaid
 :align: center
 
-stateDiagram-v2
+stateDiagram
     [*] --> Pendiente
     Pendiente --> EnProgreso : iniciar
     EnProgreso --> Completado : finalizar

@@ -29,7 +29,7 @@ Resultado: Ver la sección {ref}`figuras` para más detalles.
 Usa `:name:` dentro de la directiva `{figure}` y `{numref}` para citar por número:
 
 ````md
-```{figure} _static/logo.png
+```{figure} ../../_static/logo.png
 :width: 40%
 :name:  para citar por número:
 
@@ -46,7 +46,7 @@ Resultado:
 
 El {numref}`fig-logo-ref` resume visualmente esta parte de la explicación.
 
-```{figure} _static/logo.png
+```{figure} ../../_static/logo.png
 :width: 40%
 :name: fig-logo-ref
 

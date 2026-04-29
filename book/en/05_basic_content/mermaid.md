@@ -159,14 +159,14 @@ erDiagram
     COURSE ||--o{ LAB : includes
 ```
 
-## State diagram (`stateDiagram-v2`)
+## State diagram (`stateDiagram`)
 
 ````md
 ```{kroki}
 :type: mermaid
 :align: center
 
-stateDiagram-v2
+stateDiagram
     [*] --> Pending
     Pending --> InProgress : start
     InProgress --> Completed : finish
@@ -181,13 +181,13 @@ Result:
 
 The following diagram visually summarizes this part of the explanation.
 
-**Diagram: State diagram (`stateDiagram-v2`).**
+**Diagram: State diagram (`stateDiagram`).**
 
 ```{kroki}
 :type: mermaid
 :align: center
 
-stateDiagram-v2
+stateDiagram
     [*] --> Pending
     Pending --> InProgress : start
     InProgress --> Completed : finish

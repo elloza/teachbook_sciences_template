@@ -8,7 +8,7 @@ Figures are essential in any teaching material. MyST offers two main directives:
 The `{image}` directive inserts an image without numbering:
 
 ```md
-```{image} _static/logo.png
+```{image} ../../_static/logo.png
 :alt: TeachBook project logo
 :width: 60%
 :align: center
@@ -17,7 +17,7 @@ The `{image}` directive inserts an image without numbering:
 
 Result:
 
-```{image} _static/logo.png
+```{image} ../../_static/logo.png
 :alt: TeachBook project logo
 :width: 60%
 :align: center
@@ -28,7 +28,7 @@ Result:
 The `{figure}` directive adds automatic numbering (`Figure 1`, `Figure 2`…):
 
 ````md
-```{figure} _static/logo.png
+```{figure} ../../_static/logo.png
 :width: 50%
 :align: center
 :name: fig-figures-1
@@ -42,7 +42,7 @@ Result:
 
 The {numref}`fig-logo-en` visually summarizes this part of the explanation.
 
-```{figure} _static/logo.png
+```{figure} ../../_static/logo.png
 :width: 50%
 :align: center
 :name: fig-logo-en
@@ -65,7 +65,7 @@ Result: The {numref}`fig-logo-en` shows the project logo.
 Add `:figclass: margin` to place an image in the margin (HTML only):
 
 ````md
-```{figure} _static/logo.png
+```{figure} ../../_static/logo.png
 :figclass: margin
 :width: 100%
 :name: fig-figures-3
@@ -79,7 +79,7 @@ Result:
 
 The {numref}`fig-figures-4` visually summarizes this part of the explanation.
 
-```{figure} _static/logo.png
+```{figure} ../../_static/logo.png
 :figclass: margin
 :width: 100%
 :name: fig-figures-4

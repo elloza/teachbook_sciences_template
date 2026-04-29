@@ -19,6 +19,7 @@ import subprocess
 import sys
 import time
 import io
+import json
 from pathlib import Path
 
 
@@ -27,6 +28,7 @@ VENV = ROOT / ".venv"
 PREVIEW = ROOT / "scripts" / "preview_book.py"
 PID_FILE = ROOT / ".preview.pid"
 LOG_FILE = ROOT / ".preview.log"
+STATE_FILE = ROOT / ".preview.json"
 
 
 # ---------------------------------------------------------------------------
@@ -83,17 +85,30 @@ def process_is_running(pid: int | None) -> bool:
         return False
 
 
+def read_preview_state() -> dict[str, object]:
+    try:
+        return json.loads(STATE_FILE.read_text(encoding="utf-8"))
+    except Exception:
+        return {}
+
+
 def print_status() -> int:
     pid = read_pid()
     if process_is_running(pid):
         print(f"✅ Preview en ejecución (PID {pid})")
-        print("   URL: consulta .preview.log para ver el puerto exacto")
+        state = read_preview_state()
+        url = state.get("url")
+        if url:
+            print(f"   URL: {url}")
+        else:
+            print("   URL: arrancando todavía; usa --log si tarda demasiado")
         print(f"   Log: {LOG_FILE}")
         return 0
     print("ℹ️  No hay preview en ejecución.")
     if PID_FILE.exists():
         print("   PID antiguo eliminado.")
         PID_FILE.unlink(missing_ok=True)
+    STATE_FILE.unlink(missing_ok=True)
     return 1
 
 
@@ -119,6 +134,7 @@ def stop_preview() -> int:
                 os.kill(pid, signal.SIGKILL)
     finally:
         PID_FILE.unlink(missing_ok=True)
+        STATE_FILE.unlink(missing_ok=True)
     print("✅ Preview detenido.")
     return 0
 

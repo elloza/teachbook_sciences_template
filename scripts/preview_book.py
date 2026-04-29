@@ -33,6 +33,7 @@ import subprocess
 import sys
 import threading
 import time
+import json
 from pathlib import Path
 
 
@@ -55,6 +56,7 @@ BOOK_DIR = PROJECT_ROOT / "book"
 BUILD_SCRIPT = PROJECT_ROOT / "scripts" / "build_book.py"
 HTML_DIR = BOOK_DIR / "_build" / "html"
 PID_FILE = PROJECT_ROOT / ".preview.pid"
+STATE_FILE = PROJECT_ROOT / ".preview.json"
 
 WATCH_EXTENSIONS = {
     ".md",
@@ -348,6 +350,18 @@ def main() -> int:
 
     server = start_server(port)
     stop_event = threading.Event()
+    STATE_FILE.write_text(
+        json.dumps(
+            {
+                "pid": os.getpid(),
+                "port": port,
+                "url": f"http://127.0.0.1:{port}",
+                "html_dir": str(HTML_DIR),
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
 
     watcher_thread: threading.Thread | None = None
     if not args.no_watch:
@@ -371,6 +385,10 @@ def main() -> int:
         server.server_close()
         try:
             PID_FILE.unlink(missing_ok=True)
+        except Exception:
+            pass
+        try:
+            STATE_FILE.unlink(missing_ok=True)
         except Exception:
             pass
 
