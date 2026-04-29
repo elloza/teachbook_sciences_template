@@ -500,6 +500,7 @@ def build_pdf_for_lang(lang, engine_name):
 
         # Sanitize config to prevent self-exclusion
         sanitize_config(dest_config)
+        sanitize_kroki_blocks_for_pdf(temp_root)
         src_dir = temp_root
     else:
         src_dir = os.path.abspath(BOOK_DIR)
@@ -659,6 +660,90 @@ def sanitize_config(config_path):
         print(f"🔧 Configuración saneada (excludes minimos seguros) en: {config_path}")
     except Exception as e:
         print(f"⚠️ Error saneando configuración: {e}")
+
+
+def sanitize_kroki_blocks_for_pdf(src_dir):
+    """Replace live Kroki directives in the temporary PDF project.
+
+    HTML builds can use sphinx-kroki directly, but PDF export must not fail just
+    because kroki.io is slow or unavailable. This function only edits the
+    throw-away _temp_pdf_<lang> copy. It leaves the book sources untouched and
+    replaces real Kroki directives with a PDF-safe note plus the diagram source.
+    """
+    replaced_total = 0
+
+    for md_path in glob.glob(os.path.join(src_dir, "**", "*.md"), recursive=True):
+        try:
+            with open(md_path, "r", encoding="utf-8") as f:
+                lines = f.readlines()
+        except OSError:
+            continue
+
+        new_lines = []
+        i = 0
+        changed = False
+        inside_quad_fence = False
+
+        while i < len(lines):
+            line = lines[i]
+            stripped = line.strip()
+
+            # Do not rewrite tutorial examples enclosed in four-backtick fences.
+            if stripped.startswith("````"):
+                inside_quad_fence = not inside_quad_fence
+                new_lines.append(line)
+                i += 1
+                continue
+
+            if not inside_quad_fence and stripped.startswith("```{kroki"):
+                block_lines = [line]
+                i += 1
+                while i < len(lines):
+                    block_lines.append(lines[i])
+                    if lines[i].strip() == "```":
+                        i += 1
+                        break
+                    i += 1
+
+                source_lines = []
+                for block_line in block_lines[1:-1]:
+                    block_stripped = block_line.strip()
+                    if not block_stripped or block_stripped.startswith(":"):
+                        continue
+                    source_lines.append(block_line.rstrip("\n"))
+                source = "\n".join(source_lines).strip() or "(fuente Kroki no disponible)"
+
+                new_lines.extend(
+                    [
+                        "````{admonition} Diagrama disponible en la versión HTML\n",
+                        ":class: note\n",
+                        "\n",
+                        "Este diagrama Kroki se muestra en la versión HTML del libro. "
+                        "Para que el PDF sea autocontenido y no dependa de kroki.io, "
+                        "se incluye aquí su fuente textual.\n",
+                        "\n",
+                        "```text\n",
+                    ]
+                )
+                for source_line in source.splitlines():
+                    new_lines.append(f"{source_line}\n")
+                new_lines.extend(["```\n", "````\n"])
+                replaced_total += 1
+                changed = True
+                continue
+
+            new_lines.append(line)
+            i += 1
+
+        if changed:
+            with open(md_path, "w", encoding="utf-8") as f:
+                f.writelines(new_lines)
+
+    if replaced_total:
+        print(
+            "🔒 PDF autocontenido: "
+            f"{replaced_total} bloque(s) Kroki sustituidos por fallback textual."
+        )
 
 
 def main():
