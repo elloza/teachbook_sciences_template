@@ -8,6 +8,11 @@ Todos los ejemplos de esta sección funcionan tanto en **HTML** como en **PDF**,
 
 ## Qué encontrarás aquí
 
+
+La tabla siguiente resume los elementos principales de esta sección.
+
+**Tabla. Qué encontrarás aquí.**
+
 | Página | Qué aprenderás |
 |--------|----------------|
 | [Figuras e imágenes](figuras) | Insertar y referenciar imágenes |

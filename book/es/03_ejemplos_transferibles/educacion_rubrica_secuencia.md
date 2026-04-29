@@ -2,6 +2,11 @@
 
 ## Rúbrica: Trabajo de investigación
 
+
+La tabla siguiente resume los elementos principales de esta sección.
+
+**Tabla. Rúbrica: Trabajo de investigación.**
+
 | Criterio | Excelente (4) | Notable (3) | Suficiente (2) | Insuficiente (1) |
 |----------|---------------|-------------|----------------|-------------------|
 | **Planteamiento del problema** | Define un problema original y relevante con contexto claro | Define un problema adecuado con algún contexto | Define un problema vago o poco contextualizado | No define un problema identificable |
@@ -16,6 +21,11 @@ Puntuación mínima para aprobar: **10 / 20** (50 %). La puntuación se obtiene 
 ```
 
 ## Secuencia de objetivos de aprendizaje
+
+
+La tabla siguiente resume los elementos principales de esta sección.
+
+**Tabla. Secuencia de objetivos de aprendizaje.**
 
 | Fase | Objetivo | Resultado esperado |
 |------|----------|-------------------|

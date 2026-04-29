@@ -6,6 +6,11 @@ Tables are the most direct way to present structured data. MyST supports standar
 ## Simple Markdown table
 
 ```md
+
+The following table summarizes the main elements of this section.
+
+**Table. Simple Markdown table.**
+
 | Element | Symbol | Atomic number |
 |---------|--------|---------------|
 | Hydrogen | H     | 1             |
@@ -14,6 +19,11 @@ Tables are the most direct way to present structured data. MyST supports standar
 ```
 
 Result:
+
+
+The following table summarizes the main elements of this section.
+
+**Table. Simple Markdown table.**
 
 | Element | Symbol | Atomic number |
 |---------|--------|---------------|

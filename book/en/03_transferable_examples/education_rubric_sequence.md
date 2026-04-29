@@ -2,6 +2,11 @@
 
 ## Rubric: Research project
 
+
+The following table summarizes the main elements of this section.
+
+**Table. Rubric: Research project.**
+
 | Criterion | Excellent (4) | Good (3) | Sufficient (2) | Insufficient (1) |
 |-----------|---------------|----------|----------------|-------------------|
 | **Problem statement** | Defines an original, relevant problem with clear context | Defines an adequate problem with some context | Defines a vague or poorly contextualized problem | No identifiable problem defined |
@@ -16,6 +21,11 @@ Minimum passing score: **10 / 20** (50 %). The total score is obtained by adding
 ```
 
 ## Learning objective sequence
+
+
+The following table summarizes the main elements of this section.
+
+**Table. Learning objective sequence.**
 
 | Phase | Objective | Expected outcome |
 |-------|-----------|-----------------|

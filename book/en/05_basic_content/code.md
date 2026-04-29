@@ -101,6 +101,11 @@ ORDER BY grade DESC;
 
 ## Common languages in science
 
+
+The following table summarizes the main elements of this section.
+
+**Table. Common languages in science.**
+
 | Language | When to use it |
 |----------|---------------|
 | `python` | Data analysis, numerical computing |

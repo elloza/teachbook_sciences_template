@@ -43,6 +43,11 @@ in a normal distribution?**
 
 Using the empirical rule (68-95-99.7 rule):
 
+
+The following table summarizes the main elements of this section.
+
+**Table. Practice Questions: Statistics.**
+
 | Range | Proportion |
 |-------|-----------|
 | $\mu \pm 1\sigma$ | ≈ 68.27% |
@@ -73,6 +78,11 @@ not just observational data.
 :class: dropdown
 
 **Define Type I and Type II errors. Which one is directly controlled by the α level?**
+
+
+The following table summarizes the main elements of this section.
+
+**Table. Practice Questions: Statistics.**
 
 | Type | Occurs when... | Called |
 |------|----------------|--------|

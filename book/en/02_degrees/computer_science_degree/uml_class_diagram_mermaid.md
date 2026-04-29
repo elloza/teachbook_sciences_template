@@ -48,6 +48,11 @@ classDiagram
 
 **Result:**
 
+
+The following diagram visually summarizes this part of the explanation.
+
+**Diagram: Example: Geometric Shape Hierarchy.**
+
 ```{kroki}
 :type: mermaid
 :align: center
@@ -92,6 +97,11 @@ classDiagram
 - **Abstract class**: Indicated with `<<abstract>>`.
 
 ## Relationship types
+
+
+The following table summarizes the main elements of this section.
+
+**Table. Relationship types.**
 
 | Notation | Meaning |
 |----------|---------|

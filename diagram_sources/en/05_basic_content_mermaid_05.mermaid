@@ -1,0 +1,7 @@
+stateDiagram-v2
+    [*] --> Pending
+    Pending --> InProgress : start
+    InProgress --> Completed : finish
+    InProgress --> Error : failure
+    Error --> Pending : retry
+    Completed --> [*]

@@ -81,6 +81,11 @@ Written as `$$ ... $$` on its own line.
 ## Tables
 
 ```md
+
+The following table summarizes the main elements of this section.
+
+**Table. Tables.**
+
 | Column A | Column B | Column C |
 |----------|----------|----------|
 | data 1   | data 2   | data 3   |
@@ -88,6 +93,11 @@ Written as `$$ ... $$` on its own line.
 ```
 
 Result:
+
+
+The following table summarizes the main elements of this section.
+
+**Table. Tables.**
 
 | Column A | Column B | Column C |
 |----------|----------|----------|

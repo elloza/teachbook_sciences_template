@@ -115,6 +115,11 @@ $$M = 2 \times 1.008 + 16.00 = 18.016 \text{ g/mol}$$
 
 ## Usos docentes
 
+
+La tabla siguiente resume los elementos principales de esta sección.
+
+**Tabla. Usos docentes.**
+
 | Tipo | Uso habitual |
 |------|-------------|
 | `{note}` | Información complementaria, recordatorios |

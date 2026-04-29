@@ -7,6 +7,11 @@ Son patrones docentes reutilizables en muchas carreras, no ejemplos cerrados de 
 
 ## Familias de ejemplos
 
+
+La tabla siguiente resume los elementos principales de esta sección.
+
+**Tabla. Familias de ejemplos.**
+
 | Ejemplo | Patrón transversal | Puede adaptarse a... |
 |---------|-------------------|----------------------|
 | [Modelos de crecimiento y saturación](biologia_crecimiento_logistico.ipynb) | Sistemas que crecen hasta un límite | Poblaciones, difusión cultural, adopción tecnológica, aprendizaje, epidemias |

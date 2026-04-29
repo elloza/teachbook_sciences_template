@@ -1,0 +1,13 @@
+classDiagram
+    class Experiment {
+        +string name
+        +date date
+        +run()
+        +analyze()
+    }
+    class Sample {
+        +string type
+        +float mass
+        +prepare()
+    }
+    Experiment --> Sample : uses

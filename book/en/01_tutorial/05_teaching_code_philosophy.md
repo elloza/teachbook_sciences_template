@@ -20,6 +20,11 @@ When you draw a diagram directly in a visual tool, the result is locked inside t
 
 When you describe that same diagram with code, an intermediate layer appears:
 
+
+The following diagram visually summarizes this part of the explanation.
+
+**Diagram: Code as a bridge to the final result.**
+
 ```{kroki}
 :type: mermaid
 :align: center
@@ -35,6 +40,11 @@ flowchart LR
 That intermediate layer is where AI works especially well. An assistant can read, modify, translate, refactor, and compare structured text much better than it can directly manipulate a PDF, a final image, or a closed presentation.
 
 ## What artifacts can be generated from code?
+
+
+The following table summarizes the main elements of this section.
+
+**Table. What artifacts can be generated from code?.**
 
 | Final artifact | Intermediate language | Teaching use case |
 |---|---|---|

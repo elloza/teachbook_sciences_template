@@ -101,6 +101,11 @@ ORDER BY nota DESC;
 
 ## Lenguajes más usados en ciencias
 
+
+La tabla siguiente resume los elementos principales de esta sección.
+
+**Tabla. Lenguajes más usados en ciencias.**
+
 | Lenguaje | Cuándo usarlo |
 |----------|--------------|
 | `python` | Análisis de datos, cálculo numérico |

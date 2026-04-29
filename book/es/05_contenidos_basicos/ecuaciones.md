@@ -57,6 +57,11 @@ Resultado: La ecuación {eq}`eq-calor` describe la difusión de calor.
 
 ## Símbolos matemáticos comunes
 
+
+La tabla siguiente resume los elementos principales de esta sección.
+
+**Tabla. Símbolos matemáticos comunes.**
+
 | Símbolo | Código LaTeX | Símbolo | Código LaTeX |
 |---------|-------------|---------|-------------|
 | $\alpha$ | `\alpha` | $\beta$ | `\beta` |

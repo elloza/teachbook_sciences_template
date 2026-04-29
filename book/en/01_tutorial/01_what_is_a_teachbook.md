@@ -47,6 +47,11 @@ This matters: **we are not starting from scratch**. We are starting from existin
 
 The core idea is this:
 
+
+The following table summarizes the main elements of this section.
+
+**Table. What goes in and what comes out.**
+
 | You start with... | And you get... |
 |---|---|
 | `.md` and `.ipynb` files | book web pages |

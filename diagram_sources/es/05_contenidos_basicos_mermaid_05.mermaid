@@ -1,0 +1,7 @@
+stateDiagram-v2
+    [*] --> Pendiente
+    Pendiente --> EnProgreso : iniciar
+    EnProgreso --> Completado : finalizar
+    EnProgreso --> Error : fallo
+    Error --> Pendiente : reintentar
+    Completado --> [*]

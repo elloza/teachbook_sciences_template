@@ -57,6 +57,11 @@ Result: Equation {eq}`eq-heat` describes heat diffusion.
 
 ## Common math symbols
 
+
+The following table summarizes the main elements of this section.
+
+**Table. Common math symbols.**
+
 | Symbol | LaTeX code | Symbol | LaTeX code |
 |--------|-----------|--------|-----------|
 | $\alpha$ | `\alpha` | $\beta$ | `\beta` |

@@ -24,7 +24,9 @@ python scripts/setup_latex.py --yes --full
 python scripts/export_pdf.py --engine auto
 ```
 
-Eso instala **Tectonic** y también prepara el fallback avanzado (`latexmk` + XeLaTeX) cuando el sistema lo permite. La exportación con `--engine auto` prueba Tectonic primero y, si el motor falla, usa el fallback. Es la misma política que deben usar deploy y tests.
+Eso instala **Tectonic** y también prepara un fallback **TinyTeX portable ligero** dentro de `.venv` (`latexmk` + XeLaTeX), sin Chocolatey/Homebrew/apt ni permisos de administrador. La exportación con `--engine auto` prueba Tectonic primero y, si el motor falla, usa el fallback. Es la misma política que deben usar deploy y tests.
+
+TinyTeX debe instalarse de forma quirúrgica: `TinyTeX-1` + paquetes concretos necesarios para las plantillas del libro. No se deben instalar colecciones pesadas como `collection-latexextra`, `collection-xetex`, `collection-latexrecommended`, `collection-fontsrecommended`, `collection-langspanish`, `collection-langenglish` ni `scheme-full`.
 
 ## Qué hace `export_pdf.py`
 
@@ -58,7 +60,7 @@ python scripts/setup_latex.py --yes
 python scripts/setup_latex.py --check
 ```
 
-### Toolchain completa local/CI: Tectonic + latexmk/xelatex
+### Toolchain completa local/CI: Tectonic + TinyTeX portable ligero
 
 Usar cuando se quiera paridad con CI/CD o generación robusta de PDFs:
 
@@ -72,6 +74,8 @@ Verificación:
 ```bash
 python scripts/setup_latex.py --check-full
 ```
+
+El modo `--full` muestra antes de instalar una estimación sencilla: TinyTeX-1 descarga aproximadamente 72 MB en Windows, 65 MB en macOS y 50–53 MB en Linux; el espacio local razonable tras instalar paquetes mínimos suele quedar entre 300 y 800 MB. Si una instalación existente supera 1 GB o contiene colecciones pesadas, el script avisa sin borrar nada automáticamente.
 
 ## Instrucciones para el agente
 
@@ -107,7 +111,7 @@ El deploy y los tests deben usar la misma política que el alumno:
 .venv/bin/python scripts/export_pdf.py --engine auto
 ```
 
-Si Tectonic falla en CI con un problema del motor, `--engine auto` debe caer al fallback ya instalado. Así no se publica con un camino distinto al que puede reproducir el alumno localmente.
+Si Tectonic falla en CI con un problema del motor, `--engine auto` debe caer al fallback TinyTeX ya instalado en `.venv`. Así no se publica con un camino distinto al que puede reproducir el alumno localmente.
 
 ## Solución de problemas
 

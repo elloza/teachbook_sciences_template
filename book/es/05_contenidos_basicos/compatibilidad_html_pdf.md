@@ -5,6 +5,11 @@ Tu TeachBook se publica en dos formatos: **HTML** (web interactiva) y **PDF** (v
 
 ## Tabla de compatibilidad
 
+
+La tabla siguiente resume los elementos principales de esta sección.
+
+**Tabla. Tabla de compatibilidad.**
+
 | Elemento | HTML | PDF | Estrategia |
 |----------|------|-----|-----------|
 | Texto, listas, enlaces | ✅ | ✅ | Usar libremente |

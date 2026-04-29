@@ -29,9 +29,9 @@ La directiva `{figure}` añade numeración automática (`Figura 1`, `Figura 2`�
 
 ````md
 ```{figure} _static/logo.png
-:name: fig-logo
 :width: 50%
 :align: center
+:name: fig-figuras-1
 
 Logo oficial del proyecto TeachBook.
 ```
@@ -39,10 +39,13 @@ Logo oficial del proyecto TeachBook.
 
 Resultado:
 
+
+El {numref}`fig-logo` resume visualmente esta parte de la explicación.
+
 ```{figure} _static/logo.png
-:name: fig-logo
 :width: 50%
 :align: center
+:name: fig-logo
 
 Logo oficial del proyecto TeachBook.
 ```
@@ -65,6 +68,7 @@ Añade `:figclass: margin` para colocar una imagen en el margen (solo HTML):
 ```{figure} _static/logo.png
 :figclass: margin
 :width: 100%
+:name: fig-figuras-3
 
 Logo en el margen.
 ```
@@ -72,14 +76,23 @@ Logo en el margen.
 
 Resultado:
 
+
+El {numref}`fig-figuras-4` resume visualmente esta parte de la explicación.
+
 ```{figure} _static/logo.png
 :figclass: margin
 :width: 100%
+:name: fig-figuras-4
 
 Logo en el margen.
 ```
 
 ## Parámetros útiles
+
+
+La tabla siguiente resume los elementos principales de esta sección.
+
+**Tabla. Parámetros útiles.**
 
 | Parámetro | Qué hace | Ejemplo |
 |-----------|----------|---------|

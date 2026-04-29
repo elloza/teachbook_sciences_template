@@ -44,6 +44,7 @@ python scripts/render_circuitikz.py rc_circuit.tex book/_static/generated/rc_cir
 :alt: Circuito RC generado con CircuitikZ
 :width: 70%
 :align: center
+:name: fig-circuitikz-avanzado-1
 
 Circuito RC generado con CircuitikZ.
 ```
@@ -51,10 +52,14 @@ Circuito RC generado con CircuitikZ.
 
 ## Resultado renderizado
 
+
+El {numref}`fig-circuitikz-avanzado-2` resume visualmente esta parte de la explicación.
+
 ```{figure} ../../../_static/generated/circuito_rc_circuitikz.png
 :alt: Circuito RC generado con CircuitikZ
 :width: 70%
 :align: center
+:name: fig-circuitikz-avanzado-2
 
 Circuito RC generado desde un archivo `.tex` con CircuitikZ y convertido a imagen PNG.
 ```

@@ -20,6 +20,95 @@ if sys.stderr.encoding and sys.stderr.encoding.lower() not in ("utf-8", "utf8"):
 
 
 VENV_DIR = ".venv"
+TECTONIC_RELEASE_TAG = os.environ.get("TECTONIC_RELEASE_TAG", "tectonic@0.15.0")
+TINYTEX_VERSION = os.environ.get("TINYTEX_VERSION", "2026.04")
+TINYTEX_INSTALLER = os.environ.get("TINYTEX_INSTALLER", "TinyTeX-1")
+# TinyTeX-1 already brings the LaTeX base, XeTeX, latexmk, fontspec,
+# hyperref, xcolor, amsmath, babel and other essentials. Keep this list
+# surgical: only packages required by the TeachBook templates/Sphinx output
+# that may be missing in the base image. Do NOT add heavy collections here.
+TINYTEX_PACKAGES = [
+    "latexmk",
+    "xetex",
+    "fontspec",
+    "framed",
+    "fancyvrb",
+    "fancyhdr",
+    "fncychap",
+    "footnotehyper",
+    "tabulary",
+    "varwidth",
+    "wrapfig",
+    "needspace",
+    "capt-of",
+    "cmap",
+    "colortbl",
+    "ellipse",
+    "pict2e",
+    "parskip",
+    "titlesec",
+    "ucharclasses",
+    "upquote",
+    "pgf",
+    "pgfplots",
+    "jknapltx",  # provides mathrsfs.sty
+    "rsfs",  # provides the rsfs fonts used by mathrsfs.sty
+    "amsmath",
+    "amsfonts",
+    "bbm",
+    "bbm-macros",
+    "changepage",
+    "babel-spanish",
+    "babel-english",
+    "polyglossia",
+    "hyphen-spanish",
+    "hyphen-english",
+    "gnu-freefont",
+    "hypcap",
+    "xindy",
+]
+TINYTEX_REQUIRED_FILES = [
+    "amscd.sty",
+    "bbm.sty",
+    "capt-of.sty",
+    "changepage.sty",
+    "cmap.sty",
+    "colortbl.sty",
+    "ellipse.sty",
+    "fancyhdr.sty",
+    "fncychap.sty",
+    "footnotehyper.sty",
+    "hypcap.sty",
+    "mathrsfs.sty",
+    "needspace.sty",
+    "pgfplots.sty",
+    "pict2e.sty",
+    "parskip.sty",
+    "titlesec.sty",
+    "ucharclasses.sty",
+    "polyglossia.sty",
+    "rsfs10.mf",
+    "tabulary.sty",
+    "tikz.sty",
+    "upquote.sty",
+    "varwidth.sty",
+    "wrapfig.sty",
+]
+HEAVY_TINYTEX_COLLECTIONS = {
+    "collection-latexextra",
+    "collection-xetex",
+    "collection-latexrecommended",
+    "collection-fontsrecommended",
+    "collection-langspanish",
+    "collection-langenglish",
+    "scheme-full",
+}
+TINYTEX_DOWNLOAD_ESTIMATES_MB = {
+    "windows": "~72 MB",
+    "darwin": "~65 MB",
+    "linux": "~50–53 MB",
+}
+TINYTEX_EXPECTED_SPACE_MB = "300–800 MB"
 
 
 def run(cmd, **kwargs):
@@ -36,6 +125,155 @@ def add_github_path(path):
         with open(github_path, "a", encoding="utf-8") as f:
             f.write(path + "\n")
         print(f"✅ Añadido a GITHUB_PATH: {path}")
+
+
+def prepend_path(path):
+    """Make a tool directory visible to the current process and GitHub steps."""
+    if not path or not os.path.isdir(path):
+        return
+    current = os.environ.get("PATH", "")
+    paths = current.split(os.pathsep) if current else []
+    if path not in paths:
+        os.environ["PATH"] = path + os.pathsep + current
+    add_github_path(path)
+
+
+def get_project_tool_dir(*parts):
+    """Return a project-controlled tool directory inside .venv."""
+    return os.path.join(VENV_DIR, "tools", *parts)
+
+
+def get_tectonic_cache_dir():
+    cache_dir = get_project_tool_dir("tectonic-cache")
+    os.makedirs(cache_dir, exist_ok=True)
+    return os.path.abspath(cache_dir)
+
+
+def get_tinytex_parent_dir():
+    parent = get_project_tool_dir("tinytex")
+    os.makedirs(parent, exist_ok=True)
+    return os.path.abspath(parent)
+
+
+def get_tinytex_root():
+    return os.path.join(get_tinytex_parent_dir(), "TinyTeX")
+
+
+def get_tinytex_bin_dir():
+    root = get_tinytex_root()
+    bin_root = os.path.join(root, "bin")
+    if not os.path.isdir(bin_root):
+        return None
+    if os.name == "nt":
+        candidate = os.path.join(bin_root, "windows")
+        return candidate if os.path.isdir(candidate) else None
+    for name in os.listdir(bin_root):
+        candidate = os.path.join(bin_root, name)
+        if os.path.isdir(candidate):
+            return candidate
+    return None
+
+
+def activate_tinytex_path():
+    bin_dir = get_tinytex_bin_dir()
+    if bin_dir:
+        prepend_path(bin_dir)
+    return bin_dir
+
+
+def format_size_mb(size_bytes):
+    return f"{size_bytes / (1024 * 1024):.0f} MB"
+
+
+def get_directory_size_bytes(path):
+    """Return a best-effort recursive directory size without failing checks."""
+    if not os.path.isdir(path):
+        return 0
+    total = 0
+    for root, _dirs, files in os.walk(path):
+        for filename in files:
+            file_path = os.path.join(root, filename)
+            try:
+                if not os.path.islink(file_path):
+                    total += os.path.getsize(file_path)
+            except OSError:
+                continue
+    return total
+
+
+def read_tinytex_installed_packages():
+    """Read installed package names from TinyTeX's texlive.tlpdb if available."""
+    tlpdb_path = os.path.join(get_tinytex_root(), "tlpkg", "texlive.tlpdb")
+    if not os.path.isfile(tlpdb_path):
+        return []
+    packages = []
+    try:
+        with open(tlpdb_path, "r", encoding="utf-8", errors="replace") as f:
+            for line in f:
+                if line.startswith("name "):
+                    name = line.split(maxsplit=1)[1].strip()
+                    if name:
+                        packages.append(name)
+    except OSError:
+        return []
+    return packages
+
+
+def get_installed_heavy_tinytex_collections(packages=None):
+    if packages is None:
+        packages = read_tinytex_installed_packages()
+    installed = set(packages)
+    return sorted(HEAVY_TINYTEX_COLLECTIONS.intersection(installed))
+
+
+def get_tinytex_diagnostic_info():
+    root = get_tinytex_root()
+    packages = read_tinytex_installed_packages()
+    return {
+        "root": root,
+        "exists": os.path.isdir(root),
+        "size_bytes": get_directory_size_bytes(root),
+        "package_count": len(packages),
+        "heavy_collections": get_installed_heavy_tinytex_collections(packages),
+    }
+
+
+def print_tinytex_diagnostics():
+    """Print lightweight diagnostics for an existing project-local TinyTeX."""
+    info = get_tinytex_diagnostic_info()
+    if not info["exists"]:
+        print("ℹ️  TinyTeX portable aún no está instalado en .venv/tools/tinytex.")
+        return info
+
+    print("📊 Diagnóstico TinyTeX portable:")
+    print(f"   Ubicación: {info['root']}")
+    print(f"   Tamaño aproximado: {format_size_mb(info['size_bytes'])}")
+    if info["package_count"]:
+        print(f"   Paquetes instalados aprox.: {info['package_count']}")
+    else:
+        print("   Paquetes instalados aprox.: no se pudo leer tlpkg/texlive.tlpdb")
+
+    warning_needed = info["size_bytes"] > 1024 * 1024 * 1024 or bool(info["heavy_collections"])
+    if warning_needed:
+        print("⚠️  Esta instalación parece más grande de lo necesario para un docente.")
+        if info["size_bytes"] > 1024 * 1024 * 1024:
+            print("   Supera 1 GB; lo esperado con este flujo ligero suele ser 300–800 MB.")
+        if info["heavy_collections"]:
+            print("   Contiene colecciones pesadas:")
+            for collection in info["heavy_collections"]:
+                print(f"   • {collection}")
+        print("   No se borrará nada automáticamente. Si quieres adelgazarla, haz copia y reinstala TinyTeX dentro de .venv cuando proceda.")
+    return info
+
+
+def print_tinytex_full_mode_notice():
+    """Explain the size implications of --full before installing TinyTeX."""
+    system = platform.system().lower()
+    download_estimate = TINYTEX_DOWNLOAD_ESTIMATES_MB.get(system, "~50–72 MB")
+    print("ℹ️  Modo --full: se mantiene Tectonic como motor principal y se prepara TinyTeX solo como red de seguridad.")
+    print(f"   Descarga base TinyTeX-1 estimada para {platform.system()}: {download_estimate}.")
+    print(f"   Espacio local esperado con paquetes mínimos: {TINYTEX_EXPECTED_SPACE_MB}.")
+    print("   Instalaremos paquetes concretos, no colecciones enormes como collection-latexextra ni scheme-full.")
 
 
 def command_exists(command):
@@ -140,6 +378,45 @@ def verify_svg_converter():
     return False
 
 
+def find_command_with_common_latex_paths(command_name):
+    """Find LaTeX tools, preferring project-local TinyTeX."""
+    activate_tinytex_path()
+    found = shutil.which(command_name)
+    if found:
+        return found
+
+    executable = f"{command_name}.exe" if os.name == "nt" else command_name
+    candidates = []
+
+    tinytex_bin = get_tinytex_bin_dir()
+    if tinytex_bin:
+        candidates.append(os.path.join(tinytex_bin, executable))
+        if os.name == "nt":
+            candidates.append(os.path.join(tinytex_bin, f"{command_name}.bat"))
+
+    if os.name == "nt":
+        candidates.extend(
+            [
+                os.path.join("C:\\Program Files\\MiKTeX\\miktex\\bin\\x64", executable),
+                os.path.join("C:\\Program Files\\MiKTeX\\miktex\\bin", executable),
+                os.path.join(os.environ.get("LOCALAPPDATA", ""), "Programs", "MiKTeX", "miktex", "bin", "x64", executable),
+            ]
+        )
+    else:
+        candidates.extend(
+            [
+                os.path.join("/Library/TeX/texbin", executable),
+                os.path.join("/usr/local/bin", executable),
+                os.path.join("/usr/bin", executable),
+            ]
+        )
+
+    for candidate in candidates:
+        if candidate and os.path.isfile(candidate):
+            return candidate
+    return None
+
+
 def install_cairosvg_with_pip():
     if not ensure_pip_available():
         return False
@@ -176,39 +453,22 @@ def install_svg_converter():
     if install_cairosvg_with_pip() and verify_svg_converter():
         return True
 
-    system = platform.system().lower()
-
-    if system == "windows" and command_exists("choco"):
-        try:
-            run(["choco", "install", "librsvg", "gtk-runtime", "-y", "--no-progress"])
-            gtk_candidates = [
-                r"C:\Program Files\GTK3-Runtime Win64\bin",
-                r"C:\Program Files\GTK2-Runtime\bin",
-                r"C:\tools\gtk-runtime\bin",
-            ]
-            for gtk_bin in gtk_candidates:
-                if os.path.isdir(gtk_bin):
-                    os.environ["PATH"] = gtk_bin + os.pathsep + os.environ.get("PATH", "")
-                    add_github_path(gtk_bin)
-            return verify_svg_converter()
-        except Exception as exc:
-            print(f"⚠️  No se pudo instalar librsvg con Chocolatey: {exc}")
-
-    if system == "darwin" and command_exists("brew"):
-        try:
-            run(["brew", "install", "librsvg", "cairo", "pkg-config"])
-            return verify_svg_converter()
-        except Exception as exc:
-            print(f"⚠️  No se pudo instalar librsvg con Homebrew: {exc}")
-
-    if system == "linux" and (os.environ.get("CI") or os.environ.get("GITHUB_ACTIONS")):
-        try:
-            apt = ["apt-get"] if os.geteuid() == 0 else ["sudo", "apt-get"]
-            run(apt + ["update"])
-            run(apt + ["install", "-y", "librsvg2-bin"])
-            return verify_svg_converter()
-        except Exception as exc:
-            print(f"⚠️  No se pudo instalar librsvg en Linux: {exc}")
+    if os.environ.get("TEACHBOOK_ALLOW_SYSTEM_LATEX_DEPS") == "1":
+        system = platform.system().lower()
+        if system == "darwin" and command_exists("brew"):
+            try:
+                run(["brew", "install", "librsvg", "cairo", "pkg-config"])
+                return verify_svg_converter()
+            except Exception as exc:
+                print(f"⚠️  No se pudo instalar librsvg con Homebrew: {exc}")
+        if system == "linux" and (os.environ.get("CI") or os.environ.get("GITHUB_ACTIONS")):
+            try:
+                apt = ["apt-get"] if os.geteuid() == 0 else ["sudo", "apt-get"]
+                run(apt + ["update"])
+                run(apt + ["install", "-y", "librsvg2-bin"])
+                return verify_svg_converter()
+            except Exception as exc:
+                print(f"⚠️  No se pudo instalar librsvg en Linux: {exc}")
 
     print("⚠️  No se pudo dejar listo el conversor SVG automáticamente.")
     print("   El flujo PDF con Tectonic necesita rsvg-convert o CairoSVG para los SVG/Kroki.")
@@ -217,9 +477,17 @@ def install_svg_converter():
 
 def verify_full_latex():
     """Verify the advanced fallback PDF toolchain (latexmk + XeLaTeX)."""
-    latexmk = shutil.which("latexmk")
-    xelatex = shutil.which("xelatex")
+    activate_tinytex_path()
+    print_tinytex_diagnostics()
+    latexmk = find_command_with_common_latex_paths("latexmk")
+    xelatex = find_command_with_common_latex_paths("xelatex")
     if latexmk and xelatex:
+        missing_files = find_missing_tinytex_required_files()
+        if missing_files:
+            print("❌ Toolchain LaTeX encontrada, pero faltan paquetes usados por las plantillas:")
+            for filename in missing_files:
+                print(f"   • {filename}")
+            return False
         print("✅ Toolchain LaTeX completa detectada.")
         print(f"   latexmk: {latexmk}")
         print(f"   xelatex: {xelatex}")
@@ -235,115 +503,51 @@ def verify_full_latex():
     return False
 
 
-def install_full_latex_ci():
-    """Install the advanced XeLaTeX + latexmk fallback toolchain on CI.
+def find_missing_tinytex_required_files():
+    """Check representative .sty files required by the custom PDF templates."""
+    kpsewhich = find_command_with_common_latex_paths("kpsewhich")
+    if not kpsewhich:
+        return []
+    env = os.environ.copy()
+    bin_dir = get_tinytex_bin_dir()
+    if bin_dir:
+        env["PATH"] = bin_dir + os.pathsep + env.get("PATH", "")
+    missing = []
+    for filename in TINYTEX_REQUIRED_FILES:
+        result = subprocess.run(
+            [kpsewhich, filename],
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            env=env,
+            timeout=30,
+        )
+        if result.returncode != 0 or not result.stdout.strip():
+            missing.append(filename)
+    return missing
 
-    Tectonic remains the default user-facing flow because it is simpler and
-    more portable. This installer is kept for explicit fallback scenarios,
-    deeper diagnostics, or environments that require a full LaTeX distro.
+
+def install_full_latex_ci():
+    """Install the advanced XeLaTeX + latexmk fallback toolchain.
+
+    Tectonic remains the default user-facing flow. The fallback is TinyTeX
+    installed inside the project venv, without Chocolatey/Homebrew/apt and
+    without admin permissions.
     """
-    print("🔧 Instalando toolchain LaTeX completa AVANZADA para CI/fallback...")
-    system = platform.system().lower()
+    print("🔧 Preparando fallback LaTeX completo con TinyTeX portable...")
+    print_tinytex_full_mode_notice()
 
     full_latex_ready = verify_full_latex()
 
     if full_latex_ready and verify_svg_converter():
         return True
-
-    if system == "linux":
-        if os.geteuid() == 0:
-            apt = ["apt-get"]
-        else:
-            apt = ["sudo", "apt-get"]
-        run(apt + ["update"])
-        run(
-            apt
-            + [
-                "install",
-                "-y",
-                "latexmk",
-                "texlive-xetex",
-                "texlive-latex-recommended",
-                "texlive-latex-extra",
-                "texlive-fonts-recommended",
-                "texlive-fonts-extra",
-                "texlive-lang-spanish",
-                "texlive-lang-english",
-                "librsvg2-bin",
-                "xindy",
-            ]
-        )
-        return verify_full_latex() and verify_svg_converter()
-
-    if system == "darwin":
-        if not command_exists("brew"):
-            print("❌ Homebrew no está disponible; no puedo instalar BasicTeX automáticamente.")
-            return False
-        run(["brew", "install", "librsvg", "cairo", "pkg-config"])
-        if not full_latex_ready:
-            run(["brew", "install", "--cask", "basictex"])
-        texbin = "/Library/TeX/texbin"
-        os.environ["PATH"] = texbin + os.pathsep + os.environ.get("PATH", "")
-        add_github_path(texbin)
-        if not full_latex_ready:
-            tlmgr = os.path.join(texbin, "tlmgr")
-            run(["sudo", tlmgr, "update", "--self"])
-            run(
-                [
-                    "sudo",
-                    tlmgr,
-                    "install",
-                    "latexmk",
-                    "collection-xetex",
-                    "collection-latexrecommended",
-                    "collection-latexextra",
-                    "collection-fontsrecommended",
-                    "collection-langspanish",
-                    "collection-langenglish",
-                    "gnu-freefont",
-                    "bbm",
-                    "bbm-macros",
-                    "xindy",
-                ]
-            )
-        return verify_full_latex() and verify_svg_converter()
-
-    if system == "windows":
-        if not command_exists("choco"):
-            print("❌ Chocolatey no está disponible; no puedo instalar MiKTeX automáticamente.")
-            return False
-        packages = [] if verify_svg_converter() else ["gtk-runtime"]
-        if not full_latex_ready:
-            packages = ["miktex", "strawberryperl"] + packages
-        if packages:
-            run(["choco", "install", *packages, "-y", "--no-progress"])
-        miktex_bin = r"C:\Program Files\MiKTeX\miktex\bin\x64"
-        perl_bin = r"C:\Strawberry\perl\bin"
-        gtk_candidates = [
-            r"C:\Program Files\GTK3-Runtime Win64\bin",
-            r"C:\Program Files\GTK2-Runtime\bin",
-            r"C:\tools\gtk-runtime\bin",
-        ]
-        extra_paths = [miktex_bin, perl_bin] + [p for p in gtk_candidates if os.path.isdir(p)]
-        os.environ["PATH"] = os.pathsep.join(extra_paths) + os.pathsep + os.environ.get("PATH", "")
-        add_github_path(miktex_bin)
-        add_github_path(perl_bin)
-        for gtk_bin in gtk_candidates:
-            add_github_path(gtk_bin)
-        initexmf = shutil.which("initexmf")
-        if initexmf and not full_latex_ready:
-            subprocess.run([initexmf, "--set-config-value", "[MPM]AutoInstall=1"], check=False)
-            subprocess.run([initexmf, "--update-fndb"], check=False)
-        mpm = shutil.which("mpm")
-        if mpm and not full_latex_ready:
-            subprocess.run([mpm, "--update-db"], check=False)
-            subprocess.run([mpm, "--install=bbm"], check=False)
-            subprocess.run([mpm, "--install=bbm-macros"], check=False)
-            subprocess.run([mpm, "--install=gnu-freefont"], check=False)
-        return verify_full_latex() and verify_svg_converter()
-
-    print(f"❌ Sistema no soportado para instalación CI: {platform.system()}")
-    return False
+    if not install_tinytex_portable():
+        return False
+    if not install_tinytex_packages():
+        return False
+    print_tinytex_diagnostics()
+    return verify_full_latex() and verify_svg_converter()
 
 
 def get_venv_python():
@@ -404,6 +608,8 @@ def verify_tectonic():
     if not tectonic:
         return False
     try:
+        env = os.environ.copy()
+        env["TECTONIC_CACHE_DIR"] = get_tectonic_cache_dir()
         result = subprocess.run(
             [tectonic, "--version"],
             capture_output=True,
@@ -411,16 +617,50 @@ def verify_tectonic():
             encoding="utf-8",
             errors="replace",
             timeout=15,
+            env=env,
         )
         if result.returncode == 0:
             version = result.stdout.strip().split("\n")[0]
+            if not verify_tectonic_minimal_compile(tectonic, env):
+                return False
             print(f"✅ Tectonic {version} funcionando correctamente.")
             print(f"   Ejecutable: {tectonic}")
+            print(f"   Cache: {env['TECTONIC_CACHE_DIR']}")
             return True
     except (subprocess.TimeoutExpired, OSError):
         pass
     print("❌ Tectonic se instaló pero no se pudo ejecutar.")
     return False
+
+
+def verify_tectonic_minimal_compile(tectonic, env):
+    """Compile a tiny document so --check catches broken Tectonic installs."""
+    with tempfile.TemporaryDirectory(prefix="tectonic_check_") as tmp:
+        tex_path = os.path.join(tmp, "check.tex")
+        with open(tex_path, "w", encoding="utf-8") as f:
+            f.write("\\documentclass{article}\n\\begin{document}\nTeachBook OK\n\\end{document}\n")
+        try:
+            result = subprocess.run(
+                [tectonic, "--keep-logs", tex_path],
+                cwd=tmp,
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+                errors="replace",
+                timeout=180,
+                env=env,
+            )
+            if result.returncode == 0 and os.path.isfile(os.path.join(tmp, "check.pdf")):
+                return True
+            print("❌ Tectonic ejecuta --version, pero no compila un documento mínimo.")
+            if result.stdout:
+                print(result.stdout[-1000:])
+            if result.stderr:
+                print(result.stderr[-1000:])
+            return False
+        except Exception as exc:
+            print(f"❌ Tectonic falló compilando documento mínimo: {exc}")
+            return False
 
 
 def install_tectonic_pip():
@@ -479,9 +719,7 @@ def get_platform_target():
 
 
 def fetch_latest_release():
-    api_url = (
-        "https://api.github.com/repos/tectonic-typesetting/tectonic/releases/latest"
-    )
+    api_url = f"https://api.github.com/repos/tectonic-typesetting/tectonic/releases/tags/{TECTONIC_RELEASE_TAG}"
     headers = {"Accept": "application/vnd.github+json", "User-Agent": "teachbook-setup"}
     token = os.environ.get("GITHUB_TOKEN")
     if token:
@@ -492,7 +730,7 @@ def fetch_latest_release():
             data = json.loads(resp.read().decode("utf-8"))
         return data.get("tag_name"), data.get("assets", [])
     except Exception as e:
-        print(f"❌ Error consultando GitHub API: {e}")
+        print(f"❌ Error consultando Tectonic {TECTONIC_RELEASE_TAG}: {e}")
         return None, []
 
 
@@ -754,6 +992,158 @@ def install_tectonic_binary():
             print(f"   O añade la línea anterior a {shell_rc}")
         print()
 
+    return True
+
+
+def get_tinytex_asset_name(system, arch):
+    """Return the TinyTeX monthly release asset for this platform."""
+    installer = TINYTEX_INSTALLER
+    version = TINYTEX_VERSION
+    if system == "windows":
+        return f"{installer}-windows-v{version}.exe"
+    if system == "darwin":
+        return f"{installer}-darwin-v{version}.tar.xz"
+    if system == "linux":
+        if arch == "arm64":
+            return f"{installer}-linux-arm64-v{version}.tar.xz"
+        return f"{installer}-linux-x86_64-v{version}.tar.xz"
+    return None
+
+
+def fetch_tinytex_release_assets():
+    api_url = f"https://api.github.com/repos/rstudio/tinytex-releases/releases/tags/v{TINYTEX_VERSION}"
+    headers = {"Accept": "application/vnd.github+json", "User-Agent": "teachbook-setup"}
+    token = os.environ.get("GITHUB_TOKEN")
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
+    req = urllib.request.Request(api_url, headers=headers)
+    try:
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+        return data.get("assets", [])
+    except Exception as e:
+        print(f"❌ Error consultando TinyTeX v{TINYTEX_VERSION}: {e}")
+        return []
+
+
+def install_tinytex_portable():
+    """Install TinyTeX inside .venv/tools/tinytex without touching system PATH."""
+    print("⬇️  Preparando TinyTeX portable...")
+    activate_tinytex_path()
+    if verify_full_latex():
+        return True
+
+    if os.path.isdir(get_tinytex_root()) and get_tinytex_bin_dir():
+        print("ℹ️  TinyTeX portable ya existe; instalaré solo los paquetes que falten.")
+        return True
+
+    system = platform.system().lower()
+    arch = get_arch_tag()
+    asset_name = get_tinytex_asset_name(system, arch)
+    if not asset_name:
+        print(f"❌ TinyTeX portable no soportado para {platform.system()} {platform.machine()}.")
+        return False
+
+    assets = fetch_tinytex_release_assets()
+    asset = next((item for item in assets if item.get("name") == asset_name), None)
+    if not asset:
+        print(f"❌ No se encontró {asset_name} en TinyTeX v{TINYTEX_VERSION}.")
+        return False
+
+    download_url = asset.get("browser_download_url")
+    parent_dir = get_tinytex_parent_dir()
+    tinytex_root = get_tinytex_root()
+
+    with tempfile.TemporaryDirectory(prefix="tinytex_") as tmp:
+        archive_path = os.path.join(tmp, asset_name)
+        if not download_file_with_retries(download_url, archive_path, asset_name, attempts=3):
+            return False
+
+        extract_dir = os.path.join(tmp, "extract")
+        os.makedirs(extract_dir, exist_ok=True)
+        print("📦 Extrayendo TinyTeX...")
+        try:
+            if asset_name.endswith(".exe"):
+                run([archive_path, "-y"], cwd=extract_dir)
+            else:
+                with tarfile.open(archive_path, "r:*") as tf:
+                    tf.extractall(extract_dir)
+        except Exception as exc:
+            print(f"❌ Error extrayendo TinyTeX: {exc}")
+            return False
+
+        extracted_root = os.path.join(extract_dir, "TinyTeX")
+        if not os.path.isdir(extracted_root):
+            for root, dirs, _files in os.walk(extract_dir):
+                if "TinyTeX" in dirs:
+                    extracted_root = os.path.join(root, "TinyTeX")
+                    break
+        if not os.path.isdir(extracted_root):
+            print("❌ No se encontró la carpeta TinyTeX dentro del paquete descargado.")
+            return False
+
+        if os.path.isdir(tinytex_root):
+            shutil.rmtree(tinytex_root)
+        os.makedirs(parent_dir, exist_ok=True)
+        shutil.move(extracted_root, tinytex_root)
+
+    bin_dir = activate_tinytex_path()
+    if not bin_dir:
+        print("❌ TinyTeX se extrajo, pero no se encontró su carpeta binaria.")
+        return False
+
+    print(f"✅ TinyTeX instalado en: {tinytex_root}")
+    print("   Instalación portable dentro de .venv; no se ha usado Chocolatey/Homebrew/apt.")
+    return True
+
+
+def get_tlmgr_command():
+    activate_tinytex_path()
+    if os.name == "nt":
+        candidates = ["tlmgr.bat", "tlmgr.exe", "tlmgr"]
+    else:
+        candidates = ["tlmgr"]
+    tinytex_bin = get_tinytex_bin_dir()
+    for name in candidates:
+        if tinytex_bin:
+            candidate = os.path.join(tinytex_bin, name)
+            if os.path.isfile(candidate):
+                return candidate
+        found = shutil.which(name)
+        if found:
+            return found
+    return None
+
+
+def install_tinytex_packages():
+    """Install the LaTeX packages needed by this TeachBook fallback."""
+    forbidden = sorted(HEAVY_TINYTEX_COLLECTIONS.intersection(TINYTEX_PACKAGES))
+    if forbidden:
+        print("❌ La lista TinyTeX contiene colecciones pesadas, y eso rompería el objetivo docente ligero:")
+        for package in forbidden:
+            print(f"   • {package}")
+        return False
+
+    tlmgr = get_tlmgr_command()
+    if not tlmgr:
+        print("❌ No se encontró tlmgr en TinyTeX.")
+        return False
+
+    env = os.environ.copy()
+    bin_dir = get_tinytex_bin_dir()
+    if bin_dir:
+        env["PATH"] = bin_dir + os.pathsep + env.get("PATH", "")
+
+    print("📦 Instalando paquetes LaTeX mínimos necesarios en TinyTeX...")
+    print(f"   Paquetes explícitos: {', '.join(TINYTEX_PACKAGES)}")
+    try:
+        subprocess.run([tlmgr, "option", "repository", "ctan"], check=False, env=env, timeout=60)
+        subprocess.run([tlmgr, "update", "--self"], check=False, env=env, timeout=600)
+        run([tlmgr, "install", *TINYTEX_PACKAGES], env=env)
+        subprocess.run([tlmgr, "postaction", "install", "script", "xetex"], check=False, env=env, timeout=300)
+    except Exception as exc:
+        print(f"❌ Error instalando paquetes TinyTeX: {exc}")
+        return False
     return True
 
 

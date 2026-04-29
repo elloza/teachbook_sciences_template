@@ -4,6 +4,11 @@ Kroki lets you generate many useful diagram types in Computer Science without de
 
 ## 1. Mermaid: layered architecture
 
+
+The following diagram visually summarizes this part of the explanation.
+
+**Diagram: Mermaid: layered architecture.**
+
 ```{kroki}
 :type: mermaid
 :align: center
@@ -16,6 +21,11 @@ flowchart TB
 ```
 
 ## 2. PlantUML: system components
+
+
+The following diagram visually summarizes this part of the explanation.
+
+**Diagram: PlantUML: system components.**
 
 ```{kroki}
 :type: plantuml
@@ -31,6 +41,11 @@ flowchart TB
 
 ## 3. GraphViz: dependency graph
 
+
+The following diagram visually summarizes this part of the explanation.
+
+**Diagram: GraphViz: dependency graph.**
+
 ```{kroki}
 :type: graphviz
 :align: center
@@ -45,6 +60,11 @@ digraph G {
 ```
 
 ## 4. Structurizr: simplified C4 view
+
+
+The following diagram visually summarizes this part of the explanation.
+
+**Diagram: Structurizr: simplified C4 view.**
 
 ```{kroki}
 :type: structurizr
@@ -91,6 +111,11 @@ For C4 diagrams, define colors explicitly. Some default themes may produce white
 ```
 
 ## 5. Wavedrom: digital protocol timing
+
+
+The following diagram visually summarizes this part of the explanation.
+
+**Diagram: Wavedrom: digital protocol timing.**
 
 ```{kroki}
 :type: wavedrom

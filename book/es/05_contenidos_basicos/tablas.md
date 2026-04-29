@@ -6,6 +6,11 @@ Las tablas son la forma más directa de presentar datos estructurados. MyST sopo
 ## Tabla simple en Markdown
 
 ```md
+
+La tabla siguiente resume los elementos principales de esta sección.
+
+**Tabla. Tabla simple en Markdown.**
+
 | Elemento | Símbolo | Número atómico |
 |----------|---------|----------------|
 | Hidrógeno | H      | 1              |
@@ -14,6 +19,11 @@ Las tablas son la forma más directa de presentar datos estructurados. MyST sopo
 ```
 
 Resultado:
+
+
+La tabla siguiente resume los elementos principales de esta sección.
+
+**Tabla. Tabla simple en Markdown.**
 
 | Elemento | Símbolo | Número atómico |
 |----------|---------|----------------|

@@ -7,6 +7,11 @@ They are reusable teaching patterns for many degrees, not examples locked to a s
 
 ## Example families
 
+
+The following table summarizes the main elements of this section.
+
+**Table. Example families.**
+
 | Example | Cross-disciplinary pattern | Can be adapted to... |
 |---------|----------------------------|----------------------|
 | [Growth and saturation models](biology_logistic_growth.ipynb) | Systems that grow toward a limit | Populations, cultural diffusion, technology adoption, learning, epidemics |

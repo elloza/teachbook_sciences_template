@@ -20,6 +20,11 @@ flowchart LR
 
 Resultado:
 
+
+El diagrama siguiente resume visualmente esta parte de la explicación.
+
+**Diagrama: Diagrama de flujo (`flowchart`).**
+
 ```{kroki}
 :type: mermaid
 :align: center
@@ -52,6 +57,11 @@ sequenceDiagram
 ````
 
 Resultado:
+
+
+El diagrama siguiente resume visualmente esta parte de la explicación.
+
+**Diagrama: Diagrama de secuencia (`sequenceDiagram`).**
 
 ```{kroki}
 :type: mermaid
@@ -94,6 +104,11 @@ classDiagram
 
 Resultado:
 
+
+El diagrama siguiente resume visualmente esta parte de la explicación.
+
+**Diagrama: Diagrama de clases (`classDiagram`).**
+
 ```{kroki}
 :type: mermaid
 :align: center
@@ -129,6 +144,11 @@ erDiagram
 
 Resultado:
 
+
+El diagrama siguiente resume visualmente esta parte de la explicación.
+
+**Diagrama: Diagrama entidad-relación (`erDiagram`).**
+
 ```{kroki}
 :type: mermaid
 :align: center
@@ -158,6 +178,11 @@ stateDiagram-v2
 
 Resultado:
 
+
+El diagrama siguiente resume visualmente esta parte de la explicación.
+
+**Diagrama: Diagrama de estados (`stateDiagram-v2`).**
+
 ```{kroki}
 :type: mermaid
 :align: center
@@ -172,6 +197,11 @@ stateDiagram-v2
 ```
 
 ## Direcciones del diagrama de flujo
+
+
+La tabla siguiente resume los elementos principales de esta sección.
+
+**Tabla. Direcciones del diagrama de flujo.**
 
 | Código | Dirección |
 |--------|-----------|

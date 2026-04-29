@@ -8,6 +8,11 @@ All examples in this section work in both **HTML** and **PDF**, unless explicitl
 
 ## What you will find here
 
+
+The following table summarizes the main elements of this section.
+
+**Table. What you will find here.**
+
 | Page | What you will learn |
 |------|---------------------|
 | [Figures and images](figures) | Inserting and referencing images |

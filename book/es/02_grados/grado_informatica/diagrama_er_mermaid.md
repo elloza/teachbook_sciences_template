@@ -42,6 +42,11 @@ erDiagram
 
 **Resultado:**
 
+
+El diagrama siguiente resume visualmente esta parte de la explicación.
+
+**Diagrama: Ejemplo: Base de datos de una universidad.**
+
 ```{kroki}
 :type: mermaid
 :align: center
@@ -81,6 +86,11 @@ erDiagram
 - **Claves foráneas**: Marca los atributos con `FK`.
 
 ## Referencia rápida de cardinalidad
+
+
+La tabla siguiente resume los elementos principales de esta sección.
+
+**Tabla. Referencia rápida de cardinalidad.**
 
 | Notación | Significado |
 |----------|-------------|

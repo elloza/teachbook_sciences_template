@@ -9,6 +9,11 @@ Las palabras o conceptos más frecuentes suelen revelar la estructura de un disc
 
 ## Tabla de frecuencia: corpus de ejemplo
 
+
+La tabla siguiente resume los elementos principales de esta sección.
+
+**Tabla. Tabla de frecuencia: corpus de ejemplo.**
+
 | Término | Categoría gramatical | Frecuencia | Porcentaje acumulado |
 |---------|---------------------|------------|---------------------|
 | el | Artículo definido | 4 892 | 12.3 % |

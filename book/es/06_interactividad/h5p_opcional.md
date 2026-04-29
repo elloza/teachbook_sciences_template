@@ -8,6 +8,11 @@ H5P es **opcional** y **no es una dependencia** de esta plantilla. Requiere un s
 
 ## ¿Qué ofrece H5P?
 
+
+La tabla siguiente resume los elementos principales de esta sección.
+
+**Tabla. ¿Qué ofrece H5P?.**
+
 | Tipo de actividad | Descripción |
 |-------------------|-------------|
 | Cuestionarios | Preguntas de elección múltiple, rellenar huecos |

@@ -325,11 +325,26 @@ Todos los comandos se ejecutan desde la raíz del proyecto usando el Python del 
 | Vista previa | `python scripts/launch_preview.py` | Lanza la preview segura en `localhost:8000` usando el mismo build que producción |
 | Exportar PDF | `python scripts/export_pdf.py` | Genera PDF para cada idioma en `book/_static/` |
 | Instalar LaTeX | `python scripts/setup_latex.py` | Instala Tectonic (motor LaTeX ligero) |
+| Instalar PDF completo | `python scripts/setup_latex.py --yes --full` | Instala Tectonic + TinyTeX-1 portable ligero como fallback quirúrgico |
+| Extraer fuentes Kroki | `python scripts/extract_kroki_sources.py` | Copia bloques `{kroki}` existentes a `diagram_sources/` sin modificar el contenido |
+| Renderizar diagramas | `python scripts/render_diagrams.py` | Convierte fuentes en `diagram_sources/` a imágenes estáticas en `book/_static/generated/diagrams/` |
+| Sustituir diagramas renderizados | `python scripts/replace_kroki_with_figures.py` | Cambia bloques `{kroki}` por `{figure}` solo si existe la imagen generada |
 | Renderizar CircuitikZ | `python scripts/render_circuitikz.py <entrada.tex> [salida.png]` | Compila CircuitikZ y genera una imagen PNG |
 | Convertir PDF a MD | `python scripts/pdf_to_markdown.py <ruta>` | Convierte PDFs a Markdown para el libro |
 | Guardar y publicar | `python scripts/git_helper.py` | git add + commit + push |
 
 **IMPORTANTE**: En Windows, si `python` no funciona, probar con `py`. Los scripts manejan ambas opciones.
+
+### PDF local/CI recomendado
+
+El flujo recomendado para PDF sigue siendo:
+
+```bash
+python scripts/setup_latex.py --yes --full
+python scripts/export_pdf.py --engine auto
+```
+
+Ese modo usa **Tectonic primero** y deja **TinyTeX-1 portable dentro de `.venv`** como fallback ligero (`latexmk` + XeLaTeX). TinyTeX se instala con paquetes explícitos mínimos para las plantillas del libro; no se deben usar colecciones pesadas como `collection-latexextra`, `collection-xetex`, `collection-latexrecommended`, `collection-fontsrecommended`, `collection-langspanish`, `collection-langenglish` ni `scheme-full`. El script avisa si detecta una instalación TinyTeX mayor de 1 GB o con colecciones pesadas, pero no borra nada automáticamente.
 
 ### Vista previa para agentes de código
 

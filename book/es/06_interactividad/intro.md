@@ -6,6 +6,11 @@ Este apartado recoge las distintas formas de añadir **contenido interactivo** y
 
 La interactividad en un TeachBook abarca desde elementos tan simples como un desplegable hasta código ejecutable en el navegador. Esta sección cubre:
 
+
+La tabla siguiente resume los elementos principales de esta sección.
+
+**Tabla. ¿Qué encontrarás aquí?.**
+
 | Recurso | Tipo | ¿Funciona en PDF? |
 |---------|------|--------------------|
 | Thebe + Binder | Código ejecutable desde un kernel remoto | No |

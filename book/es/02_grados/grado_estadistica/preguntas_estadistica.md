@@ -42,6 +42,11 @@ en una distribución normal?**
 
 Usando la regla empírica (regla 68-95-99.7):
 
+
+La tabla siguiente resume los elementos principales de esta sección.
+
+**Tabla. Preguntas de Práctica: Estadística.**
+
 | Rango | Proporción |
 |-------|-----------|
 | $\mu \pm 1\sigma$ | ≈ 68.27% |
@@ -72,6 +77,11 @@ no solo observacionales.
 :class: dropdown
 
 **Define error Tipo I y error Tipo II. ¿Cuál se controla directamente con el nivel α?**
+
+
+La tabla siguiente resume los elementos principales de esta sección.
+
+**Tabla. Preguntas de Práctica: Estadística.**
 
 | Tipo | Ocurre cuando... | Se llama |
 |------|------------------|----------|

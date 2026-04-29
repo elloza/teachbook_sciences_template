@@ -9,6 +9,11 @@ The most frequent words or concepts often reveal the structure of a discourse. T
 
 ## Frequency table: sample corpus
 
+
+The following table summarizes the main elements of this section.
+
+**Table. Frequency table: sample corpus.**
+
 | Term | Grammatical category | Frequency | Cumulative percentage |
 |------|---------------------|-----------|----------------------|
 | the | Definite article | 6 892 | 12.3 % |

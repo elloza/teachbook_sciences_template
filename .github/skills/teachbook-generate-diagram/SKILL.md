@@ -30,6 +30,78 @@ El agente NO debe pensar en Kroki como “solo Mermaid”. Kroki es una capa par
 
 Necesita conexión a internet **durante la compilación** (no al leer el libro). GitHub Actions siempre tiene internet, así que el despliegue funciona siempre.
 
+## Flujo recomendado para diagramas importantes: pre-render a imagen
+
+Para diagramas importantes del libro, NO conviene depender de `kroki.io` durante cada build. La opción robusta es renderizar el diagrama previamente como imagen estática y luego insertarlo con `{figure}`.
+
+Esto evita que una caída o timeout de Kroki rompa el build de Jupyter Book.
+
+### Estructura recomendada
+
+Guardar la fuente editable del diagrama en:
+
+```text
+diagram_sources/es/flujo_experimento.mermaid
+diagram_sources/en/experiment_flow.mermaid
+```
+
+Renderizar con:
+
+```bash
+python scripts/extract_kroki_sources.py
+python scripts/render_diagrams.py
+```
+
+El script genera imágenes en:
+
+```text
+book/_static/generated/diagrams/es/flujo_experimento.svg
+book/_static/generated/diagrams/en/experiment_flow.svg
+```
+
+Después insertar la imagen generada:
+
+````markdown
+Como muestra la {numref}`fig-flujo-experimento`, el proceso va de la pregunta inicial a la conclusión.
+
+```{figure} ../../../_static/generated/diagrams/es/flujo_experimento.svg
+:name: fig-flujo-experimento
+:alt: Diagrama de flujo del proceso experimental
+:width: 80%
+:align: center
+
+Flujo básico del proceso experimental.
+```
+````
+
+### Ventajas del pre-render
+
+- El build HTML/PDF ya no depende de Kroki para ese diagrama.
+- La figura tiene caption y referencia normal con `{numref}`.
+- La fuente del diagrama sigue versionada y editable.
+- Si Kroki falla, se conservan las imágenes ya generadas.
+
+### Comandos útiles
+
+| Comando | Uso |
+|---|---|
+| `python scripts/extract_kroki_sources.py --dry-run` | Detecta bloques `{kroki}` existentes sin escribir fuentes. |
+| `python scripts/extract_kroki_sources.py` | Extrae bloques `{kroki}` a `diagram_sources/` y crea `manifest.json`. |
+| `python scripts/render_diagrams.py --dry-run` | Lista fuentes detectadas sin llamar a Kroki. |
+| `python scripts/render_diagrams.py` | Renderiza solo imágenes que aún no existen usando el endpoint oficial con `POST /<tipo>/<formato>`. |
+| `python scripts/render_diagrams.py --force` | Regenera todas las imágenes. |
+| `python scripts/render_diagrams.py --request-mode json` | Usa el modo JSON raíz (`POST /`) si se quiere comparar con el modo por ruta. |
+| `python scripts/render_diagrams.py --max-failures 1` | Para pronto si el endpoint oficial está caído o responde con timeout. |
+| `python scripts/render_diagrams.py --kroki-url http://localhost:8000/` | Usa un Kroki local si alguna vez se decide levantar uno. |
+
+### Migración progresiva recomendada
+
+1. Mantener temporalmente los bloques `{kroki}` existentes para no romper el libro.
+2. Ejecutar `python scripts/extract_kroki_sources.py` para versionar las fuentes.
+3. Ejecutar `python scripts/render_diagrams.py` cuando Kroki responda.
+4. Sustituir solo los diagramas críticos por `{figure}` apuntando a los SVG generados. Para una migración automática conservadora, usar `python scripts/replace_kroki_with_figures.py --dry-run` y luego `python scripts/replace_kroki_with_figures.py`.
+5. Dejar los diagramas de ejemplo simples como `{kroki}` si se acepta la dependencia externa.
+
 ## Decisión rápida: qué lenguaje usar
 
 | Necesidad docente | Opción recomendada | Por qué |
@@ -73,10 +145,13 @@ flowchart LR
 ### Con título (caption)
 
 ````markdown
-```{kroki-figure}
+El diagrama siguiente resume el flujo del método científico.
+
+**Diagrama. Flujo del método científico.**
+
+```{kroki}
 :type: mermaid
 :align: center
-:caption: Flujo del método científico
 
 graph TD
     A[Observación] --> B[Hipótesis]
@@ -128,10 +203,13 @@ Notas para el agente:
 Usar WaveDrom para cronogramas, buses, señales digitales y protocolos.
 
 ````markdown
-```{kroki-figure}
+El diagrama siguiente muestra un cronograma digital de reloj, datos y señal de validez.
+
+**Diagrama. Cronograma digital de una señal de reloj y datos.**
+
+```{kroki}
 :type: wavedrom
 :align: center
-:caption: Cronograma digital de una señal de reloj y datos
 
 { signal: [
   { name: "clk",  wave: "p.....|..." },
@@ -313,7 +391,7 @@ gantt
 | Circuitos reales | No usar Kroki como diseño electrónico real. Recomendar SKiDL/KiCad para netlists y KiCad CLI/export para render final. |
 | Simplicidad | Máximo **10-15 nodos**. Si necesitas más, divide en varios diagramas. |
 | Etiquetas | Usar **español** para los textos (salvo que el contenido sea en inglés). |
-| Caption | Siempre añadir `:caption:` descriptivo usando `{kroki-figure}`. |
+| Caption | Añadir siempre una frase de referencia y un título textual antes del bloque `{kroki}`. Para diagramas importantes, preferir pre-render + `{figure}` con caption. |
 | Alineación | Usar `:align: center` por defecto. |
 | HTML y PDF | Los diagramas **funcionan en ambos formatos**. No necesita fallbacks. |
 | Validación | Verificar la sintaxis antes de insertar. Un error de sintaxis rompe la página. |
@@ -324,5 +402,5 @@ gantt
 1. Preguntar qué tipo de diagrama necesita el usuario y qué concepto quiere representar.
 2. Elegir el tipo adecuado: Mermaid por defecto; PlantUML para UML complejo; GraphViz para grafos; CircuitikZ local para circuitos docentes; WaveDrom para señales digitales.
 3. Generar el código del diagrama usando la plantilla correspondiente.
-4. Insertar en el archivo `.md` usando `{kroki}` con `:type: <tipo>`.
-5. Si el usuario quiere título/caption, usar `{kroki-figure}` en lugar de `{kroki}`.
+4. Para diagramas rápidos, insertar en el archivo `.md` usando `{kroki}` con `:type: <tipo>` y título textual cercano.
+5. Para diagramas importantes o estables, guardar la fuente en `diagram_sources/`, ejecutar `python scripts/render_diagrams.py` e insertar el SVG generado con `{figure}`.

@@ -42,6 +42,11 @@ erDiagram
 
 **Result:**
 
+
+The following diagram visually summarizes this part of the explanation.
+
+**Diagram: Example: University database.**
+
 ```{kroki}
 :type: mermaid
 :align: center
@@ -81,6 +86,11 @@ erDiagram
 - **Foreign keys**: Mark attributes with `FK`.
 
 ## Cardinality reference
+
+
+The following table summarizes the main elements of this section.
+
+**Table. Cardinality reference.**
 
 | Notation | Meaning |
 |----------|---------|

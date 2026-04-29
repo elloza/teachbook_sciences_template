@@ -20,6 +20,11 @@ Cuando dibujas un diagrama directamente en una herramienta visual, el resultado 
 
 Cuando describes ese mismo diagrama con código, aparece una capa intermedia:
 
+
+El diagrama siguiente resume visualmente esta parte de la explicación.
+
+**Diagrama: El código como puente hacia el resultado final.**
+
 ```{kroki}
 :type: mermaid
 :align: center
@@ -35,6 +40,11 @@ flowchart LR
 Esa capa intermedia es donde la IA trabaja especialmente bien. Un asistente puede leer, modificar, traducir, refactorizar y comparar texto estructurado mucho mejor que manipular directamente un PDF, una imagen final o una presentación cerrada.
 
 ## ¿Qué artefactos pueden generarse desde código?
+
+
+La tabla siguiente resume los elementos principales de esta sección.
+
+**Tabla. ¿Qué artefactos pueden generarse desde código?.**
 
 | Artefacto final | Lenguaje intermedio | Ejemplo de uso docente |
 |---|---|---|

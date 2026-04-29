@@ -48,6 +48,11 @@ classDiagram
 
 **Resultado:**
 
+
+El diagrama siguiente resume visualmente esta parte de la explicación.
+
+**Diagrama: Ejemplo: Jerarquía de Figuras Geométricas.**
+
 ```{kroki}
 :type: mermaid
 :align: center
@@ -92,6 +97,11 @@ classDiagram
 - **Clase abstracta**: Indicada con `<<abstract>>`.
 
 ## Tipos de relaciones
+
+
+La tabla siguiente resume los elementos principales de esta sección.
+
+**Tabla. Tipos de relaciones.**
 
 | Notación | Significado |
 |----------|-------------|

@@ -15,6 +15,87 @@ description: >
 
 > Todo contenido debe existir en **TODOS los idiomas** configurados. Si se añade un archivo en español, DEBE existir el equivalente en inglés (y viceversa). Los cambios de contenido + TOC deben ir en el mismo commit.
 
+> Toda tabla, figura, imagen, diagrama, circuito, vídeo o recurso visual/tabular que forme parte del discurso docente debe tener un **título/caption escueto** y debe estar **referenciado explícitamente en el texto**. No basta con “ponerlo ahí”: el estudiante debe saber por qué aparece y cuándo mirarlo.
+
+## Regla obligatoria de captions y referencias
+
+Cuando añadas contenido nuevo, aplica esta norma en **TODOS los idiomas**:
+
+1. **Cada elemento visual o tabular debe tener título/caption breve.**
+   - Bueno: “Circuito RC de carga y descarga.”
+   - Malo: “Figura” o un bloque visual sin explicación.
+2. **Cada elemento debe citarse en el texto cercano.**
+   - ES: “Como muestra la {numref}`fig-circuito-rc`, la resistencia y el condensador forman una etapa de carga.”
+   - EN: “As shown in {numref}`fig-rc-circuit`, the resistor and capacitor form a charging stage.”
+3. **Usa directivas con caption cuando el elemento sea parte de la explicación.**
+   - Imágenes/diagramas renderizados: preferir `{figure}` con `name` y caption.
+   - Diagramas Kroki: usar `{kroki}` con `:type:` y añadir antes una frase de referencia + un título textual en negrita. En esta plantilla **NO uses `{kroki-figure}`**: no está disponible en el build actual.
+   - Tablas: añadir un título textual escueto antes de la tabla o usar una directiva MyST con caption cuando se necesite referencia formal.
+4. **Evita `{image}` para contenido que se vaya a comentar o citar.** `{image}` sirve para elementos decorativos o logos; para contenido docente usa `{figure}`.
+5. **La referencia debe aportar sentido.** No escribir “ver figura” como relleno: explica qué debe observar el estudiante.
+
+### Ejemplo recomendado — figura en español
+
+````markdown
+Como muestra la {numref}`fig-circuito-rc`, el condensador se carga a través de la resistencia.
+
+```{figure} ../../../_static/generated/circuito_rc.png
+---
+name: fig-circuito-rc
+width: 70%
+align: center
+---
+Circuito RC de carga y descarga.
+```
+````
+
+### Recommended example — figure in English
+
+````markdown
+As shown in {numref}`fig-rc-circuit`, the capacitor charges through the resistor.
+
+```{figure} ../../../_static/generated/rc_circuit.png
+---
+name: fig-rc-circuit
+width: 70%
+align: center
+---
+RC charging and discharging circuit.
+```
+````
+
+### Ejemplo recomendado — diagrama Kroki
+
+````markdown
+El diagrama siguiente resume el flujo básico del proceso experimental.
+
+**Diagrama. Flujo básico del proceso experimental.**
+
+```{kroki}
+:type: mermaid
+:align: center
+
+flowchart LR
+    A[Pregunta] --> B[Experimento]
+    B --> C[Datos]
+    C --> D[Conclusión]
+```
+````
+
+### Ejemplo recomendado — tabla sencilla
+
+```markdown
+La Tabla 1 resume qué herramienta conviene usar según el tipo de material.
+
+**Tabla 1. Herramientas recomendadas por tipo de recurso.**
+
+| Recurso | Herramienta recomendada |
+|---|---|
+| Diagrama de flujo | Kroki/Mermaid |
+| Circuito eléctrico simple | Schemdraw |
+| Circuito eléctrico preciso | CircuitikZ local |
+```
+
 ## Recomendación clave para primeros usos
 
 Cuando un docente o estudiante quiera "dejar el libro solo con un capítulo" para empezar, **NO recomendar borrar contenido de ejemplo a la primera**.

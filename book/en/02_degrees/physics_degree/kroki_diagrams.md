@@ -11,6 +11,11 @@ Kroki is useful for **block diagrams, signal flow, timing diagrams, and conceptu
 
 ## 1. Mermaid: instrumentation chain
 
+
+The following diagram visually summarizes this part of the explanation.
+
+**Diagram: Mermaid: instrumentation chain.**
+
 ```{kroki}
 :type: mermaid
 :align: center
@@ -24,6 +29,11 @@ flowchart LR
 ```
 
 ## 2. GraphViz: signal flow in an experimental setup
+
+
+The following diagram visually summarizes this part of the explanation.
+
+**Diagram: GraphViz: signal flow in an experimental setup.**
 
 ```{kroki}
 :type: graphviz
@@ -43,10 +53,14 @@ digraph G {
 
 The following circuit is not drawn by hand: it comes from a `.tex` file with CircuitikZ code, rendered beforehand as an image so it works the same way in HTML and PDF.
 
+
+The {numref}`fig-kroki-diagrams-3` visually summarizes this part of the explanation.
+
 ```{figure} ../../../_static/generated/rc_circuit_circuitikz.png
 :alt: RC circuit generated with CircuitikZ
 :width: 70%
 :align: center
+:name: fig-kroki-diagrams-3
 
 RC circuit generated from CircuitikZ code.
 ```
@@ -68,6 +82,11 @@ Kroki supports TikZ, but the public Kroki service does not guarantee that the `c
 
 ## 4. Wavedrom: input and output signals
 
+
+The following diagram visually summarizes this part of the explanation.
+
+**Diagram: Wavedrom: input and output signals.**
+
 ```{kroki}
 :type: wavedrom
 :align: center
@@ -80,6 +99,11 @@ Kroki supports TikZ, but the public Kroki service does not guarantee that the `c
 ```
 
 ## 5. Ditaa: quick experimental bench sketch
+
+
+The following diagram visually summarizes this part of the explanation.
+
+**Diagram: Ditaa: quick experimental bench sketch.**
 
 ```{kroki}
 :type: ditaa

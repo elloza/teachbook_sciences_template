@@ -29,9 +29,9 @@ The `{figure}` directive adds automatic numbering (`Figure 1`, `Figure 2`…):
 
 ````md
 ```{figure} _static/logo.png
-:name: fig-logo-en
 :width: 50%
 :align: center
+:name: fig-figures-1
 
 Official TeachBook project logo.
 ```
@@ -39,10 +39,13 @@ Official TeachBook project logo.
 
 Result:
 
+
+The {numref}`fig-logo-en` visually summarizes this part of the explanation.
+
 ```{figure} _static/logo.png
-:name: fig-logo-en
 :width: 50%
 :align: center
+:name: fig-logo-en
 
 Official TeachBook project logo.
 ```
@@ -65,6 +68,7 @@ Add `:figclass: margin` to place an image in the margin (HTML only):
 ```{figure} _static/logo.png
 :figclass: margin
 :width: 100%
+:name: fig-figures-3
 
 Logo in the margin.
 ```
@@ -72,14 +76,23 @@ Logo in the margin.
 
 Result:
 
+
+The {numref}`fig-figures-4` visually summarizes this part of the explanation.
+
 ```{figure} _static/logo.png
 :figclass: margin
 :width: 100%
+:name: fig-figures-4
 
 Logo in the margin.
 ```
 
 ## Useful parameters
+
+
+The following table summarizes the main elements of this section.
+
+**Table. Useful parameters.**
 
 | Parameter | What it does | Example |
 |-----------|--------------|---------|

@@ -20,6 +20,11 @@ flowchart LR
 
 Result:
 
+
+The following diagram visually summarizes this part of the explanation.
+
+**Diagram: Flowchart (`flowchart`).**
+
 ```{kroki}
 :type: mermaid
 :align: center
@@ -52,6 +57,11 @@ sequenceDiagram
 ````
 
 Result:
+
+
+The following diagram visually summarizes this part of the explanation.
+
+**Diagram: Sequence diagram (`sequenceDiagram`).**
 
 ```{kroki}
 :type: mermaid
@@ -94,6 +104,11 @@ classDiagram
 
 Result:
 
+
+The following diagram visually summarizes this part of the explanation.
+
+**Diagram: Class diagram (`classDiagram`).**
+
 ```{kroki}
 :type: mermaid
 :align: center
@@ -129,6 +144,11 @@ erDiagram
 
 Result:
 
+
+The following diagram visually summarizes this part of the explanation.
+
+**Diagram: Entity-relationship diagram (`erDiagram`).**
+
 ```{kroki}
 :type: mermaid
 :align: center
@@ -158,6 +178,11 @@ stateDiagram-v2
 
 Result:
 
+
+The following diagram visually summarizes this part of the explanation.
+
+**Diagram: State diagram (`stateDiagram-v2`).**
+
 ```{kroki}
 :type: mermaid
 :align: center
@@ -172,6 +197,11 @@ stateDiagram-v2
 ```
 
 ## Flowchart directions
+
+
+The following table summarizes the main elements of this section.
+
+**Table. Flowchart directions.**
 
 | Code | Direction |
 |------|-----------|

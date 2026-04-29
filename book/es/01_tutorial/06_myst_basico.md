@@ -81,6 +81,11 @@ Se escribe como `$$ ... $$` en su propia línea.
 ## Tablas
 
 ```md
+
+La tabla siguiente resume los elementos principales de esta sección.
+
+**Tabla. Tablas.**
+
 | Columna A | Columna B | Columna C |
 |-----------|-----------|-----------|
 | dato 1    | dato 2    | dato 3    |
@@ -88,6 +93,11 @@ Se escribe como `$$ ... $$` en su propia línea.
 ```
 
 Resultado:
+
+
+La tabla siguiente resume los elementos principales de esta sección.
+
+**Tabla. Tablas.**
 
 | Columna A | Columna B | Columna C |
 |-----------|-----------|-----------|

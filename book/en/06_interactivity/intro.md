@@ -6,6 +6,11 @@ This section covers the different ways to add **interactive content** and **asse
 
 Interactivity in a TeachBook ranges from simple dropdowns to live executable code in the browser. This section covers:
 
+
+The following table summarizes the main elements of this section.
+
+**Table. What will you find here?.**
+
 | Resource | Type | Works in PDF? |
 |----------|------|---------------|
 | Thebe + Binder | Live code with a remote kernel | No |

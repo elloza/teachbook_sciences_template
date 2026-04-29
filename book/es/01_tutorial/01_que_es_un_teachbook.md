@@ -47,6 +47,11 @@ Es importante entender esto bien: **no partimos de cero**. Partimos de herramien
 
 La idea base del sistema es esta:
 
+
+La tabla siguiente resume los elementos principales de esta sección.
+
+**Tabla. De qué se parte y qué se obtiene.**
+
 | Se parte de... | Y se obtiene... |
 |---|---|
 | archivos `.md` y `.ipynb` | páginas web del libro |

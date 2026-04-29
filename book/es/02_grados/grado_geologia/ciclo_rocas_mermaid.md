@@ -30,6 +30,11 @@ flowchart LR
 
 **Resultado:**
 
+
+El diagrama siguiente resume visualmente esta parte de la explicación.
+
+**Diagrama: El ciclo.**
+
 ```{kroki}
 :type: mermaid
 :align: center
@@ -50,6 +55,11 @@ flowchart LR
 ```
 
 ## Explicación de las transiciones
+
+
+La tabla siguiente resume los elementos principales de esta sección.
+
+**Tabla. Explicación de las transiciones.**
 
 | Transición | Proceso geológico |
 |------------|-------------------|

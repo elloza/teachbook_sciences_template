@@ -115,6 +115,11 @@ $$M = 2 \times 1.008 + 16.00 = 18.016 \text{ g/mol}$$
 
 ## Teaching use cases
 
+
+The following table summarizes the main elements of this section.
+
+**Table. Teaching use cases.**
+
 | Type | Common use |
 |------|-----------|
 | `{note}` | Complementary information, reminders |

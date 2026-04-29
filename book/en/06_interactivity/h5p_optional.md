@@ -8,6 +8,11 @@ H5P is **optional** and **not a dependency** of this template. It requires an ex
 
 ## What does H5P offer?
 
+
+The following table summarizes the main elements of this section.
+
+**Table. What does H5P offer?.**
+
 | Activity type | Description |
 |---------------|-------------|
 | Quizzes | Multiple choice, fill in the blanks |

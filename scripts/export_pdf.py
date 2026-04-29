@@ -98,6 +98,11 @@ def find_command_with_common_latex_paths(command_name):
 
     executable = f"{command_name}.exe" if os.name == "nt" else command_name
     candidates = []
+    tinytex_bin = find_project_tinytex_bin_dir()
+    if tinytex_bin:
+        candidates.append(os.path.join(tinytex_bin, executable))
+        if os.name == "nt":
+            candidates.append(os.path.join(tinytex_bin, f"{command_name}.bat"))
     if os.name == "nt":
         candidates.extend(
             [
@@ -120,6 +125,22 @@ def find_command_with_common_latex_paths(command_name):
 
     for candidate in candidates:
         if candidate and os.path.isfile(candidate):
+            return candidate
+    return None
+
+
+def find_project_tinytex_bin_dir():
+    """Find project-local TinyTeX installed by setup_latex.py --full."""
+    tinytex_root = os.path.join(PROJECT_ROOT, ".venv", "tools", "tinytex", "TinyTeX")
+    bin_root = os.path.join(tinytex_root, "bin")
+    if not os.path.isdir(bin_root):
+        return None
+    if os.name == "nt":
+        candidate = os.path.join(bin_root, "windows")
+        return candidate if os.path.isdir(candidate) else None
+    for name in os.listdir(bin_root):
+        candidate = os.path.join(bin_root, name)
+        if os.path.isdir(candidate):
             return candidate
     return None
 
@@ -171,8 +192,13 @@ def latex_env(tex_engine_path):
     """Return an environment that can find a project-local LaTeX engine."""
     env = os.environ.copy()
     env.setdefault("PYTHONUTF8", "1")
+    env.setdefault("TECTONIC_CACHE_DIR", os.path.join(PROJECT_ROOT, ".venv", "tools", "tectonic-cache"))
     engine_dir = os.path.dirname(os.path.abspath(tex_engine_path))
-    env["PATH"] = engine_dir + os.pathsep + env.get("PATH", "")
+    extra_paths = [engine_dir]
+    tinytex_bin = find_project_tinytex_bin_dir()
+    if tinytex_bin:
+        extra_paths.append(tinytex_bin)
+    env["PATH"] = os.pathsep.join(extra_paths) + os.pathsep + env.get("PATH", "")
     return env
 
 

@@ -4,6 +4,11 @@ Kroki permite generar muchos tipos de diagramas útiles en Informática sin depe
 
 ## 1. Mermaid: arquitectura por capas
 
+
+El diagrama siguiente resume visualmente esta parte de la explicación.
+
+**Diagrama: Mermaid: arquitectura por capas.**
+
 ```{kroki}
 :type: mermaid
 :align: center
@@ -16,6 +21,11 @@ flowchart TB
 ```
 
 ## 2. PlantUML: componentes del sistema
+
+
+El diagrama siguiente resume visualmente esta parte de la explicación.
+
+**Diagrama: PlantUML: componentes del sistema.**
 
 ```{kroki}
 :type: plantuml
@@ -31,6 +41,11 @@ flowchart TB
 
 ## 3. GraphViz: grafo de dependencias
 
+
+El diagrama siguiente resume visualmente esta parte de la explicación.
+
+**Diagrama: GraphViz: grafo de dependencias.**
+
 ```{kroki}
 :type: graphviz
 :align: center
@@ -45,6 +60,11 @@ digraph G {
 ```
 
 ## 4. Structurizr: vista C4 simplificada
+
+
+El diagrama siguiente resume visualmente esta parte de la explicación.
+
+**Diagrama: Structurizr: vista C4 simplificada.**
 
 ```{kroki}
 :type: structurizr
@@ -91,6 +111,11 @@ En diagramas C4 conviene definir colores explícitos. Algunos temas por defecto 
 ```
 
 ## 5. Wavedrom: protocolo digital
+
+
+El diagrama siguiente resume visualmente esta parte de la explicación.
+
+**Diagrama: Wavedrom: protocolo digital.**
 
 ```{kroki}
 :type: wavedrom

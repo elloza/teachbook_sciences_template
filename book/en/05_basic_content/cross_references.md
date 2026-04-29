@@ -30,8 +30,10 @@ Use `:name:` inside the `{figure}` directive and `{numref}` to cite by number:
 
 ````md
 ```{figure} _static/logo.png
-:name: fig-logo-ref-en
 :width: 40%
+:name:  to cite by number:
+
+
 
 Project logo.
 ```
@@ -41,9 +43,12 @@ The {numref}`fig-logo-ref-en` shows the logo.
 
 Result:
 
+
+The {numref}`fig-logo-ref-en` visually summarizes this part of the explanation.
+
 ```{figure} _static/logo.png
-:name: fig-logo-ref-en
 :width: 40%
+:name: fig-logo-ref-en
 
 Project logo.
 ```
@@ -103,6 +108,11 @@ Result:
 The {numref}`tab-constants-en` lists fundamental constants.
 
 ## Roles summary
+
+
+The following table summarizes the main elements of this section.
+
+**Table. Roles summary.**
 
 | Role | What it references | Example |
 |------|-------------------|---------|

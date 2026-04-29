@@ -30,8 +30,10 @@ Usa `:name:` dentro de la directiva `{figure}` y `{numref}` para citar por núme
 
 ````md
 ```{figure} _static/logo.png
-:name: fig-logo-ref
 :width: 40%
+:name:  para citar por número:
+
+
 
 Logo del proyecto.
 ```
@@ -41,9 +43,12 @@ La {numref}`fig-logo-ref` muestra el logo.
 
 Resultado:
 
+
+El {numref}`fig-logo-ref` resume visualmente esta parte de la explicación.
+
 ```{figure} _static/logo.png
-:name: fig-logo-ref
 :width: 40%
+:name: fig-logo-ref
 
 Logo del proyecto.
 ```
@@ -103,6 +108,11 @@ Resultado:
 La {numref}`tab-constantes` lista constantes fundamentales.
 
 ## Resumen de roles
+
+
+La tabla siguiente resume los elementos principales de esta sección.
+
+**Tabla. Resumen de roles.**
 
 | Rol | Qué referencia | Ejemplo |
 |-----|---------------|---------|
