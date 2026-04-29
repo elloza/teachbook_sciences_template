@@ -1076,12 +1076,7 @@ def install_tinytex_portable():
             print(f"❌ Error extrayendo TinyTeX: {exc}")
             return False
 
-        extracted_root = os.path.join(extract_dir, "TinyTeX")
-        if not os.path.isdir(extracted_root):
-            for root, dirs, _files in os.walk(extract_dir):
-                if "TinyTeX" in dirs:
-                    extracted_root = os.path.join(root, "TinyTeX")
-                    break
+        extracted_root = find_extracted_tinytex_root(extract_dir)
         if not os.path.isdir(extracted_root):
             print("❌ No se encontró la carpeta TinyTeX dentro del paquete descargado.")
             return False
@@ -1099,6 +1094,28 @@ def install_tinytex_portable():
     print(f"✅ TinyTeX instalado en: {tinytex_root}")
     print("   Instalación portable dentro de .venv; no se ha usado Chocolatey/Homebrew/apt.")
     return True
+
+
+def find_extracted_tinytex_root(extract_dir):
+    """Find the TinyTeX root regardless of archive top-level layout."""
+    direct = os.path.join(extract_dir, "TinyTeX")
+    if is_tinytex_root(direct):
+        return direct
+    if is_tinytex_root(extract_dir):
+        return extract_dir
+
+    for root, dirs, _files in os.walk(extract_dir):
+        if "TinyTeX" in dirs:
+            candidate = os.path.join(root, "TinyTeX")
+            if is_tinytex_root(candidate):
+                return candidate
+        if "tlpkg" in dirs and "bin" in dirs:
+            return root
+    return direct
+
+
+def is_tinytex_root(path):
+    return os.path.isdir(os.path.join(path, "tlpkg")) and os.path.isdir(os.path.join(path, "bin"))
 
 
 def get_tlmgr_command():
