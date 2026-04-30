@@ -26,6 +26,8 @@ from __future__ import annotations
 
 import argparse
 import json
+import shutil
+import subprocess
 import sys
 import time
 from dataclasses import dataclass
@@ -111,6 +113,15 @@ def parse_args() -> argparse.Namespace:
         ),
     )
     parser.add_argument(
+        "--mermaid-renderer",
+        choices=("auto", "mmdc", "kroki"),
+        default="auto",
+        help=(
+            "Renderer for Mermaid sources. 'auto' prefers local Mermaid CLI "
+            "when available and falls back to Kroki."
+        ),
+    )
+    parser.add_argument(
         "--force",
         action="store_true",
         help="Re-render even when the output file already exists.",
@@ -172,7 +183,12 @@ def render_job(
     timeout: int,
     retries: int,
     request_mode: str,
+    mermaid_renderer: str = "auto",
 ) -> None:
+    if job.diagram_type == "mermaid" and mermaid_renderer in ("auto", "mmdc"):
+        if render_mermaid_with_mmdc(job, mermaid_renderer):
+            return
+
     if requests is None:
         raise RuntimeError(
             "No se puede importar 'requests'. Ejecuta el script con el Python de .venv."
@@ -218,6 +234,32 @@ def render_job(
     raise RuntimeError(f"No se pudo renderizar {job.source}: {last_error}")
 
 
+def render_mermaid_with_mmdc(job: DiagramJob, mermaid_renderer: str) -> bool:
+    """Render Mermaid locally with Mermaid CLI when available.
+
+    This keeps ES/EN diagrams visually consistent and avoids Kroki availability
+    changing the published result. If `auto` is selected and neither `mmdc` nor
+    `npx` is available, return False so the caller can fall back to Kroki.
+    """
+    mmdc = shutil.which("mmdc")
+    if mmdc:
+        cmd = [mmdc]
+    elif shutil.which("npx"):
+        cmd = ["npx", "--yes", "@mermaid-js/mermaid-cli"]
+    elif mermaid_renderer == "mmdc":
+        raise RuntimeError("No se encontró Mermaid CLI (mmdc) ni npx para renderizar Mermaid localmente.")
+    else:
+        return False
+
+    background = "white" if job.output_format == "png" else "transparent"
+    cmd.extend(["-i", str(job.source), "-o", str(job.output), "-b", background])
+    if job.output_format == "png":
+        cmd.extend(["-s", "2"])
+    job.output.parent.mkdir(parents=True, exist_ok=True)
+    subprocess.run(cmd, check=True)
+    return True
+
+
 def maybe_render_pdf_fallback_png(
     job: DiagramJob,
     source_dir: Path,
@@ -226,6 +268,7 @@ def maybe_render_pdf_fallback_png(
     timeout: int,
     retries: int,
     request_mode: str,
+    mermaid_renderer: str,
     force: bool,
 ) -> None:
     """Render a PDF-only PNG sidecar for Mermaid SVG diagrams.
@@ -255,6 +298,7 @@ def maybe_render_pdf_fallback_png(
         timeout,
         retries,
         request_mode,
+        mermaid_renderer,
     )
 
 
@@ -314,6 +358,7 @@ def main() -> int:
                     args.timeout,
                     args.retries,
                     args.request_mode,
+                    args.mermaid_renderer,
                     args.force,
                 )
             except Exception as exc:
@@ -328,7 +373,14 @@ def main() -> int:
             continue
         try:
             print(f"🔧 Renderizando {job.source.relative_to(PROJECT_ROOT)}...")
-            render_job(job, args.kroki_url, args.timeout, args.retries, args.request_mode)
+            render_job(
+                job,
+                args.kroki_url,
+                args.timeout,
+                args.retries,
+                args.request_mode,
+                args.mermaid_renderer,
+            )
             maybe_render_pdf_fallback_png(
                 job,
                 source_dir,
@@ -337,6 +389,7 @@ def main() -> int:
                 args.timeout,
                 args.retries,
                 args.request_mode,
+                args.mermaid_renderer,
                 args.force,
             )
             rendered.append(job)

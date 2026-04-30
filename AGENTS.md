@@ -344,6 +344,7 @@ Todos los comandos se ejecutan desde la raíz del proyecto usando el Python del 
 | Extraer fuentes Kroki | `python scripts/extract_kroki_sources.py` | Copia bloques `{kroki}` existentes a `diagram_sources/` sin modificar el contenido |
 | Renderizar diagramas | `python scripts/render_diagrams.py` | Convierte fuentes en `diagram_sources/` a imágenes estáticas en `book/_static/generated/diagrams/` |
 | Sustituir diagramas renderizados | `python scripts/replace_kroki_with_figures.py` | Cambia bloques `{kroki}` por `{figure}` solo si existe la imagen generada |
+| Verificar idiomas/menús | `python scripts/check_multilang_integrity.py` | Comprueba que todos los idiomas tienen la misma estructura de menú y archivos completos |
 | Renderizar CircuitikZ | `python scripts/render_circuitikz.py <entrada.tex> [salida.png]` | Compila CircuitikZ y genera una imagen PNG |
 | Convertir PDF a MD | `python scripts/pdf_to_markdown.py <ruta>` | Convierte PDFs a Markdown para el libro |
 | Guardar y publicar | `python scripts/git_helper.py` | git add + commit + push |

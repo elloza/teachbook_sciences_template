@@ -15,6 +15,8 @@ description: >
 
 > Todo contenido debe existir en **TODOS los idiomas** configurados. Si se añade un archivo en español, DEBE existir el equivalente en inglés (y viceversa). Los cambios de contenido + TOC deben ir en el mismo commit.
 
+> **Puerta de cierre obligatoria:** antes de decir “listo”, el agente DEBE comprobar que el menú lateral y los archivos visibles tienen correspondencia en todos los idiomas. Si hay más de un idioma configurado, no se puede cerrar un cambio de contenido sin ejecutar `python scripts/check_multilang_integrity.py` con el Python de `.venv` y obtener resultado correcto.
+
 > Toda tabla, figura, imagen, diagrama, circuito, vídeo o recurso visual/tabular que forme parte del discurso docente debe tener un **título/caption escueto** y debe estar **referenciado explícitamente en el texto**. No basta con “ponerlo ahí”: el estudiante debe saber por qué aparece y cuándo mirarlo.
 
 ## Regla obligatoria de captions y referencias
@@ -248,10 +250,19 @@ Si el objetivo es **ocultar** contenido existente, comentar las entradas en ambo
 
 El agente DEBE ejecutar estas verificaciones ANTES de commit:
 
-1. **Listar archivos `.md`** en `book/es/` y `book/en/` y confirmar que cada uno aparece en su `_toc_<lang>.yml`.
-2. **Leer cada `_toc_<lang>.yml`** y confirmar que cada entrada `file:` apunta a un archivo que existe físicamente.
-3. **Comparar la estructura** de ambos TOC: deben tener el mismo número de partes, capítulos y secciones.
-4. **Reportar** cualquier archivo huérfano (existe pero no está en el TOC) o entrada rota (en el TOC pero no existe el archivo).
+1. Ejecutar la comprobación automática multi-idioma:
+
+   | Sistema | Comando |
+   |---|---|
+   | Linux / macOS | `.venv/bin/python scripts/check_multilang_integrity.py` |
+   | Windows | `.venv\Scripts\python.exe scripts/check_multilang_integrity.py` |
+
+2. Confirmar que cada `_toc_<lang>.yml` tiene la **misma forma**: mismas partes, mismos capítulos, mismas secciones y mismo orden.
+3. Confirmar que cada entrada `file:` apunta a un archivo `.md` o `.ipynb` existente.
+4. Confirmar que no hay archivos huérfanos en `book/<lang>/` fuera del TOC.
+5. **Reportar** cualquier diferencia de menú, archivo huérfano o entrada rota. No ocultes el problema.
+
+La comprobación automática es obligatoria aunque el cambio parezca pequeño. En un libro multi-idioma, “solo he tocado una página” puede romper el menú lateral de otro idioma.
 
 **Importante**: un archivo ocultado deliberadamente al comentar su entrada en el TOC **NO cuenta como error** si el usuario pidió conservarlo como referencia.
 

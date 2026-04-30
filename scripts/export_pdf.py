@@ -447,7 +447,10 @@ def prepare_svg_images_for_latex(latex_build_dir):
         output_path = pdf_path
         pdf_fallback_png = find_pdf_fallback_png_for_svg(svg_path)
         try:
-            if rsvg_convert:
+            if pdf_fallback_png:
+                shutil.copy2(pdf_fallback_png, png_path)
+                output_path = png_path
+            elif rsvg_convert:
                 subprocess.run(
                     [rsvg_convert, "--format", "pdf", "--output", pdf_path, svg_path],
                     check=True,
