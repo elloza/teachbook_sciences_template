@@ -31,32 +31,16 @@ flowchart LR
 **Result:**
 
 
-The following diagram visually summarizes this part of the explanation.
+As shown in {numref}`fig-diagram-02-degrees-geology-degree-rock-cycle-mermaid-01`, the diagram is versioned as a static image.
 
-**Diagram: The cycle.**
-
-```{kroki}
-:type: mermaid
+```{figure} ../../../_static/generated/diagrams/en/02_degrees_geology_degree_rock_cycle_mermaid_01.svg
+:name: fig-diagram-02-degrees-geology-degree-rock-cycle-mermaid-01
+:alt: Diagram: The cycle
+:width: 90%
 :align: center
 
-flowchart LR
-    Magma["Magma"]
-    Igneous["Igneous Rock"]
-    Sedimentary["Sedimentary Rock"]
-    Metamorphic["Metamorphic Rock"]
-
-    Magma -->|"Cooling and solidification"| Igneous
-    Igneous -->|"Weathering and erosion"| Sedimentary
-    Sedimentary -->|"Heat and pressure"| Metamorphic
-    Metamorphic -->|"Melting"| Magma
-    Igneous -->|"Heat and pressure"| Metamorphic
-    Metamorphic -->|"Weathering and erosion"| Sedimentary
-    Sedimentary -->|"Melting"| Magma
+Diagram: The cycle.
 ```
-
-## Transition explanation
-
-
 The following table summarizes the main elements of this section.
 
 **Table. Transition explanation.**

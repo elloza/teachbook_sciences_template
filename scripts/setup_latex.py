@@ -41,6 +41,7 @@ TINYTEX_PACKAGES = [
     "wrapfig",
     "needspace",
     "capt-of",
+    "caption",
     "cmap",
     "colortbl",
     "ellipse",
@@ -71,6 +72,7 @@ TINYTEX_REQUIRED_FILES = [
     "amscd.sty",
     "bbm.sty",
     "capt-of.sty",
+    "caption.sty",
     "changepage.sty",
     "cmap.sty",
     "colortbl.sty",
@@ -378,6 +380,30 @@ def verify_svg_converter():
     return False
 
 
+def verify_svg_vector_converter():
+    """Return True when SVG can be converted to vector PDF for LaTeX.
+
+    `resvg` is an excellent SVG->PNG renderer, but it does not provide the
+    vector PDF output we prefer for crisp diagram PDFs. For vector output we
+    need `rsvg-convert --format pdf` or CairoSVG.
+    """
+    converter = shutil.which("rsvg-convert")
+    if converter:
+        print(f"✅ Conversor SVG→PDF detectado: {converter}")
+        return True
+
+    if python_module_available("cairosvg"):
+        print("✅ CairoSVG disponible para conversión SVG→PDF.")
+        return True
+
+    if python_module_available("svglib") and python_module_available("reportlab"):
+        print("✅ svglib/reportlab disponible para conversión SVG→PDF vectorial.")
+        return True
+
+    print("⚠️  Falta conversor vectorial SVG→PDF (rsvg-convert o CairoSVG).")
+    return False
+
+
 def find_command_with_common_latex_paths(command_name):
     """Find LaTeX tools, preferring project-local TinyTeX."""
     activate_tinytex_path()
@@ -421,6 +447,32 @@ def install_cairosvg_with_pip():
     if not ensure_pip_available():
         return False
 
+
+def install_svglib_with_pip():
+    if not ensure_pip_available():
+        return False
+
+    python = get_python_launcher()
+    print("📦 Intentando instalar svglib/reportlab en el entorno del proyecto...")
+    try:
+        result = subprocess.run(
+            [python, "-m", "pip", "install", "svglib", "reportlab"],
+            check=False,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            timeout=900,
+        )
+        if result.stdout:
+            print(result.stdout.strip())
+        if result.stderr:
+            print(result.stderr.strip())
+        return result.returncode == 0
+    except Exception as exc:
+        print(f"⚠️  Falló la instalación de svglib/reportlab con pip: {exc}")
+        return False
+
     python = get_python_launcher()
     print("📦 Intentando instalar CairoSVG en el entorno del proyecto...")
     try:
@@ -444,13 +496,19 @@ def install_cairosvg_with_pip():
 
 
 def install_svg_converter():
-    if verify_svg_converter():
+    raster_converter_ready = verify_svg_converter()
+    vector_converter_ready = verify_svg_vector_converter()
+    if raster_converter_ready and vector_converter_ready:
         return True
 
     print("🖼️  Instalando soporte SVG para PDF con Tectonic...")
-    if install_resvg_binary() and verify_svg_converter():
-        return True
-    if install_cairosvg_with_pip() and verify_svg_converter():
+    if not raster_converter_ready and install_resvg_binary():
+        raster_converter_ready = verify_svg_converter()
+    if not vector_converter_ready and install_cairosvg_with_pip():
+        vector_converter_ready = verify_svg_vector_converter()
+    if not vector_converter_ready and install_svglib_with_pip():
+        vector_converter_ready = verify_svg_vector_converter()
+    if raster_converter_ready and vector_converter_ready:
         return True
 
     if os.environ.get("TEACHBOOK_ALLOW_SYSTEM_LATEX_DEPS") == "1":

@@ -31,32 +31,16 @@ flowchart LR
 **Resultado:**
 
 
-El diagrama siguiente resume visualmente esta parte de la explicación.
+Como muestra la {numref}`fig-diagrama-02-grados-grado-geologia-ciclo-rocas-mermaid-01`, el diagrama queda versionado como imagen estática.
 
-**Diagrama: El ciclo.**
-
-```{kroki}
-:type: mermaid
+```{figure} ../../../_static/generated/diagrams/es/02_grados_grado_geologia_ciclo_rocas_mermaid_01.svg
+:name: fig-diagrama-02-grados-grado-geologia-ciclo-rocas-mermaid-01
+:alt: Diagrama: El ciclo
+:width: 90%
 :align: center
 
-flowchart LR
-    Magma["Magma"]
-    Ignea["Roca Ígnea"]
-    Sedimentaria["Roca Sedimentaria"]
-    Metamorfica["Roca Metamórfica"]
-
-    Magma -->|"Enfriamiento y solidificación"| Ignea
-    Ignea -->|"Meteorización y erosión"| Sedimentaria
-    Sedimentaria -->|"Calor y presión"| Metamorfica
-    Metamorfica -->|"Fusión"| Magma
-    Ignea -->|"Calor y presión"| Metamorfica
-    Metamorfica -->|"Meteorización y erosión"| Sedimentaria
-    Sedimentaria -->|"Fusión"| Magma
+Diagrama: El ciclo.
 ```
-
-## Explicación de las transiciones
-
-
 La tabla siguiente resume los elementos principales de esta sección.
 
 **Tabla. Explicación de las transiciones.**

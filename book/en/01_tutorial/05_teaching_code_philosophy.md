@@ -21,25 +21,16 @@ When you draw a diagram directly in a visual tool, the result is locked inside t
 When you describe that same diagram with code, an intermediate layer appears:
 
 
-The following diagram visually summarizes this part of the explanation.
+As shown in {numref}`fig-diagram-01-tutorial-05-teaching-code-philosophy-01`, the diagram is versioned as a static image.
 
-**Diagram: Code as a bridge to the final result.**
-
-```{kroki}
-:type: mermaid
+```{figure} ../../_static/generated/diagrams/en/01_tutorial_05_teaching_code_philosophy_01.svg
+:name: fig-diagram-01-tutorial-05-teaching-code-philosophy-01
+:alt: Diagram: Code as a bridge to the final result
+:width: 90%
 :align: center
 
-flowchart LR
-    A[Teaching idea] --> B[Intermediate language]
-    B --> C[Final artifact]
-    C --> D[HTML]
-    C --> E[PDF]
-    C --> F[Video or image]
+Diagram: Code as a bridge to the final result.
 ```
-
-That intermediate layer is where AI works especially well. An assistant can read, modify, translate, refactor, and compare structured text much better than it can directly manipulate a PDF, a final image, or a closed presentation.
-
-## What artifacts can be generated from code?
 
 
 The following table summarizes the main elements of this section.

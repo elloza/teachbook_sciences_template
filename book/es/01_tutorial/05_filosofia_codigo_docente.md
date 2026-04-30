@@ -21,25 +21,16 @@ Cuando dibujas un diagrama directamente en una herramienta visual, el resultado 
 Cuando describes ese mismo diagrama con código, aparece una capa intermedia:
 
 
-El diagrama siguiente resume visualmente esta parte de la explicación.
+Como muestra la {numref}`fig-diagrama-01-tutorial-05-filosofia-codigo-docente-01`, el diagrama queda versionado como imagen estática.
 
-**Diagrama: El código como puente hacia el resultado final.**
-
-```{kroki}
-:type: mermaid
+```{figure} ../../_static/generated/diagrams/es/01_tutorial_05_filosofia_codigo_docente_01.svg
+:name: fig-diagrama-01-tutorial-05-filosofia-codigo-docente-01
+:alt: Diagrama: El código como puente hacia el resultado final
+:width: 90%
 :align: center
 
-flowchart LR
-    A[Idea docente] --> B[Lenguaje intermedio]
-    B --> C[Artefacto final]
-    C --> D[HTML]
-    C --> E[PDF]
-    C --> F[Vídeo o imagen]
+Diagrama: El código como puente hacia el resultado final.
 ```
-
-Esa capa intermedia es donde la IA trabaja especialmente bien. Un asistente puede leer, modificar, traducir, refactorizar y comparar texto estructurado mucho mejor que manipular directamente un PDF, una imagen final o una presentación cerrada.
-
-## ¿Qué artefactos pueden generarse desde código?
 
 
 La tabla siguiente resume los elementos principales de esta sección.

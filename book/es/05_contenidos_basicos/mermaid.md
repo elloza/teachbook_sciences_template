@@ -21,24 +21,16 @@ flowchart LR
 Resultado:
 
 
-El diagrama siguiente resume visualmente esta parte de la explicación.
+Como muestra la {numref}`fig-diagrama-05-contenidos-basicos-mermaid-01`, el diagrama queda versionado como imagen estática.
 
-**Diagrama: Diagrama de flujo (`flowchart`).**
-
-```{kroki}
-:type: mermaid
+```{figure} ../../_static/generated/diagrams/es/05_contenidos_basicos_mermaid_01.svg
+:name: fig-diagrama-05-contenidos-basicos-mermaid-01
+:alt: Diagrama: Diagrama de flujo (`flowchart`)
+:width: 90%
 :align: center
 
-flowchart LR
-    A[Muestra] --> B[Preparación]
-    B --> C[Medición]
-    C --> D[Análisis]
-    D --> E[Resultados]
+Diagrama: Diagrama de flujo (`flowchart`).
 ```
-
-Descripción: El flujo va de izquierda a derecha: Muestra → Preparación → Medición → Análisis → Resultados.
-
-## Diagrama de secuencia (`sequenceDiagram`)
 
 ````md
 ```{kroki}
@@ -59,27 +51,16 @@ sequenceDiagram
 Resultado:
 
 
-El diagrama siguiente resume visualmente esta parte de la explicación.
+Como muestra la {numref}`fig-diagrama-05-contenidos-basicos-mermaid-02`, el diagrama queda versionado como imagen estática.
 
-**Diagrama: Diagrama de secuencia (`sequenceDiagram`).**
-
-```{kroki}
-:type: mermaid
+```{figure} ../../_static/generated/diagrams/es/05_contenidos_basicos_mermaid_02.svg
+:name: fig-diagrama-05-contenidos-basicos-mermaid-02
+:alt: Diagrama: Diagrama de secuencia (`sequenceDiagram`)
+:width: 90%
 :align: center
 
-sequenceDiagram
-    participant E as Estudiante
-    participant P as Profesor
-    participant L as Laboratorio
-    E->>P: Entrega informe
-    P->>E: Correcciones
-    E->>L: Reserva equipo
-    L->>E: Confirmación
+Diagrama: Diagrama de secuencia (`sequenceDiagram`).
 ```
-
-Descripción: El estudiante entrega un informe al profesor, recibe correcciones, y luego reserva un equipo en el laboratorio.
-
-## Diagrama de clases (`classDiagram`)
 
 ````md
 ```{kroki}
@@ -105,30 +86,16 @@ classDiagram
 Resultado:
 
 
-El diagrama siguiente resume visualmente esta parte de la explicación.
+Como muestra la {numref}`fig-diagrama-05-contenidos-basicos-mermaid-03`, el diagrama queda versionado como imagen estática.
 
-**Diagrama: Diagrama de clases (`classDiagram`).**
-
-```{kroki}
-:type: mermaid
+```{figure} ../../_static/generated/diagrams/es/05_contenidos_basicos_mermaid_03.svg
+:name: fig-diagrama-05-contenidos-basicos-mermaid-03
+:alt: Diagrama: Diagrama de clases (`classDiagram`)
+:width: 90%
 :align: center
 
-classDiagram
-    class Experimento {
-        +string nombre
-        +date fecha
-        +ejecutar()
-        +analizar()
-    }
-    class Muestra {
-        +string tipo
-        +float masa
-        +preparar()
-    }
-    Experimento --> Muestra : usa
+Diagrama: Diagrama de clases (`classDiagram`).
 ```
-
-## Diagrama entidad-relación (`erDiagram`)
 
 ````md
 ```{kroki}
@@ -145,21 +112,16 @@ erDiagram
 Resultado:
 
 
-El diagrama siguiente resume visualmente esta parte de la explicación.
+Como muestra la {numref}`fig-diagrama-05-contenidos-basicos-mermaid-04`, el diagrama queda versionado como imagen estática.
 
-**Diagrama: Diagrama entidad-relación (`erDiagram`).**
-
-```{kroki}
-:type: mermaid
+```{figure} ../../_static/generated/diagrams/es/05_contenidos_basicos_mermaid_04.svg
+:name: fig-diagrama-05-contenidos-basicos-mermaid-04
+:alt: Diagrama: Diagrama entidad-relación (`erDiagram`)
+:width: 90%
 :align: center
 
-erDiagram
-    ESTUDIANTE ||--o{ INSCRIPCION : realiza
-    INSCRIPCION }o--|| ASIGNATURA : corresponde
-    ASIGNATURA ||--o{ PRACTICA : incluye
+Diagrama: Diagrama entidad-relación (`erDiagram`).
 ```
-
-## Diagrama de estados (`stateDiagram`)
 
 ````md
 ```{kroki}
@@ -179,26 +141,16 @@ stateDiagram
 Resultado:
 
 
-El diagrama siguiente resume visualmente esta parte de la explicación.
+Como muestra la {numref}`fig-diagrama-05-contenidos-basicos-mermaid-05`, el diagrama queda versionado como imagen estática.
 
-**Diagrama: Diagrama de estados (`stateDiagram`).**
-
-```{kroki}
-:type: mermaid
+```{figure} ../../_static/generated/diagrams/es/05_contenidos_basicos_mermaid_05.svg
+:name: fig-diagrama-05-contenidos-basicos-mermaid-05
+:alt: Diagrama: Diagrama de estados (`stateDiagram-v2`)
+:width: 90%
 :align: center
 
-stateDiagram
-    [*] --> Pendiente
-    Pendiente --> EnProgreso : iniciar
-    EnProgreso --> Completado : finalizar
-    EnProgreso --> Error : fallo
-    Error --> Pendiente : reintentar
-    Completado --> [*]
+Diagrama: Diagrama de estados (`stateDiagram-v2`).
 ```
-
-## Direcciones del diagrama de flujo
-
-
 La tabla siguiente resume los elementos principales de esta sección.
 
 **Tabla. Direcciones del diagrama de flujo.**

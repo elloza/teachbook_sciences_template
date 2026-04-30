@@ -16,6 +16,7 @@ if sys.stderr.encoding and sys.stderr.encoding.lower() not in ("utf-8", "utf8"):
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_OUTPUT_DIR = PROJECT_ROOT / "book" / "_static" / "generated"
+VENV_DIR = PROJECT_ROOT / ".venv"
 
 
 def fail(message: str, code: int = 1):
@@ -23,11 +24,35 @@ def fail(message: str, code: int = 1):
     sys.exit(code)
 
 
-def ensure_tectonic():
-    if shutil.which("tectonic") is None:
+def local_binary_candidates(binary_name: str) -> list[Path]:
+    candidates: list[Path] = []
+    candidates.append(VENV_DIR / ("Scripts" if os.name == "nt" else "bin") / binary_name)
+    if os.name == "nt":
+        candidates.append(Path(os.environ.get("APPDATA", str(Path.home()))) / "teachbook" / binary_name)
+    else:
+        candidates.append(Path.home() / ".local" / "bin" / binary_name)
+    candidates.append(Path(__file__).resolve().parent / binary_name)
+    return candidates
+
+
+def get_tectonic_command() -> str | None:
+    found = shutil.which("tectonic")
+    if found:
+        return found
+    executable_name = "tectonic.exe" if os.name == "nt" else "tectonic"
+    for candidate in local_binary_candidates(executable_name):
+        if candidate.is_file():
+            return str(candidate)
+    return None
+
+
+def ensure_tectonic() -> str:
+    tectonic = get_tectonic_command()
+    if tectonic is None:
         fail(
             "No se encontró Tectonic. Instálalo con: python scripts/setup_latex.py"
         )
+    return tectonic
 
 
 def ensure_pymupdf():
@@ -61,10 +86,12 @@ def build_full_document(content: str) -> str:
 """.strip() + "\n"
 
 
-def render_pdf(tex_file: Path, workdir: Path):
+def render_pdf(tex_file: Path, workdir: Path, tectonic: str):
+    env = os.environ.copy()
+    env.setdefault("TECTONIC_CACHE_DIR", str(VENV_DIR / "tools" / "tectonic-cache"))
     result = subprocess.run(
         [
-            "tectonic",
+            tectonic,
             str(tex_file.name),
             "--outdir",
             str(workdir),
@@ -72,6 +99,7 @@ def render_pdf(tex_file: Path, workdir: Path):
         cwd=workdir,
         capture_output=True,
         text=True,
+        env=env,
     )
     if result.returncode != 0:
         print(result.stdout)
@@ -81,12 +109,30 @@ def render_pdf(tex_file: Path, workdir: Path):
 
 def pdf_to_png(pdf_path: Path, png_path: Path):
     import fitz
+    from PIL import Image, ImageChops
 
     png_path.parent.mkdir(parents=True, exist_ok=True)
     doc = fitz.open(pdf_path)
     page = doc[0]
-    pix = page.get_pixmap(matrix=fitz.Matrix(2.5, 2.5), alpha=False)
-    pix.save(str(png_path))
+    pix = page.get_pixmap(matrix=fitz.Matrix(4.0, 4.0), alpha=False)
+    image = Image.open(io.BytesIO(pix.tobytes("png"))).convert("RGB")
+
+    # Some LaTeX inputs or toolchain combinations may still produce a full-page
+    # PDF even when the source is intended to be a tight CircuitikZ diagram. Do
+    # not let that leak into the book: crop the rasterized output to the actual
+    # non-white drawing area, preserving a small margin for labels and strokes.
+    background = Image.new("RGB", image.size, "white")
+    diff = ImageChops.difference(image, background)
+    bbox = diff.getbbox()
+    if bbox:
+        margin = 32
+        left = max(0, bbox[0] - margin)
+        top = max(0, bbox[1] - margin)
+        right = min(image.width, bbox[2] + margin)
+        bottom = min(image.height, bbox[3] + margin)
+        image = image.crop((left, top, right, bottom))
+
+    image.save(str(png_path))
     doc.close()
 
 
@@ -110,7 +156,7 @@ def main():
     else:
         output_path = (DEFAULT_OUTPUT_DIR / f"{input_path.stem}.png").resolve()
 
-    ensure_tectonic()
+    tectonic = ensure_tectonic()
     ensure_pymupdf()
 
     print(f"📄 Leyendo fuente CircuitikZ: {input_path}")
@@ -124,7 +170,7 @@ def main():
 
         tex_file.write_text(full_doc, encoding="utf-8")
         print("🧮 Compilando con Tectonic...")
-        render_pdf(tex_file, tmpdir)
+        render_pdf(tex_file, tmpdir, tectonic)
 
         if not pdf_file.is_file():
             fail("No se generó el PDF esperado.")

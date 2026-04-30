@@ -12,46 +12,26 @@ Kroki es útil para representar **diagramas de bloques, flujo de señales, crono
 ## 1. Mermaid: cadena de instrumentación
 
 
-El diagrama siguiente resume visualmente esta parte de la explicación.
+Como muestra la {numref}`fig-diagrama-02-grados-grado-fisica-diagramas-kroki-01`, el diagrama queda versionado como imagen estática.
 
-**Diagrama: Mermaid: cadena de instrumentación.**
-
-```{kroki}
-:type: mermaid
+```{figure} ../../../_static/generated/diagrams/es/02_grados_grado_fisica_diagramas_kroki_01.svg
+:name: fig-diagrama-02-grados-grado-fisica-diagramas-kroki-01
+:alt: Diagrama: Mermaid: cadena de instrumentación
+:width: 90%
 :align: center
 
-flowchart LR
-    G[Generador] --> R[Circuito RC]
-    R --> O[Osciloscopio]
-    R --> M[Multímetro]
-    O --> A[Análisis de fase]
-    M --> B[Medida de amplitud]
+Diagrama: Mermaid: cadena de instrumentación.
 ```
+Como muestra la {numref}`fig-diagrama-02-grados-grado-fisica-diagramas-kroki-02`, el diagrama queda versionado como imagen estática.
 
-## 2. GraphViz: flujo de señal en un montaje
-
-
-El diagrama siguiente resume visualmente esta parte de la explicación.
-
-**Diagrama: GraphViz: flujo de señal en un montaje.**
-
-```{kroki}
-:type: graphviz
+```{figure} ../../../_static/generated/diagrams/es/02_grados_grado_fisica_diagramas_kroki_02.svg
+:name: fig-diagrama-02-grados-grado-fisica-diagramas-kroki-02
+:alt: Diagrama: GraphViz: flujo de señal en un montaje
+:width: 90%
 :align: center
 
-digraph G {
-    rankdir=LR;
-    Generador -> "Circuito RC";
-    "Circuito RC" -> Osciloscopio;
-    "Circuito RC" -> "Sensor de corriente";
-    Osciloscopio -> "Cálculo de desfase";
-    "Sensor de corriente" -> "Cálculo de impedancia";
-}
+Diagrama: GraphViz: flujo de señal en un montaje.
 ```
-
-## 3. CircuitikZ: circuito docente como imagen
-
-El circuito siguiente no se dibuja a mano: procede de un archivo `.tex` con código CircuitikZ, renderizado previamente como imagen para que funcione igual en HTML y PDF.
 
 
 El {numref}`fig-diagramas-kroki-3` resume visualmente esta parte de la explicación.
@@ -83,40 +63,26 @@ Kroki soporta TikZ, pero el servicio público de Kroki no garantiza tener dispon
 ## 4. Wavedrom: señales de entrada y salida
 
 
-El diagrama siguiente resume visualmente esta parte de la explicación.
+Como muestra la {numref}`fig-diagrama-02-grados-grado-fisica-diagramas-kroki-03`, el diagrama queda versionado como imagen estática.
 
-**Diagrama: Wavedrom: señales de entrada y salida.**
-
-```{kroki}
-:type: wavedrom
+```{figure} ../../../_static/generated/diagrams/es/02_grados_grado_fisica_diagramas_kroki_03.svg
+:name: fig-diagrama-02-grados-grado-fisica-diagramas-kroki-03
+:alt: Diagrama: Wavedrom: señales de entrada y salida
+:width: 90%
 :align: center
 
-{ signal: [
-  { name: "Vin", wave: "p....|...." },
-  { name: "Vout", wave: "0.p..|.p..", phase: 0.5 },
-  { name: "I", wave: "0..p.|..p.", phase: 0.75 }
-]}
+Diagrama: Wavedrom: señales de entrada y salida.
 ```
+Como muestra la {numref}`fig-diagrama-02-grados-grado-fisica-diagramas-kroki-04`, el diagrama queda versionado como imagen estática.
 
-## 5. Ditaa: esquema rápido de banco experimental
-
-
-El diagrama siguiente resume visualmente esta parte de la explicación.
-
-**Diagrama: Ditaa: esquema rápido de banco experimental.**
-
-```{kroki}
-:type: ditaa
+```{figure} ../../../_static/generated/diagrams/es/02_grados_grado_fisica_diagramas_kroki_04.svg
+:name: fig-diagrama-02-grados-grado-fisica-diagramas-kroki-04
+:alt: Diagrama: Ditaa: esquema rápido de banco experimental
+:width: 90%
 :align: center
 
-+----------+      +------------+      +-------------+
-| Generador |----->| Circuito RC |----->| Osciloscopio |
-+----------+      +------------+      +-------------+
+Diagrama: Ditaa: esquema rápido de banco experimental.
 ```
-
-## Idea clave
-
-Kroki, CircuitikZ y SchemDraw **se complementan**. No compiten:
 
 - **Kroki** = explicación visual del sistema, bloques, flujos y cronogramas.
 - **CircuitikZ** = circuito formal con símbolos normalizados y acabado LaTeX.

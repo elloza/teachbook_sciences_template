@@ -12,46 +12,26 @@ Kroki is useful for **block diagrams, signal flow, timing diagrams, and conceptu
 ## 1. Mermaid: instrumentation chain
 
 
-The following diagram visually summarizes this part of the explanation.
+As shown in {numref}`fig-diagram-02-degrees-physics-degree-kroki-diagrams-01`, the diagram is versioned as a static image.
 
-**Diagram: Mermaid: instrumentation chain.**
-
-```{kroki}
-:type: mermaid
+```{figure} ../../../_static/generated/diagrams/en/02_degrees_physics_degree_kroki_diagrams_01.svg
+:name: fig-diagram-02-degrees-physics-degree-kroki-diagrams-01
+:alt: Diagram: Mermaid: instrumentation chain
+:width: 90%
 :align: center
 
-flowchart LR
-    G[Generator] --> R[RC Circuit]
-    R --> O[Oscilloscope]
-    R --> M[Multimeter]
-    O --> A[Phase analysis]
-    M --> B[Amplitude measurement]
+Diagram: Mermaid: instrumentation chain.
 ```
+As shown in {numref}`fig-diagram-02-degrees-physics-degree-kroki-diagrams-02`, the diagram is versioned as a static image.
 
-## 2. GraphViz: signal flow in an experimental setup
-
-
-The following diagram visually summarizes this part of the explanation.
-
-**Diagram: GraphViz: signal flow in an experimental setup.**
-
-```{kroki}
-:type: graphviz
+```{figure} ../../../_static/generated/diagrams/en/02_degrees_physics_degree_kroki_diagrams_02.svg
+:name: fig-diagram-02-degrees-physics-degree-kroki-diagrams-02
+:alt: Diagram: GraphViz: signal flow in an experimental setup
+:width: 90%
 :align: center
 
-digraph G {
-    rankdir=LR;
-    Generator -> "RC Circuit";
-    "RC Circuit" -> Oscilloscope;
-    "RC Circuit" -> "Current sensor";
-    Oscilloscope -> "Phase calculation";
-    "Current sensor" -> "Impedance calculation";
-}
+Diagram: GraphViz: signal flow in an experimental setup.
 ```
-
-## 3. CircuitikZ: teaching circuit as an image
-
-The following circuit is not drawn by hand: it comes from a `.tex` file with CircuitikZ code, rendered beforehand as an image so it works the same way in HTML and PDF.
 
 
 The {numref}`fig-kroki-diagrams-3` visually summarizes this part of the explanation.
@@ -83,40 +63,26 @@ Kroki supports TikZ, but the public Kroki service does not guarantee that the `c
 ## 4. Wavedrom: input and output signals
 
 
-The following diagram visually summarizes this part of the explanation.
+As shown in {numref}`fig-diagram-02-degrees-physics-degree-kroki-diagrams-03`, the diagram is versioned as a static image.
 
-**Diagram: Wavedrom: input and output signals.**
-
-```{kroki}
-:type: wavedrom
+```{figure} ../../../_static/generated/diagrams/en/02_degrees_physics_degree_kroki_diagrams_03.svg
+:name: fig-diagram-02-degrees-physics-degree-kroki-diagrams-03
+:alt: Diagram: Wavedrom: input and output signals
+:width: 90%
 :align: center
 
-{ signal: [
-  { name: "Vin", wave: "p....|...." },
-  { name: "Vout", wave: "0.p..|.p..", phase: 0.5 },
-  { name: "I", wave: "0..p.|..p.", phase: 0.75 }
-]}
+Diagram: Wavedrom: input and output signals.
 ```
+As shown in {numref}`fig-diagram-02-degrees-physics-degree-kroki-diagrams-04`, the diagram is versioned as a static image.
 
-## 5. Ditaa: quick experimental bench sketch
-
-
-The following diagram visually summarizes this part of the explanation.
-
-**Diagram: Ditaa: quick experimental bench sketch.**
-
-```{kroki}
-:type: ditaa
+```{figure} ../../../_static/generated/diagrams/en/02_degrees_physics_degree_kroki_diagrams_04.svg
+:name: fig-diagram-02-degrees-physics-degree-kroki-diagrams-04
+:alt: Diagram: Ditaa: quick experimental bench sketch
+:width: 90%
 :align: center
 
-+----------+      +------------+      +-------------+
-| Generator |----->| RC Circuit |----->| Oscilloscope |
-+----------+      +------------+      +-------------+
+Diagram: Ditaa: quick experimental bench sketch.
 ```
-
-## Key idea
-
-Kroki, CircuitikZ, and SchemDraw **complement** each other. They do not compete:
 
 - **Kroki** = system-level visual explanation, blocks, flows, and timing diagrams.
 - **CircuitikZ** = formal circuit with standard symbols and LaTeX-quality output.

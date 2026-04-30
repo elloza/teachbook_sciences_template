@@ -43,44 +43,16 @@ erDiagram
 **Resultado:**
 
 
-El diagrama siguiente resume visualmente esta parte de la explicación.
+Como muestra la {numref}`fig-diagrama-02-grados-grado-informatica-diagrama-er-mermaid-01`, el diagrama queda versionado como imagen estática.
 
-**Diagrama: Ejemplo: Base de datos de una universidad.**
-
-```{kroki}
-:type: mermaid
+```{figure} ../../../_static/generated/diagrams/es/02_grados_grado_informatica_diagrama_er_mermaid_01.svg
+:name: fig-diagrama-02-grados-grado-informatica-diagrama-er-mermaid-01
+:alt: Diagrama: Ejemplo: Base de datos de una universidad
+:width: 90%
 :align: center
 
-erDiagram
-    ESTUDIANTE {
-        int id PK
-        string nombre
-        string email
-    }
-    CURSO {
-        int id PK
-        string nombre
-        int creditos
-    }
-    PROFESOR {
-        int id PK
-        string nombre
-        string departamento
-    }
-    MATRICULA {
-        int id PK
-        float nota
-        string convocatoria
-    }
-
-    ESTUDIANTE ||--o{ MATRICULA : "se matricula"
-    CURSO ||--o{ MATRICULA : "tiene"
-    PROFESOR ||--o{ CURSO : "imparte"
+Diagrama: Ejemplo: Base de datos de una universidad.
 ```
-
-## Cómo modificarlo
-
-- **Añadir una entidad**: Copia un bloque como `ENTIDAD { ... }` y define sus atributos.
 - **Tipos de relación**: Usa `||--o{` (uno a muchos), `||--||` (uno a uno), `}o--o{` (muchos a muchos).
 - **Claves primarias**: Marca los atributos con `PK`.
 - **Claves foráneas**: Marca los atributos con `FK`.

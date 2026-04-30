@@ -1,5 +1,5 @@
 digraph G {
-    rankdir=LR;
+    rankdir=TB;
     Generador -> "Circuito RC";
     "Circuito RC" -> Osciloscopio;
     "Circuito RC" -> "Sensor de corriente";

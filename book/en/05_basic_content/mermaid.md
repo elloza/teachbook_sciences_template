@@ -21,24 +21,16 @@ flowchart LR
 Result:
 
 
-The following diagram visually summarizes this part of the explanation.
+As shown in {numref}`fig-diagram-05-basic-content-mermaid-01`, the diagram is versioned as a static image.
 
-**Diagram: Flowchart (`flowchart`).**
-
-```{kroki}
-:type: mermaid
+```{figure} ../../_static/generated/diagrams/en/05_basic_content_mermaid_01.svg
+:name: fig-diagram-05-basic-content-mermaid-01
+:alt: Diagram: Flowchart (`flowchart`)
+:width: 90%
 :align: center
 
-flowchart LR
-    A[Sample] --> B[Preparation]
-    B --> C[Measurement]
-    C --> D[Analysis]
-    D --> E[Results]
+Diagram: Flowchart (`flowchart`).
 ```
-
-Description: The flow goes left to right: Sample → Preparation → Measurement → Analysis → Results.
-
-## Sequence diagram (`sequenceDiagram`)
 
 ````md
 ```{kroki}
@@ -59,27 +51,16 @@ sequenceDiagram
 Result:
 
 
-The following diagram visually summarizes this part of the explanation.
+As shown in {numref}`fig-diagram-05-basic-content-mermaid-02`, the diagram is versioned as a static image.
 
-**Diagram: Sequence diagram (`sequenceDiagram`).**
-
-```{kroki}
-:type: mermaid
+```{figure} ../../_static/generated/diagrams/en/05_basic_content_mermaid_02.svg
+:name: fig-diagram-05-basic-content-mermaid-02
+:alt: Diagram: Sequence diagram (`sequenceDiagram`)
+:width: 90%
 :align: center
 
-sequenceDiagram
-    participant S as Student
-    participant T as Teacher
-    participant L as Laboratory
-    S->>T: Submit report
-    T->>S: Corrections
-    S->>L: Book equipment
-    L->>S: Confirmation
+Diagram: Sequence diagram (`sequenceDiagram`).
 ```
-
-Description: The student submits a report to the teacher, receives corrections, and then books equipment in the laboratory.
-
-## Class diagram (`classDiagram`)
 
 ````md
 ```{kroki}
@@ -105,30 +86,16 @@ classDiagram
 Result:
 
 
-The following diagram visually summarizes this part of the explanation.
+As shown in {numref}`fig-diagram-05-basic-content-mermaid-03`, the diagram is versioned as a static image.
 
-**Diagram: Class diagram (`classDiagram`).**
-
-```{kroki}
-:type: mermaid
+```{figure} ../../_static/generated/diagrams/en/05_basic_content_mermaid_03.svg
+:name: fig-diagram-05-basic-content-mermaid-03
+:alt: Diagram: Class diagram (`classDiagram`)
+:width: 90%
 :align: center
 
-classDiagram
-    class Experiment {
-        +string name
-        +date date
-        +run()
-        +analyze()
-    }
-    class Sample {
-        +string type
-        +float mass
-        +prepare()
-    }
-    Experiment --> Sample : uses
+Diagram: Class diagram (`classDiagram`).
 ```
-
-## Entity-relationship diagram (`erDiagram`)
 
 ````md
 ```{kroki}
@@ -145,21 +112,16 @@ erDiagram
 Result:
 
 
-The following diagram visually summarizes this part of the explanation.
+As shown in {numref}`fig-diagram-05-basic-content-mermaid-04`, the diagram is versioned as a static image.
 
-**Diagram: Entity-relationship diagram (`erDiagram`).**
-
-```{kroki}
-:type: mermaid
+```{figure} ../../_static/generated/diagrams/en/05_basic_content_mermaid_04.svg
+:name: fig-diagram-05-basic-content-mermaid-04
+:alt: Diagram: Entity-relationship diagram (`erDiagram`)
+:width: 90%
 :align: center
 
-erDiagram
-    STUDENT ||--o{ ENROLLMENT : makes
-    ENROLLMENT }o--|| COURSE : belongs_to
-    COURSE ||--o{ LAB : includes
+Diagram: Entity-relationship diagram (`erDiagram`).
 ```
-
-## State diagram (`stateDiagram`)
 
 ````md
 ```{kroki}
@@ -179,26 +141,16 @@ stateDiagram
 Result:
 
 
-The following diagram visually summarizes this part of the explanation.
+As shown in {numref}`fig-diagram-05-basic-content-mermaid-05`, the diagram is versioned as a static image.
 
-**Diagram: State diagram (`stateDiagram`).**
-
-```{kroki}
-:type: mermaid
+```{figure} ../../_static/generated/diagrams/en/05_basic_content_mermaid_05.svg
+:name: fig-diagram-05-basic-content-mermaid-05
+:alt: Diagram: State diagram (`stateDiagram-v2`)
+:width: 90%
 :align: center
 
-stateDiagram
-    [*] --> Pending
-    Pending --> InProgress : start
-    InProgress --> Completed : finish
-    InProgress --> Error : failure
-    Error --> Pending : retry
-    Completed --> [*]
+Diagram: State diagram (`stateDiagram-v2`).
 ```
-
-## Flowchart directions
-
-
 The following table summarizes the main elements of this section.
 
 **Table. Flowchart directions.**

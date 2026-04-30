@@ -6,6 +6,7 @@ import sys
 import glob
 import yaml
 import re
+from datetime import datetime
 
 
 # Determine script/project directories once, before any chdir.
@@ -34,6 +35,7 @@ def get_jupyter_book():
 BOOK_DIR = "book"
 STATIC_DIR = os.path.join(BOOK_DIR, "_static")
 SUPPORTED_ENGINES = ("tectonic", "latexmk", "auto")
+VERBOSE = "--verbose" in sys.argv or "-v" in sys.argv
 
 
 def get_languages():
@@ -202,6 +204,36 @@ def latex_env(tex_engine_path):
     return env
 
 
+def write_command_log(cmd, stdout, stderr):
+    """Persist full command output so quiet mode never hides errors."""
+    log_dir = os.path.join(PROJECT_ROOT, ".build_logs")
+    os.makedirs(log_dir, exist_ok=True)
+    timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+    safe_name = os.path.basename(cmd[0]).replace(".", "_")
+    log_path = os.path.join(log_dir, f"latex-{timestamp}-{safe_name}.log")
+    with open(log_path, "w", encoding="utf-8", newline="\n") as f:
+        f.write("$ " + " ".join(cmd) + "\n\n")
+        if stdout:
+            f.write("--- STDOUT ---\n")
+            f.write(stdout)
+            if not stdout.endswith("\n"):
+                f.write("\n")
+        if stderr:
+            f.write("--- STDERR ---\n")
+            f.write(stderr)
+            if not stderr.endswith("\n"):
+                f.write("\n")
+    return log_path
+
+
+def print_output_tail(stdout, stderr, lines=80):
+    """Show the most useful end of a failed command without flooding the terminal."""
+    combined = "\n".join(part for part in (stdout, stderr) if part)
+    tail = combined.splitlines()[-lines:]
+    if tail:
+        print("\n".join(tail))
+
+
 def compile_latex_with_engine(tex_engine_path, main_tex):
     """Compile a LaTeX file with one concrete engine path."""
     print(f"🔧 Usando motor: {tex_engine_path}")
@@ -237,7 +269,25 @@ def compile_latex_with_engine(tex_engine_path, main_tex):
     for attempt, cmd in enumerate(commands, start=1):
         try:
             print(f"🚀 Ejecutando ({attempt}/{len(commands)}): {' '.join(cmd)}")
-            subprocess.run(cmd, check=True, env=env)
+            if VERBOSE:
+                subprocess.run(cmd, check=True, env=env)
+            else:
+                result = subprocess.run(
+                    cmd,
+                    check=False,
+                    env=env,
+                    capture_output=True,
+                    text=True,
+                    encoding="utf-8",
+                    errors="replace",
+                )
+                log_path = write_command_log(cmd, result.stdout, result.stderr)
+                if result.returncode != 0:
+                    print(f"❌ El motor LaTeX falló. Log completo: {log_path}")
+                    print("Últimas líneas relevantes:")
+                    print_output_tail(result.stdout, result.stderr)
+                    raise subprocess.CalledProcessError(result.returncode, cmd)
+                print(f"   ✅ Motor completado. Log completo: {log_path}")
             return True
         except subprocess.CalledProcessError as exc:
             last_error = exc
@@ -260,9 +310,23 @@ def ensure_static_dir():
 
 
 def glob_pdf(search_dir):
+    preferred_names = [
+        "projectnamenotset.pdf",
+    ]
+    for preferred in preferred_names:
+        candidate = os.path.join(search_dir, preferred)
+        if os.path.isfile(candidate):
+            return os.path.abspath(candidate)
+
+    candidates = []
     for file in os.listdir(search_dir):
         if file.endswith(".pdf"):
-            return os.path.abspath(os.path.join(search_dir, file))
+            candidates.append(os.path.abspath(os.path.join(search_dir, file)))
+    if candidates:
+        # Avoid accidentally copying a small SVG-converted figure PDF when the
+        # actual book PDF has a non-standard name. The final book PDF is by far
+        # the largest PDF in the LaTeX build directory.
+        return max(candidates, key=lambda path: os.path.getsize(path))
     return None
 
 
@@ -284,6 +348,7 @@ def generate_metadata_tex(lang, latex_build_dir):
     latex_config = config.get("latex", {})
 
     metadata = {
+        "BookTitle": config.get("title", ""),
         "BookISBN": latex_config.get("isbn", ""),
         "BookDOI": latex_config.get("doi", ""),
         "BookEdition": latex_config.get("edition", ""),
@@ -291,6 +356,7 @@ def generate_metadata_tex(lang, latex_build_dir):
         "BookYear": str(config.get("copyright", "")),
         "BookSubtitle": latex_config.get("subtitle", ""),
         "BookInstitution": latex_config.get("institution", ""),
+        "BookHeaderTitle": latex_config.get("header_title", config.get("title", "")),
     }
 
     # Check for cover image (USAL logo)
@@ -308,24 +374,38 @@ def generate_metadata_tex(lang, latex_build_dir):
         for cmd, value in metadata.items():
             if value:  # Only write non-empty values
                 # Escape LaTeX special characters
-                safe_value = (
-                    str(value)
-                    .replace("&", "\\&")
-                    .replace("#", "\\#")
-                    .replace("%", "\\%")
-                )
+                safe_value = escape_latex_metadata(value)
                 f.write(f"\\renewcommand{{\\{cmd}}}{{{safe_value}}}\n")
 
     print(f"   📝 Metadata TeX generado: {tex_path}")
 
 
+def escape_latex_metadata(value):
+    """Escape simple metadata while preserving intentional YAML line breaks.
+
+    Teachers can write multi-line YAML values for PDF headers/titles. In LaTeX
+    those newlines must become explicit line breaks (`\\`).
+    """
+    return (
+        str(value)
+        .replace("\\", "\\textbackslash{}")
+        .replace("&", "\\&")
+        .replace("#", "\\#")
+        .replace("%", "\\%")
+        .replace("_", "\\_")
+        .replace("\r\n", "\n")
+        .replace("\r", "\n")
+        .replace("\n", r"\\")
+    )
+
+
 def prepare_svg_images_for_latex(latex_build_dir):
-    """Convert SVG images in the LaTeX build to PNG and rewrite TeX refs.
+    """Convert SVG images in the LaTeX build to PDF/PNG and rewrite TeX refs.
 
     Sphinx's default converter uses ImageMagick `convert`, which fails on some
     Kroki/Mermaid SVGs (`stroke-dasharray`).  XeLaTeX also cannot infer SVG
-    bounding boxes directly.  CairoSVG handles these diagrams reliably enough
-    for static PDF output and keeps the workflow cross-platform.
+    bounding boxes directly. Prefer vector PDF output to avoid pixelated
+    diagrams; fall back to PNG only if vector conversion fails.
     """
     svg_paths = glob.glob(os.path.join(latex_build_dir, "**", "*.svg"), recursive=True)
     if not svg_paths:
@@ -359,30 +439,64 @@ def prepare_svg_images_for_latex(latex_build_dir):
             print(f"   Detalle CairoSVG: {exc}")
             return False
 
-    print(f"🖼️  Convirtiendo {len(svg_paths)} SVG(s) a PNG para LaTeX...")
+    print(f"🖼️  Convirtiendo {len(svg_paths)} SVG(s) a formato LaTeX-safe...")
     replacements = {}
     for svg_path in svg_paths:
+        pdf_path = os.path.splitext(svg_path)[0] + ".pdf"
         png_path = os.path.splitext(svg_path)[0] + ".png"
+        output_path = pdf_path
+        pdf_fallback_png = find_pdf_fallback_png_for_svg(svg_path)
         try:
-            if resvg:
+            if rsvg_convert:
                 subprocess.run(
-                    [resvg, svg_path, png_path],
-                    check=True,
-                )
-            elif rsvg_convert:
-                subprocess.run(
-                    [rsvg_convert, "--width", "1600", "--output", png_path, svg_path],
+                    [rsvg_convert, "--format", "pdf", "--output", pdf_path, svg_path],
                     check=True,
                 )
             else:
-                cairosvg.svg2png(url=svg_path, write_to=png_path, output_width=1600)
+                if cairosvg is None:
+                    try:
+                        import cairosvg as cairosvg_module
+                        cairosvg = cairosvg_module
+                    except Exception:
+                        cairosvg = None
+                if cairosvg is not None:
+                    cairosvg.svg2pdf(url=svg_path, write_to=pdf_path)
+                else:
+                    convert_svg_to_pdf_with_svglib(svg_path, pdf_path)
         except Exception as exc:
-            print(f"❌ No se pudo convertir {svg_path}: {exc}")
-            return False
+            print(f"   ⚠️  Conversión vectorial falló para {os.path.basename(svg_path)}: {exc}")
+            print("      Usando PNG de alta resolución como fallback.")
+            output_path = png_path
+            try:
+                if pdf_fallback_png:
+                    shutil.copy2(pdf_fallback_png, png_path)
+                elif resvg:
+                    subprocess.run([resvg, "--zoom", "4", svg_path, png_path], check=True)
+                elif rsvg_convert:
+                    subprocess.run(
+                        [rsvg_convert, "--width", "2400", "--output", png_path, svg_path],
+                        check=True,
+                    )
+                else:
+                    if cairosvg is None:
+                        import cairosvg as cairosvg_module
+                        cairosvg = cairosvg_module
+                    cairosvg.svg2png(url=svg_path, write_to=png_path, output_width=2400)
+            except Exception as fallback_exc:
+                print(f"❌ No se pudo convertir {svg_path}: {fallback_exc}")
+                return False
         svg_rel = os.path.relpath(svg_path, latex_build_dir).replace(os.sep, "/")
-        png_rel = os.path.relpath(png_path, latex_build_dir).replace(os.sep, "/")
-        replacements[svg_rel] = png_rel
-        replacements[os.path.basename(svg_path)] = os.path.basename(png_path)
+        out_rel = os.path.relpath(output_path, latex_build_dir).replace(os.sep, "/")
+        svg_base = os.path.basename(svg_path)
+        out_base = os.path.basename(output_path)
+        svg_stem = os.path.splitext(svg_base)[0]
+        out_ext = os.path.splitext(out_base)[1]
+        replacements[svg_rel] = out_rel
+        replacements[svg_base] = out_base
+        # Sphinx may emit image names in TeX as `{name}.svg` rather than
+        # `name.svg`. The regular basename replacement does not match that
+        # braced form, so cover it explicitly without rewriting unrelated SVGs.
+        replacements[f"{{{svg_stem}}}.svg"] = f"{{{svg_stem}}}{out_ext}"
 
     for tex_path in glob.glob(os.path.join(latex_build_dir, "*.tex")):
         with open(tex_path, "r", encoding="utf-8") as f:
@@ -390,16 +504,47 @@ def prepare_svg_images_for_latex(latex_build_dir):
         original = text
         for svg_name, png_name in replacements.items():
             text = text.replace(svg_name, png_name)
-        # Sphinx may emit SVG paths as `{{name}.svg}` rather than `name.svg`.
-        # At this point every SVG in the LaTeX build directory has a PNG pair,
-        # so rewriting the remaining `.svg` extensions in TeX files is safe.
-        text = text.replace(".svg", ".png")
+        # Do not blindly rewrite all .svg extensions: mixed PDF/PNG fallback is
+        # possible, so only explicit replacement entries are safe.
         if text != original:
             with open(tex_path, "w", encoding="utf-8") as f:
                 f.write(text)
             print(f"   🔁 Referencias SVG actualizadas en {os.path.basename(tex_path)}")
 
     return True
+
+
+def find_pdf_fallback_png_for_svg(svg_path):
+    """Find a pre-rendered PDF PNG fallback for a generated diagram SVG."""
+    basename = os.path.splitext(os.path.basename(svg_path))[0] + ".png"
+    fallback_root = os.path.join(PROJECT_ROOT, "book", "_static", "generated", "diagrams_pdf")
+    matches = glob.glob(os.path.join(fallback_root, "**", basename), recursive=True)
+    return matches[0] if matches else None
+
+
+def convert_svg_to_pdf_with_svglib(svg_path, pdf_path):
+    """Convert SVG to vector PDF using svglib/reportlab.
+
+    Mermaid SVGs can contain CSS rules such as `stroke-dasharray: 0`, which
+    ReportLab rejects as an invalid dash pattern. The drawing is still valid as
+    a solid line, so normalize all-zero dash arrays before rendering.
+    """
+    from svglib.svglib import svg2rlg
+    from reportlab.graphics import renderPDF
+
+    drawing = svg2rlg(svg_path)
+    if drawing is None:
+        raise RuntimeError("svglib no pudo leer el SVG")
+
+    def normalize_dash_arrays(node):
+        dash_array = getattr(node, "strokeDashArray", None)
+        if dash_array and sum(float(value) for value in dash_array) == 0:
+            node.strokeDashArray = None
+        for child in getattr(node, "contents", []) or []:
+            normalize_dash_arrays(child)
+
+    normalize_dash_arrays(drawing)
+    renderPDF.drawToFile(drawing, pdf_path)
 
 
 def mirror_shared_asset_paths_for_latex(latex_build_dir):
@@ -772,10 +917,14 @@ Uso:
   python scripts/export_pdf.py --engine latexmk                  # fallback avanzado explícito
   python scripts/export_pdf.py --engine auto                     # diagnóstico: Tectonic → latexmk → pdflatex
   python scripts/export_pdf.py --allow-existing                  # en CI, permite continuar si ya existen PDFs publicados
+  python scripts/export_pdf.py --verbose                         # muestra el log completo en pantalla
 
 La opción --allow-existing es un salvavidas para despliegue: NO oculta el fallo
 de generación, pero permite publicar la web si `book/_static/teachbook_<lang>.pdf`
 ya existe y tiene contenido.
+
+Por defecto se muestra una salida resumida para docentes. Los logs completos se
+guardan en `.build_logs/` y, si algo falla, se imprime la cola relevante del error.
 """
         )
         return

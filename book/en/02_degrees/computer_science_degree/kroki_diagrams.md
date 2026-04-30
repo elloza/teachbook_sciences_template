@@ -5,133 +5,61 @@ Kroki lets you generate many useful diagram types in Computer Science without de
 ## 1. Mermaid: layered architecture
 
 
-The following diagram visually summarizes this part of the explanation.
+As shown in {numref}`fig-diagram-02-degrees-computer-science-degree-kroki-diagrams-01`, the diagram is versioned as a static image.
 
-**Diagram: Mermaid: layered architecture.**
-
-```{kroki}
-:type: mermaid
+```{figure} ../../../_static/generated/diagrams/en/02_degrees_computer_science_degree_kroki_diagrams_01.svg
+:name: fig-diagram-02-degrees-computer-science-degree-kroki-diagrams-01
+:alt: Diagram: Mermaid: layered architecture
+:width: 90%
 :align: center
 
-flowchart TB
-    UI[Frontend] --> API[REST API]
-    API --> APP[Business logic]
-    APP --> DB[(Database)]
-    APP --> CACHE[(Cache)]
+Diagram: Mermaid: layered architecture.
 ```
+As shown in {numref}`fig-diagram-02-degrees-computer-science-degree-kroki-diagrams-02`, the diagram is versioned as a static image.
 
-## 2. PlantUML: system components
-
-
-The following diagram visually summarizes this part of the explanation.
-
-**Diagram: PlantUML: system components.**
-
-```{kroki}
-:type: plantuml
+```{figure} ../../../_static/generated/diagrams/en/02_degrees_computer_science_degree_kroki_diagrams_02.svg
+:name: fig-diagram-02-degrees-computer-science-degree-kroki-diagrams-02
+:alt: Diagram: PlantUML: system components
+:width: 90%
 :align: center
 
-@startuml
-[Web App] --> [API]
-[API] --> [Service Layer]
-[Service Layer] --> [PostgreSQL]
-[Service Layer] --> [Redis]
-@enduml
+Diagram: PlantUML: system components.
 ```
+As shown in {numref}`fig-diagram-02-degrees-computer-science-degree-kroki-diagrams-03`, the diagram is versioned as a static image.
 
-## 3. GraphViz: dependency graph
-
-
-The following diagram visually summarizes this part of the explanation.
-
-**Diagram: GraphViz: dependency graph.**
-
-```{kroki}
-:type: graphviz
+```{figure} ../../../_static/generated/diagrams/en/02_degrees_computer_science_degree_kroki_diagrams_03.svg
+:name: fig-diagram-02-degrees-computer-science-degree-kroki-diagrams-03
+:alt: Diagram: GraphViz: dependency graph
+:width: 90%
 :align: center
 
-digraph G {
-    rankdir=LR;
-    Controller -> Service;
-    Service -> Repository;
-    Repository -> Database;
-    Service -> Cache;
-}
+Diagram: GraphViz: dependency graph.
 ```
+As shown in {numref}`fig-diagram-02-degrees-computer-science-degree-kroki-diagrams-04`, the diagram is versioned as a static image.
 
-## 4. Structurizr: simplified C4 view
-
-
-The following diagram visually summarizes this part of the explanation.
-
-**Diagram: Structurizr: simplified C4 view.**
-
-```{kroki}
-:type: structurizr
+```{figure} ../../../_static/generated/diagrams/en/02_degrees_computer_science_degree_kroki_diagrams_04.svg
+:name: fig-diagram-02-degrees-computer-science-degree-kroki-diagrams-04
+:alt: Diagram: Structurizr: simplified C4 view
+:width: 90%
 :align: center
 
-workspace {
-  model {
-    user = person "User"
-    softwareSystem = softwareSystem "Teaching Platform" {
-      web = container "Web"
-      api = container "API"
-      db = container "Database"
-    }
-    user -> web "Uses"
-    web -> api "Calls"
-    api -> db "Reads/writes"
-  }
-  views {
-    container softwareSystem {
-      include *
-      autoLayout lr
-    }
-    styles {
-      element "Software System" {
-        background #1168BD
-        color #FFFFFF
-      }
-      element "Container" {
-        background #438DD5
-        color #FFFFFF
-      }
-      element "Person" {
-        background #08427B
-        color #FFFFFF
-      }
-    }
-  }
-}
+Diagram: Structurizr: simplified C4 view.
 ```
-
-```{admonition} PDF note
-:class: tip
-For C4 diagrams, define colors explicitly. Some default themes may produce white text on a white background when SVG is converted to PDF.
 ```
 
 ## 5. Wavedrom: digital protocol timing
 
 
-The following diagram visually summarizes this part of the explanation.
+As shown in {numref}`fig-diagram-02-degrees-computer-science-degree-kroki-diagrams-05`, the diagram is versioned as a static image.
 
-**Diagram: Wavedrom: digital protocol timing.**
-
-```{kroki}
-:type: wavedrom
+```{figure} ../../../_static/generated/diagrams/en/02_degrees_computer_science_degree_kroki_diagrams_05.svg
+:name: fig-diagram-02-degrees-computer-science-degree-kroki-diagrams-05
+:alt: Diagram: Wavedrom: digital protocol timing
+:width: 90%
 :align: center
 
-{ signal: [
-  { name: "clk", wave: "p....|...." },
-  { name: "req", wave: "0.1..|0..." },
-  { name: "ack", wave: "0..1.|0..." },
-  { name: "data", wave: "x.=x.|.=x.", data: ["A", "B"] }
-]}
+Diagram: Wavedrom: digital protocol timing.
 ```
-
-## Key idea
-
-In Computer Science, Kroki is ideal for:
 
 - architecture
 - UML

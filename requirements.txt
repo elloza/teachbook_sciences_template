@@ -5,6 +5,8 @@ sphinxcontrib-bibtex
 sphinx-thebe
 sphinx-kroki
 cairosvg
+svglib
+reportlab
 jupyterquiz
 manim
 matplotlib

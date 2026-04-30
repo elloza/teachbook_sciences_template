@@ -7,12 +7,44 @@ import shutil
 import json
 import yaml
 import time
+from datetime import datetime
 
 # Fix: Windows cp1252 can't encode emojis — force UTF-8
 if sys.stdout.encoding and sys.stdout.encoding.lower() not in ("utf-8", "utf8"):
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
 if sys.stderr.encoding and sys.stderr.encoding.lower() not in ("utf-8", "utf8"):
     sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8", errors="replace")
+
+VERBOSE = "--verbose" in sys.argv or "-v" in sys.argv
+
+
+def write_command_log(cmd, stdout, stderr):
+    """Persist full build output so quiet mode never hides errors."""
+    log_dir = os.path.join(os.getcwd(), ".build_logs")
+    os.makedirs(log_dir, exist_ok=True)
+    timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+    log_path = os.path.join(log_dir, f"html-{timestamp}.log")
+    with open(log_path, "w", encoding="utf-8", newline="\n") as f:
+        f.write("$ " + " ".join(cmd) + "\n\n")
+        if stdout:
+            f.write("--- STDOUT ---\n")
+            f.write(stdout)
+            if not stdout.endswith("\n"):
+                f.write("\n")
+        if stderr:
+            f.write("--- STDERR ---\n")
+            f.write(stderr)
+            if not stderr.endswith("\n"):
+                f.write("\n")
+    return log_path
+
+
+def print_output_tail(stdout, stderr, lines=80):
+    """Show useful failure context without flooding the terminal."""
+    combined = "\n".join(part for part in (stdout, stderr) if part)
+    tail = combined.splitlines()[-lines:]
+    if tail:
+        print("\n".join(tail))
 
 
 def get_jupyter_book():
@@ -38,7 +70,25 @@ def run_jupyter_book_build(cmd, label, attempts=3):
     for attempt in range(1, attempts + 1):
         try:
             print(f"🚀 Ejecutando build {label} ({attempt}/{attempts}): {' '.join(cmd)}")
-            subprocess.check_call(cmd, shell=(os.name == "nt"))
+            if VERBOSE:
+                subprocess.check_call(cmd, shell=(os.name == "nt"))
+            else:
+                result = subprocess.run(
+                    cmd,
+                    shell=(os.name == "nt"),
+                    check=False,
+                    capture_output=True,
+                    text=True,
+                    encoding="utf-8",
+                    errors="replace",
+                )
+                log_path = write_command_log(cmd, result.stdout, result.stderr)
+                if result.returncode != 0:
+                    print(f"❌ Build {label} falló. Log completo: {log_path}")
+                    print("Últimas líneas relevantes:")
+                    print_output_tail(result.stdout, result.stderr)
+                    raise subprocess.CalledProcessError(result.returncode, cmd)
+                print(f"   ✅ Build {label} completado. Log completo: {log_path}")
             return
         except subprocess.CalledProcessError as exc:
             last_error = exc
@@ -507,6 +557,8 @@ def merge_dir_into(src_dir, dst_dir):
 
 def debug_directory(path):
     """Prints the directory structure for debugging."""
+    if not VERBOSE:
+        return
     print(f"📂 [DEBUG] Listing contents of: {path}")
     for root, dirs, files in os.walk(path):
         level = root.replace(path, "").count(os.sep)
@@ -524,11 +576,13 @@ def sanitize_config(config_path):
     """
     try:
         debug_directory(os.path.dirname(config_path))
-        print(f"📄 [DEBUG] Reading config from: {config_path}")
+        if VERBOSE:
+            print(f"📄 [DEBUG] Reading config from: {config_path}")
         with open(config_path, "r", encoding="utf-8") as f:
             content = f.read()
-            print(content)
-            print("-" * 20)
+            if VERBOSE:
+                print(content)
+                print("-" * 20)
             lines = content.splitlines(keepends=True)
 
         new_lines = []

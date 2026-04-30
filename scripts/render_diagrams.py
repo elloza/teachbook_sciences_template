@@ -40,6 +40,7 @@ except ImportError:  # pragma: no cover - handled for user-friendly diagnostics
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_SOURCE_DIR = PROJECT_ROOT / "diagram_sources"
 DEFAULT_OUTPUT_DIR = PROJECT_ROOT / "book" / "_static" / "generated" / "diagrams"
+DEFAULT_PDF_FALLBACK_DIR = PROJECT_ROOT / "book" / "_static" / "generated" / "diagrams_pdf"
 DEFAULT_KROKI_URL = "https://kroki.io/"
 
 EXTENSION_TO_KROKI_TYPE = {
@@ -84,10 +85,16 @@ def parse_args() -> argparse.Namespace:
         help="Output directory for rendered images (default: book/_static/generated/diagrams/).",
     )
     parser.add_argument(
+        "--pdf-fallback-dir",
+        type=Path,
+        default=DEFAULT_PDF_FALLBACK_DIR,
+        help="Directory for PDF-only Mermaid PNG fallbacks (default: book/_static/generated/diagrams_pdf/).",
+    )
+    parser.add_argument(
         "--format",
         default="svg",
         choices=("svg", "png", "pdf"),
-        help="Output image format (default: svg).",
+        help="Output image format (default: svg; crisp for HTML and converted for PDF export).",
     )
     parser.add_argument(
         "--kroki-url",
@@ -211,6 +218,46 @@ def render_job(
     raise RuntimeError(f"No se pudo renderizar {job.source}: {last_error}")
 
 
+def maybe_render_pdf_fallback_png(
+    job: DiagramJob,
+    source_dir: Path,
+    pdf_fallback_dir: Path,
+    kroki_url: str,
+    timeout: int,
+    retries: int,
+    request_mode: str,
+    force: bool,
+) -> None:
+    """Render a PDF-only PNG sidecar for Mermaid SVG diagrams.
+
+    Kroki's Mermaid SVG can contain `foreignObject` HTML labels. Those are crisp
+    in browsers, but some SVG converters drop the text. Kroki's native PNG
+    endpoint preserves the labels, so PDF export can use this sidecar when no
+    vector SVG→PDF converter is available.
+    """
+    if job.output_format != "svg" or job.diagram_type != "mermaid":
+        return
+
+    relative = job.source.relative_to(source_dir)
+    output = pdf_fallback_dir / relative.with_suffix(".png")
+    if output.exists() and not force:
+        return
+
+    print(f"   🧩 Generando fallback PDF Mermaid PNG: {output.relative_to(PROJECT_ROOT)}")
+    render_job(
+        DiagramJob(
+            source=job.source,
+            output=output,
+            diagram_type=job.diagram_type,
+            output_format="png",
+        ),
+        kroki_url,
+        timeout,
+        retries,
+        request_mode,
+    )
+
+
 def write_manifest(jobs: list[DiagramJob], output_dir: Path) -> None:
     output_dir.mkdir(parents=True, exist_ok=True)
     manifest = {
@@ -235,6 +282,7 @@ def main() -> int:
     args = parse_args()
     source_dir = args.source_dir.resolve()
     output_dir = args.output_dir.resolve()
+    pdf_fallback_dir = args.pdf_fallback_dir.resolve()
 
     jobs = discover_jobs(source_dir, output_dir, args.format)
 
@@ -257,12 +305,40 @@ def main() -> int:
     failed = 0
     for job in jobs:
         if job.output.exists() and not args.force:
+            try:
+                maybe_render_pdf_fallback_png(
+                    job,
+                    source_dir,
+                    pdf_fallback_dir,
+                    args.kroki_url,
+                    args.timeout,
+                    args.retries,
+                    args.request_mode,
+                    args.force,
+                )
+            except Exception as exc:
+                failed += 1
+                print(f"❌ {exc}")
+                if args.max_failures and failed >= args.max_failures:
+                    print(f"🛑 Parando tras {failed} fallos. Usa --max-failures 0 para continuar siempre.")
+                    break
+                continue
             skipped += 1
             rendered.append(job)
             continue
         try:
             print(f"🔧 Renderizando {job.source.relative_to(PROJECT_ROOT)}...")
             render_job(job, args.kroki_url, args.timeout, args.retries, args.request_mode)
+            maybe_render_pdf_fallback_png(
+                job,
+                source_dir,
+                pdf_fallback_dir,
+                args.kroki_url,
+                args.timeout,
+                args.retries,
+                args.request_mode,
+                args.force,
+            )
             rendered.append(job)
         except Exception as exc:
             failed += 1

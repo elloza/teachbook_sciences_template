@@ -1,6 +1,9 @@
-title: TeachBook (Plantilla Ciencias Químicas) 
+title: |
+  TeachBook
+  (Plantilla
+  CienciasQuímicas)
 author: Álvaro Lozano Murciego y André Sales Mendes
-copyright: "2025"
+copyright: "2026"
 logo: "_static/logo.png"
 language: es
 exclude_patterns: ["_build", "Thumbs.db", ".DS_Store", "**.ipynb_checkpoints", "_build_*", "en/", "temp_build_*", "latex_templates*", "_TRASH*"]
@@ -45,6 +48,10 @@ latex:
   latex_engine: xelatex
   options: "spanish"
   subtitle: "Facultad de Ciencias"    # Opcional: subtítulo del libro
+  header_title: |
+    TeachBook
+    (Plantilla
+    CienciasQuímicas)
   institution: "Universidad de Salamanca"  # Opcional
   edition: "1ª Edición"               # Opcional
   publisher: "Ediciones Universidad de Salamanca"  # Opcional

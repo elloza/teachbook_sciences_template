@@ -239,7 +239,22 @@ print("Hola")
 - Tablas: `{numref}`\`tabla-ejemplo\`
 
 ### Diagramas con Kroki (HTML ✅ y PDF ✅)
-Kroki convierte texto en diagramas SVG. Funciona en **HTML y PDF**. Usa Mermaid por defecto.
+Kroki convierte texto en diagramas. Usa Mermaid por defecto.
+
+**Regla crítica del proyecto:** los diagramas finales del libro NO deben depender de bloques `{kroki}` en tiempo de compilación. El flujo correcto es:
+
+1. Mantener la fuente editable en `diagram_sources/`.
+2. Renderizar SVG para HTML con `python scripts/render_diagrams.py`.
+3. Usar las imágenes generadas desde `{figure}`.
+4. Para PDF, `render_diagrams.py` también genera fallbacks PNG SOLO para Mermaid en `book/_static/generated/diagrams_pdf/`.
+
+Motivo: Kroki/Mermaid genera algunos SVG con texto HTML (`foreignObject`). En navegador se ve bien, pero algunos conversores LaTeX/PDF pierden ese texto y dejan cajas vacías. Por eso:
+
+- HTML usa SVG nítido desde `book/_static/generated/diagrams/`.
+- PDF usa SVG convertido si hay conversor vectorial real.
+- Si no hay conversor vectorial, PDF usa el PNG nativo de Kroki desde `book/_static/generated/diagrams_pdf/`, que conserva el texto.
+
+**NO usar `resvg` como fallback único para Mermaid con `foreignObject`: puede renderizar cajas sin texto.**
 
 ````md
 ```{kroki}
@@ -253,10 +268,10 @@ flowchart LR
 ````
 
 Tipos disponibles: `mermaid` (recomendado), `plantuml`, `graphviz`, `excalidraw`, `vegalite`, `wavedrom`, `ditaa`, y 15+ más.
-Requiere internet durante el build (no al leer). GitHub Actions siempre tiene internet.
-Para añadir título: usar `{kroki-figure}` con `:caption: Título`.
+Requiere internet solo durante el pre-renderizado de diagramas, no durante la lectura del libro ya generado.
+Para añadir título final: usar `{figure}` con caption, no `{kroki-figure}`.
 
-**NO usar `{mermaid}`** (requiere sphinxcontrib-mermaid, no funciona en PDF). Usar siempre `{kroki}` con `:type: mermaid`.
+**NO usar `{mermaid}`** (requiere sphinxcontrib-mermaid, no funciona en PDF). Para contenido final, usar fuentes en `diagram_sources/` + `{figure}` renderizado.
 
 ### CircuitikZ (opción avanzada para circuitos precisos)
 CircuitikZ usa LaTeX para generar esquemas eléctricos con acabado profesional. En TeachBook se usa como flujo **a imagen**:
@@ -306,7 +321,7 @@ Circuito generado con CircuitikZ.
 | Ecuaciones LaTeX | ✅ | ✅ | Usar libremente |
 | Admonitions | ✅ | ✅ | Usar libremente |
 | Dropdowns | ✅ | ✅ expandido | Usar libremente |
-| Diagramas Kroki (Mermaid, etc.) | ✅ | ✅ | Usar `{kroki}` con `:type: mermaid` |
+| Diagramas Kroki (Mermaid, etc.) | ✅ | ✅ | Usar `diagram_sources/` + SVG renderizado; PDF usa fallback PNG Mermaid si hace falta |
 | iframe/YouTube | ✅ | ❌ | Añadir `{raw} latex` con URL |
 | Thebe live code | ✅ | ❌ | Código visible como texto |
 | Tabs | ✅ | ❌ | Añadir alternativa sin tabs |

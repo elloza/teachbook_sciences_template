@@ -168,6 +168,8 @@ def extract_from_file(markdown_path: Path, output_dir: Path, force: bool, dry_ru
         relative_markdown = markdown_path.relative_to(BOOK_DIR / language)
         base_name = f"{slug(relative_markdown.with_suffix('').as_posix())}_{diagram_index:02d}"
         source_file = output_dir / language / f"{base_name}{extension}"
+        # Keep SVG as the book-facing artifact: HTML stays crisp and PDF export
+        # converts SVG to a LaTeX-safe vector PDF whenever possible.
         expected_output = PROJECT_ROOT / "book" / "_static" / "generated" / "diagrams" / language / f"{base_name}.svg"
         caption = detect_caption(lines, start_line - 1, language)
 

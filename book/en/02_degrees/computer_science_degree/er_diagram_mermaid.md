@@ -43,44 +43,16 @@ erDiagram
 **Result:**
 
 
-The following diagram visually summarizes this part of the explanation.
+As shown in {numref}`fig-diagram-02-degrees-computer-science-degree-er-diagram-mermaid-01`, the diagram is versioned as a static image.
 
-**Diagram: Example: University database.**
-
-```{kroki}
-:type: mermaid
+```{figure} ../../../_static/generated/diagrams/en/02_degrees_computer_science_degree_er_diagram_mermaid_01.svg
+:name: fig-diagram-02-degrees-computer-science-degree-er-diagram-mermaid-01
+:alt: Diagram: Example: University database
+:width: 90%
 :align: center
 
-erDiagram
-    STUDENT {
-        int id PK
-        string name
-        string email
-    }
-    COURSE {
-        int id PK
-        string name
-        int credits
-    }
-    PROFESSOR {
-        int id PK
-        string name
-        string department
-    }
-    ENROLLMENT {
-        int id PK
-        float grade
-        string term
-    }
-
-    STUDENT ||--o{ ENROLLMENT : "enrolls in"
-    COURSE ||--o{ ENROLLMENT : "has"
-    PROFESSOR ||--o{ COURSE : "teaches"
+Diagram: Example: University database.
 ```
-
-## How to modify it
-
-- **Add an entity**: Copy a block like `ENTITY { ... }` and define its attributes.
 - **Relationship types**: Use `||--o{` (one-to-many), `||--||` (one-to-one), `}o--o{` (many-to-many).
 - **Primary keys**: Mark attributes with `PK`.
 - **Foreign keys**: Mark attributes with `FK`.

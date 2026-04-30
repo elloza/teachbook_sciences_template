@@ -1,6 +1,9 @@
-title: TeachBook (Chemistry Sciences Template)
+title: |
+  TeachBook
+  (Chemistry
+  Sciences Template)
 author: Álvaro Lozano Murciego and André Sales Mendes
-copyright: "2025"
+copyright: "2026"
 logo: "_static/logo.png"
 language: en
 exclude_patterns: ["_build", "Thumbs.db", ".DS_Store", "**.ipynb_checkpoints", "_build_*", "es/","temp_build_*", "latex_templates*", "_TRASH*"]
@@ -45,6 +48,10 @@ latex:
   latex_engine: xelatex
   options: "english"
   subtitle: "Faculty of Sciences"       # Optional
+  header_title: |
+    TeachBook
+    (Chemistry
+    Sciences Template)
   institution: "Universidad de Salamanca"  # Optional
   edition: "1st Edition"                # Optional
   publisher: "Ediciones Universidad de Salamanca"  # Optional

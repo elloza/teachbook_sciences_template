@@ -127,7 +127,7 @@ def build_figure_block(item: dict[str, object]) -> list[str]:
         f"```{{figure}} {image_path}",
         f":name: {label}",
         f":alt: {alt}",
-        ":width: 80%",
+        ":width: 90%",
         ":align: center",
         "",
         caption,

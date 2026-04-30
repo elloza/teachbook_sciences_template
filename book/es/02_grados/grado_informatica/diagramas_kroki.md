@@ -5,133 +5,61 @@ Kroki permite generar muchos tipos de diagramas útiles en Informática sin depe
 ## 1. Mermaid: arquitectura por capas
 
 
-El diagrama siguiente resume visualmente esta parte de la explicación.
+Como muestra la {numref}`fig-diagrama-02-grados-grado-informatica-diagramas-kroki-01`, el diagrama queda versionado como imagen estática.
 
-**Diagrama: Mermaid: arquitectura por capas.**
-
-```{kroki}
-:type: mermaid
+```{figure} ../../../_static/generated/diagrams/es/02_grados_grado_informatica_diagramas_kroki_01.svg
+:name: fig-diagrama-02-grados-grado-informatica-diagramas-kroki-01
+:alt: Diagrama: Mermaid: arquitectura por capas
+:width: 90%
 :align: center
 
-flowchart TB
-    UI[Frontend] --> API[API REST]
-    API --> APP[Lógica de negocio]
-    APP --> DB[(Base de datos)]
-    APP --> CACHE[(Cache)]
+Diagrama: Mermaid: arquitectura por capas.
 ```
+Como muestra la {numref}`fig-diagrama-02-grados-grado-informatica-diagramas-kroki-02`, el diagrama queda versionado como imagen estática.
 
-## 2. PlantUML: componentes del sistema
-
-
-El diagrama siguiente resume visualmente esta parte de la explicación.
-
-**Diagrama: PlantUML: componentes del sistema.**
-
-```{kroki}
-:type: plantuml
+```{figure} ../../../_static/generated/diagrams/es/02_grados_grado_informatica_diagramas_kroki_02.svg
+:name: fig-diagrama-02-grados-grado-informatica-diagramas-kroki-02
+:alt: Diagrama: PlantUML: componentes del sistema
+:width: 90%
 :align: center
 
-@startuml
-[Web App] --> [API]
-[API] --> [Service Layer]
-[Service Layer] --> [PostgreSQL]
-[Service Layer] --> [Redis]
-@enduml
+Diagrama: PlantUML: componentes del sistema.
 ```
+Como muestra la {numref}`fig-diagrama-02-grados-grado-informatica-diagramas-kroki-03`, el diagrama queda versionado como imagen estática.
 
-## 3. GraphViz: grafo de dependencias
-
-
-El diagrama siguiente resume visualmente esta parte de la explicación.
-
-**Diagrama: GraphViz: grafo de dependencias.**
-
-```{kroki}
-:type: graphviz
+```{figure} ../../../_static/generated/diagrams/es/02_grados_grado_informatica_diagramas_kroki_03.svg
+:name: fig-diagrama-02-grados-grado-informatica-diagramas-kroki-03
+:alt: Diagrama: GraphViz: grafo de dependencias
+:width: 90%
 :align: center
 
-digraph G {
-    rankdir=LR;
-    Controller -> Service;
-    Service -> Repository;
-    Repository -> Database;
-    Service -> Cache;
-}
+Diagrama: GraphViz: grafo de dependencias.
 ```
+Como muestra la {numref}`fig-diagrama-02-grados-grado-informatica-diagramas-kroki-04`, el diagrama queda versionado como imagen estática.
 
-## 4. Structurizr: vista C4 simplificada
-
-
-El diagrama siguiente resume visualmente esta parte de la explicación.
-
-**Diagrama: Structurizr: vista C4 simplificada.**
-
-```{kroki}
-:type: structurizr
+```{figure} ../../../_static/generated/diagrams/es/02_grados_grado_informatica_diagramas_kroki_04.svg
+:name: fig-diagrama-02-grados-grado-informatica-diagramas-kroki-04
+:alt: Diagrama: Structurizr: vista C4 simplificada
+:width: 90%
 :align: center
 
-workspace {
-  model {
-    user = person "Usuario"
-    softwareSystem = softwareSystem "Plataforma Docente" {
-      web = container "Web"
-      api = container "API"
-      db = container "Database"
-    }
-    user -> web "Usa"
-    web -> api "Llama"
-    api -> db "Lee/escribe"
-  }
-  views {
-    container softwareSystem {
-      include *
-      autoLayout lr
-    }
-    styles {
-      element "Software System" {
-        background #1168BD
-        color #FFFFFF
-      }
-      element "Container" {
-        background #438DD5
-        color #FFFFFF
-      }
-      element "Person" {
-        background #08427B
-        color #FFFFFF
-      }
-    }
-  }
-}
+Diagrama: Structurizr: vista C4 simplificada.
 ```
-
-```{admonition} Nota sobre PDF
-:class: tip
-En diagramas C4 conviene definir colores explícitos. Algunos temas por defecto pueden producir texto blanco sobre fondo blanco al convertir SVG a PDF.
 ```
 
 ## 5. Wavedrom: protocolo digital
 
 
-El diagrama siguiente resume visualmente esta parte de la explicación.
+Como muestra la {numref}`fig-diagrama-02-grados-grado-informatica-diagramas-kroki-05`, el diagrama queda versionado como imagen estática.
 
-**Diagrama: Wavedrom: protocolo digital.**
-
-```{kroki}
-:type: wavedrom
+```{figure} ../../../_static/generated/diagrams/es/02_grados_grado_informatica_diagramas_kroki_05.svg
+:name: fig-diagrama-02-grados-grado-informatica-diagramas-kroki-05
+:alt: Diagrama: Wavedrom: protocolo digital
+:width: 90%
 :align: center
 
-{ signal: [
-  { name: "clk", wave: "p....|...." },
-  { name: "req", wave: "0.1..|0..." },
-  { name: "ack", wave: "0..1.|0..." },
-  { name: "data", wave: "x.=x.|.=x.", data: ["A", "B"] }
-]}
+Diagrama: Wavedrom: protocolo digital.
 ```
-
-## Idea clave
-
-En Informática, Kroki es ideal para:
 
 - arquitectura
 - UML
