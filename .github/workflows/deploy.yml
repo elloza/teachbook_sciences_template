@@ -6,6 +6,11 @@ on:
       - main
   workflow_dispatch:
 
+env:
+  # Opt in early to GitHub's Node 24 runtime for JavaScript actions.
+  # This avoids Node 20 deprecation warnings on official actions.
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   deploy-book:
     runs-on: ubuntu-latest
