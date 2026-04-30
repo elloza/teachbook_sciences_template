@@ -347,7 +347,7 @@ Todos los comandos se ejecutan desde la raíz del proyecto usando el Python del 
 | Verificar idiomas/menús | `python scripts/check_multilang_integrity.py` | Comprueba que todos los idiomas tienen la misma estructura de menú y archivos completos |
 | Renderizar CircuitikZ | `python scripts/render_circuitikz.py <entrada.tex> [salida.png]` | Compila CircuitikZ y genera una imagen PNG |
 | Convertir PDF a MD | `python scripts/pdf_to_markdown.py <ruta>` | Convierte PDFs a Markdown para el libro |
-| Guardar y publicar | `python scripts/git_helper.py` | git add + commit + push |
+| Guardar y publicar | `python scripts/git_helper.py` | git add + commit + push; GitHub Actions regenera HTML y PDFs nuevos |
 
 **IMPORTANTE**: En Windows, si `python` no funciona, probar con `py`. Los scripts manejan ambas opciones.
 
@@ -389,9 +389,13 @@ Reglas estrictas:
 
 El proyecto incluye un GitHub Action (`.github/workflows/deploy.yml`) que:
 1. Se ejecuta automáticamente al hacer `push` a la rama principal.
-2. Compila el libro HTML para todos los idiomas.
-3. Genera los PDFs.
-4. Despliega a GitHub Pages.
+2. Instala/prepara el entorno TeachBook.
+3. Instala la cadena PDF completa con `scripts/setup_latex.py --yes --full`.
+4. Genera PDFs nuevos para todos los idiomas con `scripts/export_pdf.py --engine auto`.
+5. Compila el libro HTML para todos los idiomas con `scripts/build_book.py`.
+6. Despliega a GitHub Pages.
+
+**Regla crítica de publicación:** no se debe publicar una versión nueva subiendo solo HTML. La ruta soportada es `commit + push` a `main`, porque el workflow regenera primero `book/_static/teachbook_<lang>.pdf` y después construye la web que enlaza esos PDFs recientes. Si se cambia contenido, diagramas, imágenes o notebooks, el deploy debe producir PDFs nuevos en la misma ejecución.
 
 Para que funcione, el usuario debe:
 1. Tener el repo en GitHub.

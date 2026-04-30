@@ -1,4 +1,4 @@
-# Editing with AI
+# 3. Editing with AI
 
 This template is optimized for use with Artificial Intelligence assistants (like GitHub Copilot, ChatGPT, or Claude).
 

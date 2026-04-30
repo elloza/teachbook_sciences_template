@@ -1,4 +1,4 @@
-# Editing Workflow
+# 2. Editing Workflow
 
 The workflow with **TeachBook** is designed to be simple and efficient.
 
